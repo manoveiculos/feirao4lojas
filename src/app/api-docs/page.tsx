@@ -110,26 +110,25 @@ export default function ApiDocsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-white/10 bg-slate-950/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
+    <div className="min-h-screen overflow-x-clip bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3.5 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30 sm:h-10 sm:w-10">
               <Bot className="h-5 w-5" />
             </div>
-            <div>
-              <h1 className="text-base font-extrabold text-white sm:text-lg">
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-extrabold text-white sm:text-lg">
                 API do Chatbot — Feirão 4 Lojas
               </h1>
-              <p className="text-xs text-slate-400">
-                Endpoints REST JSON prontos para WhatsApp (n8n, Typebot, IA,
-                Manychat, Evolution API)
+              <p className="truncate text-[11px] text-slate-400 sm:text-xs">
+                Endpoints REST JSON para WhatsApp (n8n, Typebot, IA)
               </p>
             </div>
           </div>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/10"
+            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar ao Feirão
@@ -137,11 +136,11 @@ export default function ApiDocsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8">
         {/* Live API Tester */}
-        <section className="rounded-2xl border border-emerald-500/25 bg-slate-900 p-5 sm:p-6">
+        <section className="rounded-2xl border border-emerald-500/25 bg-slate-900 p-4 sm:p-6">
           <div className="flex items-center gap-2 text-emerald-400">
-            <Terminal className="h-5 w-5" />
+            <Terminal className="h-5 w-5 shrink-0" />
             <h2 className="text-base font-extrabold text-white">
               Testar API ao Vivo
             </h2>
@@ -156,13 +155,13 @@ export default function ApiDocsPage() {
               type="text"
               value={testUrl}
               onChange={(e) => setTestUrl(e.target.value)}
-              className="h-11 flex-1 rounded-xl border border-white/15 bg-slate-950 px-4 font-mono text-xs text-emerald-300 focus:border-emerald-400 focus:outline-none sm:text-sm"
+              className="h-12 flex-1 rounded-xl border border-white/15 bg-slate-950 px-3.5 font-mono text-sm text-emerald-300 focus:border-emerald-400 focus:outline-none sm:h-11 sm:px-4"
             />
             <button
               type="button"
               onClick={() => runTest()}
               disabled={loading}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-xs font-extrabold text-slate-950 transition hover:bg-emerald-400 disabled:opacity-50 cursor-pointer"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-emerald-400 active:scale-[0.98] disabled:opacity-50 cursor-pointer sm:h-11 sm:text-xs"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -173,7 +172,7 @@ export default function ApiDocsPage() {
             </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             {[
               { label: 'Resumo de Todos os Carros', url: '/api/chatbot/resumo' },
               {
@@ -197,7 +196,7 @@ export default function ApiDocsPage() {
                 key={q.url}
                 type="button"
                 onClick={() => runTest(q.url)}
-                className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-300 transition hover:border-emerald-400/50 hover:text-white cursor-pointer"
+                className="shrink-0 whitespace-nowrap rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-emerald-400/50 hover:text-white active:scale-95 cursor-pointer sm:px-2.5 sm:py-1 sm:text-[11px]"
               >
                 {q.label}
               </button>
@@ -211,14 +210,14 @@ export default function ApiDocsPage() {
                   <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-emerald-400">
                     Prévia da Mensagem Pronta p/ WhatsApp
                   </p>
-                  <div className="rounded-xl bg-[#005c4b] p-3.5 text-xs leading-relaxed whitespace-pre-line text-white shadow">
+                  <div className="rounded-xl bg-[#005c4b] p-3.5 text-xs leading-relaxed whitespace-pre-line break-words text-white shadow">
                     {waPreview}
                   </div>
                 </div>
               )}
 
               <div
-                className={`rounded-xl border border-white/10 bg-slate-950 p-4 ${
+                className={`min-w-0 rounded-xl border border-white/10 bg-slate-950 p-4 ${
                   waPreview ? 'lg:col-span-7' : 'lg:col-span-12'
                 }`}
               >
@@ -229,7 +228,7 @@ export default function ApiDocsPage() {
                   <button
                     type="button"
                     onClick={() => copyText('json', responseJson)}
-                    className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded-lg bg-white/5 px-2.5 py-1 text-xs text-slate-300 hover:text-white cursor-pointer"
                   >
                     {copiedKey === 'json' ? (
                       <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -239,7 +238,7 @@ export default function ApiDocsPage() {
                     Copiar
                   </button>
                 </div>
-                <pre className="thin-scrollbar max-h-96 overflow-auto font-mono text-[11px] text-slate-300">
+                <pre className="thin-scrollbar max-h-80 overflow-auto font-mono text-[11px] text-slate-300 sm:max-h-96">
                   {responseJson}
                 </pre>
               </div>
@@ -251,7 +250,7 @@ export default function ApiDocsPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Code2 className="h-5 w-5 text-amber-400" />
-            <h2 className="text-lg font-extrabold text-white">
+            <h2 className="text-base font-extrabold text-white sm:text-lg">
               Referência dos Endpoints
             </h2>
           </div>
@@ -260,10 +259,10 @@ export default function ApiDocsPage() {
             {ENDPOINTS.map((ep) => (
               <div
                 key={ep.path}
-                className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900 p-5"
+                className="flex min-w-0 flex-col justify-between rounded-2xl border border-white/10 bg-slate-900 p-4 sm:p-5"
               >
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-extrabold ${
                         ep.method === 'GET'
@@ -273,7 +272,7 @@ export default function ApiDocsPage() {
                     >
                       {ep.method}
                     </span>
-                    <code className="font-mono text-xs font-bold text-white">
+                    <code className="break-all font-mono text-xs font-bold text-white">
                       {ep.path}
                     </code>
                   </div>
@@ -287,13 +286,13 @@ export default function ApiDocsPage() {
 
                 {ep.method === 'GET' && (
                   <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
-                    <code className="truncate font-mono text-[11px] text-emerald-300">
+                    <code className="min-w-0 truncate font-mono text-[11px] text-emerald-300">
                       {ep.exampleQuery}
                     </code>
                     <button
                       type="button"
                       onClick={() => runTest(ep.exampleQuery)}
-                      className="shrink-0 rounded-lg bg-white/10 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-emerald-500 hover:text-slate-950 cursor-pointer"
+                      className="min-h-[34px] shrink-0 rounded-lg bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-500 hover:text-slate-950 active:scale-95 cursor-pointer"
                     >
                       Testar
                     </button>
@@ -305,7 +304,7 @@ export default function ApiDocsPage() {
         </section>
 
         {/* Chatbot Integration Tip */}
-        <section className="rounded-2xl border border-white/10 bg-slate-900 p-5 sm:p-6">
+        <section className="rounded-2xl border border-white/10 bg-slate-900 p-4 sm:p-6">
           <h2 className="text-base font-extrabold text-white">
             Como o Chatbot identifica o carro automaticamente
           </h2>
@@ -321,7 +320,10 @@ export default function ApiDocsPage() {
             <code className="rounded bg-white/10 px-1.5 py-0.5 text-amber-300">
               {'/[A-Z0-9]{2}-\\d{3}/'}
             </code>
-            ) e fazer um <code className="text-emerald-300">GET /api/veiculos/V3-001</code>{' '}
+            ) e fazer um{' '}
+            <code className="break-all text-emerald-300">
+              GET /api/veiculos/V3-001
+            </code>{' '}
             para obter na hora todas as fotos, opcionais, preço, loja e resposta
             pronta para enviar ao cliente!
           </p>

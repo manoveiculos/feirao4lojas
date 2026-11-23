@@ -4,11 +4,14 @@
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
   }
 
   body {
     background-color: #f8fafc;
     color: #0f172a;
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -48,4 +51,17 @@
 .thin-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.45);
   border-radius: 9999px;
+}
+
+/* Hide scrollbar on horizontal mobile carousels */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }

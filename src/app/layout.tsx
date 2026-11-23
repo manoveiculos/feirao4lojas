@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { FEIRAO_CONFIG } from '@/lib/config';
 import './globals.css';
@@ -8,6 +8,14 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-jakarta',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#020617',
+};
 
 export const metadata: Metadata = {
   title: `${FEIRAO_CONFIG.nome} | Carros Seminovos e 0km em ${FEIRAO_CONFIG.cidade}`,
