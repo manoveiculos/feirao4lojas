@@ -155,6 +155,14 @@ export function FeiraoCatalog({
   const [visibleCount, setVisibleCount] = useState(18);
   const [selectedVehicle, setSelectedVehicle] = useState<Veiculo | null>(null);
 
+  // Deep link dos anúncios: /?carro=NA-001 abre direto a ficha do carro
+  useEffect(() => {
+    const codigo = new URLSearchParams(window.location.search).get('carro');
+    if (!codigo) return;
+    const alvo = veiculos.find((v) => v.codigo.toLowerCase() === codigo.toLowerCase());
+    if (alvo) setSelectedVehicle(alvo);
+  }, [veiculos]);
+
   const priceRanges = useMemo(
     () => buildPriceRanges(facets.faixaPreco.maxArredondado),
     [facets.faixaPreco.maxArredondado]

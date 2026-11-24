@@ -4,3 +4,7 @@ out
 .env.local
 .DS_Store
 *.log
+
+# dados de runtime (leads, mensagens)
+/data/runtime/
+tsconfig.tsbuildinfo

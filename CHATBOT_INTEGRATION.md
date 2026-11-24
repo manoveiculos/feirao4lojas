@@ -1,5 +1,9 @@
 # Guia de Integração do Chatbot de WhatsApp — Feirão 4 Lojas
 
+> **Atualização:** o agente de WhatsApp agora roda dentro do próprio projeto (`/api/whatsapp/webhook`, veja o [README](README.md)).
+> Este guia continua válido para quem quiser consumir a API de estoque por fora (n8n, Typebot etc.).
+> As mensagens do site terminam com `[Ref: AV3-...]` e um `[#sid]` de atribuição (ex.: `[#k3j9x2ab]`), que o backend remove e usa para ligar o clique à conversa.
+
 A API do Feirão foi desenhada especificamente para alimentar chatbots de WhatsApp (n8n, Typebot, Manychat, Evolution API, Z-API, Botpress ou Agentes de IA com OpenAI/Gemini).
 
 Todos os endpoints respondem em **JSON UTF-8** com **CORS liberado (`*`)**.

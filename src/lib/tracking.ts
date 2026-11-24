@@ -47,11 +47,28 @@ export interface WebhookLeadPayload {
   utm_campaign: string;
   utm_content: string;
   fbclid: string;
+  sid: string;
   pagina: string;
   timestamp_iso: string;
 }
 
 const UTM_STORAGE_KEY = 'acelerav3_tracking_params';
+const SID_STORAGE_KEY = 'acelerav3_sid';
+
+/** Identificador anônimo do visitante, usado para casar o clique no site com a conversa no WhatsApp. */
+export function getSid(): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    let sid = window.localStorage.getItem(SID_STORAGE_KEY);
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
+      window.localStorage.setItem(SID_STORAGE_KEY, sid);
+    }
+    return sid;
+  } catch {
+    return '';
+  }
+}
 
 declare global {
   interface Window {
@@ -138,9 +155,24 @@ export function sendLeadWebhook(input: {
     utm_campaign: utms.utm_campaign,
     utm_content: utms.utm_content,
     fbclid: utms.fbclid,
+    sid: getSid(),
     pagina: typeof window !== 'undefined' ? window.location.href : '',
     timestamp_iso: new Date().toISOString(),
   };
+
+  if (typeof window !== 'undefined') {
+    try {
+      // Backend próprio: cria o lead / registra o clique com atribuição (UTM, fbclid, sid)
+      void fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      // nunca bloqueia a UX
+    }
+  }
 
   if (typeof window !== 'undefined' && N8N_WEBHOOK_URL) {
     try {
@@ -322,7 +354,8 @@ export function triggerWhatsappLead(params: {
     veiculo: params.veiculo,
   });
 
-  const url = buildWhatsappUrl(params.message);
+  const sid = getSid();
+  const url = buildWhatsappUrl(sid ? `${params.message} [#${sid}]` : params.message);
   if (params.openWindow !== false && typeof window !== 'undefined') {
     window.open(url, '_blank', 'noopener,noreferrer');
   }
