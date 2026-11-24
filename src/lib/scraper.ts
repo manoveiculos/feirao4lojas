@@ -261,8 +261,8 @@ function inferCategoria(
   ) {
     return 'Hatch';
   }
-  if (combustivel === 'Elétrico') return 'Elétrico';
-  return 'Hatch / Passeio';
+  if (combustivel === 'Elétrico') return 'Hatch';
+  return 'Hatch';
 }
 
 function makeShortCode(lojaSlug: LojaSlug, index: number): string {
@@ -508,6 +508,7 @@ async function extractAltoValeLikeStore(
         fotos,
         urlOriginal: url,
         atualizadoEm: nowIso,
+        pronta_entrega: false,
       };
       return veiculo;
     } catch (err) {
@@ -732,6 +733,7 @@ async function extractManosStore(): Promise<{ veiculos: Veiculo[]; erros: string
         fotos,
         urlOriginal: url,
         atualizadoEm: nowIso,
+        pronta_entrega: false,
       };
       return veiculo;
     } catch (err) {

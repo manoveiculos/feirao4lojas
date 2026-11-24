@@ -5,8 +5,10 @@ import type { EstoqueDatabase } from './types';
 
 export {
   filterVeiculos,
+  formatKmDisplay,
   formatVeiculoParaWhatsapp,
   getEstoqueFacets,
+  isMoto,
   normalizeSearch,
 } from './filters';
 
@@ -36,5 +38,14 @@ export function loadEstoque(): EstoqueDatabase {
     };
   }
   const raw = fs.readFileSync(DATA_FILE_PATH, 'utf8');
-  return JSON.parse(raw) as EstoqueDatabase;
+  const parsed = JSON.parse(raw) as EstoqueDatabase;
+  return {
+    ...parsed,
+    // Always use canonical store config (with sigla, mapsUrl, TODOs and no per-store phone)
+    lojas: LOJAS,
+    veiculos: (parsed.veiculos || []).map((v) => ({
+      ...v,
+      pronta_entrega: Boolean(v.pronta_entrega),
+    })),
+  };
 }

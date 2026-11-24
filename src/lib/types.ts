@@ -4,13 +4,22 @@ export type LojaSlug =
   | 'v3-automoveis'
   | 'manos-veiculos';
 
+export type LojaSigla = 'MV' | 'NA' | 'RA' | 'V3';
+
+export type CampaignMode = 'pre_lancamento' | 'aberto' | 'encerrado';
+
 export interface LojaInfo {
   slug: LojaSlug;
+  sigla: LojaSigla;
   nome: string;
   nomeCurto: string;
   cidade: string;
-  endereco: string;
-  telefoneOriginal: string;
+  /** Endereço completo ou null quando pendente de confirmação (nunca inventar). */
+  endereco: string | null;
+  /** Indica se há pendência/confirmação necessária no endereço. */
+  enderecoPendente?: string;
+  mapsUrl: string;
+  horarioFeirao: string;
   siteUrl: string;
   logo: string;
   logoTheme: 'dark' | 'light';
@@ -46,6 +55,8 @@ export interface Veiculo {
   fotos: string[];
   urlOriginal: string;
   atualizadoEm: string;
+  /** Campo pronta_entrega: documentação ok, revisado, higienizado (default false). */
+  pronta_entrega: boolean;
 }
 
 export interface EstoqueMetadata {
@@ -69,6 +80,9 @@ export interface FiltroVeiculos {
   categoria?: string;
   cambio?: string;
   combustivel?: string;
+  prontaEntrega?: boolean;
+  apenasMotos?: boolean;
+  excluirMotos?: boolean;
   precoMin?: number;
   precoMax?: number;
   anoMin?: number;

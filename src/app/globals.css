@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+:root {
+  --petrol-950: #051f29;
+  --petrol-900: #062835;
+  --petrol-800: #0b3c4e;
+  --petrol-700: #0e4d63;
+  --accent-orange: #f97316;
+  --accent-orange-hover: #ea580c;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -13,31 +22,11 @@
     overflow-x: clip;
     -webkit-tap-highlight-color: transparent;
   }
-}
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.75;
+  :focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
   }
-  70% {
-    transform: scale(1.18);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.18);
-    opacity: 0;
-  }
-}
-
-.whatsapp-pulse::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background-color: #25d366;
-  animation: pulse-ring 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-  z-index: -1;
 }
 
 /* Custom thin scrollbar for photo thumbnails */
@@ -64,4 +53,38 @@
 
 .safe-bottom {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Subtle kinetic speed-streak animation for Acelera V3 Hero (zero JS, LCP safe) */
+@keyframes speed-streak {
+  0% {
+    transform: translateX(-120%) skewX(-24deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(220%) skewX(-24deg);
+    opacity: 0;
+  }
+}
+
+.hero-streak {
+  animation: speed-streak 5.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.hero-streak-delay {
+  animation: speed-streak 7.2s cubic-bezier(0.22, 1, 0.36, 1) 2.2s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-streak,
+  .hero-streak-delay {
+    animation: none;
+    opacity: 0;
+  }
 }

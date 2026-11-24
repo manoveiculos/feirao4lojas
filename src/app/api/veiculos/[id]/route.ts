@@ -35,6 +35,6 @@ export async function GET(
     veiculo,
     loja,
     textoWhatsapp: formatVeiculoParaWhatsapp(veiculo),
-    linkWhatsappFeirao: buildWhatsappUrl(buildVehicleWhatsappMessage(veiculo, 'info')),
+    linkWhatsappFeirao: buildWhatsappUrl(buildVehicleWhatsappMessage(veiculo)),
   });
 }

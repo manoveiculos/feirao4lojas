@@ -1,3 +1,4 @@
+import Fuse from 'fuse.js';
 import type { FiltroVeiculos, Veiculo } from './types';
 
 export function normalizeSearch(str: string): string {
@@ -22,11 +23,32 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   utilitario: ['utilitario', 'picape'],
 };
 
+export function isMoto(v: Veiculo): boolean {
+  return normalizeSearch(v.categoria) === 'moto';
+}
+
+export function formatKmDisplay(km: number | null, kmFormatado?: string): string {
+  if (km === null || km === undefined) return 'Km sob consulta';
+  if (kmFormatado && /consulte/i.test(kmFormatado)) return 'Km sob consulta';
+  if (km === 0) return '0 km';
+  return `${new Intl.NumberFormat('pt-BR').format(km)} km`;
+}
+
 export function filterVeiculos(
   veiculos: Veiculo[],
   filtros: FiltroVeiculos
 ): Veiculo[] {
   let list = [...veiculos];
+
+  if (filtros.apenasMotos) {
+    list = list.filter((v) => isMoto(v));
+  } else if (filtros.excluirMotos) {
+    list = list.filter((v) => !isMoto(v));
+  }
+
+  if (filtros.prontaEntrega) {
+    list = list.filter((v) => Boolean(v.pronta_entrega));
+  }
 
   if (filtros.loja && filtros.loja !== 'todas') {
     const target = normalizeSearch(filtros.loja);
@@ -108,33 +130,45 @@ export function filterVeiculos(
     list = list.filter((v) => v.km !== null && v.km <= filtros.kmMax!);
   }
 
+  // Fuzzy search with Fuse.js (tolerates typos like "Corola", "Haval", "Onix", "Renegad")
   if (filtros.q && filtros.q.trim()) {
-    const tokens = normalizeSearch(filtros.q)
-      .split(/\s+/)
-      .filter((t) => t.length >= 2);
-    list = list.filter((v) => {
-      const haystack = normalizeSearch(
-        [
-          v.codigo,
-          v.titulo,
-          v.marca,
-          v.modelo,
-          v.versao,
-          v.anoTexto,
-          v.categoria,
-          v.cambio,
-          v.combustivel,
-          v.cor,
-          v.lojaNome,
-          v.descricao,
-          v.opcionais.join(' '),
-        ].join(' ')
-      );
-      return tokens.every((tok) => {
-        const synonyms = SEARCH_SYNONYMS[tok] || [tok];
-        return synonyms.some((s) => haystack.includes(s));
+    const query = filtros.q.trim();
+    const normQuery = normalizeSearch(query);
+
+    // Exact/code fast match first (e.g. "NA-001", "V3-001")
+    const codeMatch = list.filter(
+      (v) => normalizeSearch(v.codigo) === normQuery
+    );
+    if (codeMatch.length > 0) {
+      list = codeMatch;
+    } else {
+      // Expand common synonyms in query tokens (vw -> volkswagen, gm -> chevrolet)
+      const expandedQuery = normQuery
+        .split(/\s+/)
+        .map((tok) => (SEARCH_SYNONYMS[tok] ? SEARCH_SYNONYMS[tok][0] : tok))
+        .join(' ');
+
+      const fuse = new Fuse(list, {
+        includeScore: true,
+        threshold: 0.36,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+        keys: [
+          { name: 'marca', weight: 0.3 },
+          { name: 'modelo', weight: 0.35 },
+          { name: 'titulo', weight: 0.25 },
+          { name: 'versao', weight: 0.15 },
+          { name: 'codigo', weight: 0.2 },
+          { name: 'anoTexto', weight: 0.1 },
+          { name: 'combustivel', weight: 0.1 },
+          { name: 'cambio', weight: 0.1 },
+          { name: 'cor', weight: 0.08 },
+          { name: 'lojaNome', weight: 0.08 },
+        ],
       });
-    });
+
+      list = fuse.search(expandedQuery).map((r) => r.item);
+    }
   }
 
   switch (filtros.ordenar) {
@@ -154,7 +188,14 @@ export function filterVeiculos(
     case 'km_asc':
       list.sort((a, b) => (a.km ?? 9e9) - (b.km ?? 9e9));
       break;
+    case 'destaque':
     default:
+      // "Destaques do feirão": pronta entrega primeiro, depois menor preço
+      list.sort((a, b) => {
+        const peDiff = Number(Boolean(b.pronta_entrega)) - Number(Boolean(a.pronta_entrega));
+        if (peDiff !== 0) return peDiff;
+        return (a.preco ?? 9e9) - (b.preco ?? 9e9);
+      });
       break;
   }
 
@@ -162,6 +203,9 @@ export function filterVeiculos(
 }
 
 export function getEstoqueFacets(veiculos: Veiculo[]) {
+  const carros = veiculos.filter((v) => !isMoto(v));
+  const motos = veiculos.filter((v) => isMoto(v));
+
   const marcasMap = new Map<string, number>();
   const categoriasMap = new Map<string, number>();
   const combustiveisMap = new Map<string, number>();
@@ -169,9 +213,10 @@ export function getEstoqueFacets(veiculos: Veiculo[]) {
   let minPreco = Infinity;
   let maxPreco = 0;
 
-  for (const v of veiculos) {
+  for (const v of carros) {
     marcasMap.set(v.marca, (marcasMap.get(v.marca) || 0) + 1);
-    categoriasMap.set(v.categoria, (categoriasMap.get(v.categoria) || 0) + 1);
+    const cat = v.categoria === 'Hatch / Passeio' ? 'Hatch' : v.categoria;
+    categoriasMap.set(cat, (categoriasMap.get(cat) || 0) + 1);
     combustiveisMap.set(
       v.combustivel,
       (combustiveisMap.get(v.combustivel) || 0) + 1
@@ -183,6 +228,10 @@ export function getEstoqueFacets(veiculos: Veiculo[]) {
     }
   }
 
+  // Round max price UP to nearest 10k so the highest-priced vehicle is always covered
+  const maxPrecoArredondado =
+    maxPreco > 0 ? Math.ceil(maxPreco / 10000) * 10000 : 300000;
+
   const sortMap = (m: Map<string, number>) =>
     [...m.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -193,9 +242,16 @@ export function getEstoqueFacets(veiculos: Veiculo[]) {
     categorias: sortMap(categoriasMap),
     combustiveis: sortMap(combustiveisMap),
     cambios: sortMap(cambiosMap),
+    totalCarros: carros.length,
+    totalMotos: motos.length,
+    totalEletricos: carros.filter(
+      (v) => normalizeSearch(v.combustivel) === 'eletrico'
+    ).length,
+    totalProntaEntrega: carros.filter((v) => Boolean(v.pronta_entrega)).length,
     faixaPreco: {
       min: Number.isFinite(minPreco) ? minPreco : 0,
       max: maxPreco,
+      maxArredondado: maxPrecoArredondado,
     },
   };
 }
@@ -204,7 +260,7 @@ export function formatVeiculoParaWhatsapp(v: Veiculo): string {
   const linhas = [
     `*${v.titulo}*`,
     `💰 *${v.precoFormatado}*`,
-    `📅 Ano: ${v.anoTexto} | 🛣️ ${v.kmFormatado}`,
+    `📅 Ano: ${v.anoTexto} | 🛣️ ${formatKmDisplay(v.km, v.kmFormatado)}`,
     `⚙️ ${v.cambio} | ⛽ ${v.combustivel} | 🎨 ${v.cor}`,
     `🏪 Loja: ${v.lojaNome} (${v.cidade}) | 🔖 Cód: ${v.codigo}`,
   ];
