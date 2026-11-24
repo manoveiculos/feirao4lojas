@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "atualizadoEm": "2026-11-24T12:48:58.273Z",
-    "totalVeiculos": 91,
+    "atualizadoEm": "2026-11-24T16:44:44.383Z",
+    "totalVeiculos": 90,
     "porLoja": {
       "nenem-autos": 19,
       "rosa-automoveis": 7,
       "v3-automoveis": 24,
-      "manos-veiculos": 41
+      "manos-veiculos": 40
     },
     "erros": []
   },
@@ -156,7 +156,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a20a42-969b-78ab-92ab-90245a0d20b2/262dfb93-97b2-40be-a422-6354ea1d1d56/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/renault-boreal-iconic-1-3-turbo-automatico-2026-rio-do-sul-175144",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -249,7 +249,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/byd-dolphin-ev-gs-eletrico-2027-rio-do-sul-01a1cc76-bcf9-7896-ad2a-afac8d76c71b",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -257,10 +257,10 @@
       "codigo": "MV-001",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Fiat Toro Ranch 2.2 16V 4x4 TB Diesel Aut. 2023",
+      "titulo": "Fiat Toro Ranch 2.2 16V 4x4 TB Diesel Aut.",
       "marca": "Fiat",
       "modelo": "Toro",
-      "versao": "Ranch 2.2 16V 4x4 TB Diesel Aut.",
+      "versao": "Ranch 2.2 16V 4x4 TB Diesel Automático",
       "anoFabricacao": 2023,
       "anoModelo": 2023,
       "anoTexto": "2023",
@@ -338,7 +338,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/4c9135f3-78d1-43e7-a715-f9cf9ea17ade/95e2e3686c8a4ff3b1566259f2fa94bf_1795456718106.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/fiat-toro-ranch-2-2-16v-4x4-tb-diesel-aut-cinza-2023-2023/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -427,7 +427,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a0cb8f-e400-786f-8fa0-6a38e11a1e51/016f5e66-e800-76a0-8dfa-8cc16ca427d0/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/hyundai-hb20-sedan-comfort-1-0-turbo-automatico-2025-rio-do-sul-176652",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -515,7 +515,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a168e6-a84e-7d4e-bc3d-f4c04bad2be8/f177d58d-3b94-4bb0-b061-4cd201e2eeda/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/volkswagen-t-cross-extreme-1-4-tsi-automatica-2026-rio-do-sul-177295",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -523,9 +523,9 @@
       "codigo": "V3-002",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "GAC AION Y Premium (Elétrico)",
+      "titulo": "GAC Aion Y Premium (Elétrico)",
       "marca": "GAC",
-      "modelo": "AION",
+      "modelo": "Aion",
       "versao": "Y Premium (Elétrico)",
       "anoFabricacao": 2026,
       "anoModelo": 2026,
@@ -613,7 +613,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/gac-aion-y-premium-eletrico-2026-rio-do-sul-01a1e972-a14f-7526-a5a9-fd7f2e776c4b",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -621,10 +621,10 @@
       "codigo": "MV-002",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Aut. 2022",
+      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Aut.",
       "marca": "Jeep",
       "modelo": "Renegade",
-      "versao": "Long. T270 1.3 TB 4x2 Flex Aut.",
+      "versao": "Long. T270 1.3 TB 4x2 Flex Automático",
       "anoFabricacao": 2022,
       "anoModelo": 2022,
       "anoTexto": "2022",
@@ -696,7 +696,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/da39ebae-0f21-4f56-8184-57cc1349d89b/af0dd04d9ad64cd8935dbffa7b3a2f76_1795268150209.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/jeep-renegade-long-t270-1-3-tb-4x2-flex-aut-cinza-2022-2022/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -777,7 +777,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a1ad72-c6bf-7595-b949-a18dae4ed78c/d4ef1ae0-7963-4b88-ae46-e5db6faf8242/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/fiat-strada-freedom-1-3-flex-8v-cs-plus-2025-rio-do-sul-01a1dc00-c07b-7aaf-bfbc-731ae3f5b71c",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -867,7 +867,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019eb920-e000-7c2f-9896-4752fddc67de/016f5e66-e800-769e-992a-b258e25158f8/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-corolla-cross-xrx-1-8-hybrido-automatico-2025-rio-do-sul-178691",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -875,10 +875,10 @@
       "codigo": "V3-003",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen Virtus Highline 200 TSI 1.0 Flex 12V Aut",
+      "titulo": "Volkswagen Virtus Highline 200 TSI 1.0 Flex 12V Aut.",
       "marca": "Volkswagen",
       "modelo": "Virtus",
-      "versao": "Highline 200 TSI 1.0 Flex 12V Aut",
+      "versao": "Highline 200 TSI 1.0 Flex 12V Aut.",
       "anoFabricacao": 2026,
       "anoModelo": 2026,
       "anoTexto": "2026",
@@ -955,7 +955,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-virtus-highline-200-tsi-1-0-flex-12v-aut-2026-rio-do-sul-01a1f07d-55e8-79b2-932f-8ac230890f50",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -963,10 +963,10 @@
       "codigo": "MV-003",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "GAC MOTORS AION Y PREMIUM 2026",
+      "titulo": "GAC Aion Y Premium",
       "marca": "GAC",
-      "modelo": "AION Y",
-      "versao": "MOTORS AION Y PREMIUM",
+      "modelo": "Aion Y",
+      "versao": "Motors Aion Y Premium",
       "anoFabricacao": 2025,
       "anoModelo": 2026,
       "anoTexto": "2025/2026",
@@ -1042,7 +1042,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/79e43f1e-71e9-40ba-87d0-647778e85a44/718b0cab05504a9c916fdf7bc5665ae6_1794945865586.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/gac-motors-aion-y-premium-cinza-2025-2026/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -1050,10 +1050,10 @@
       "codigo": "RA-003",
       "lojaSlug": "rosa-automoveis",
       "lojaNome": "Rosa Automóveis",
-      "titulo": "Toyota Corolla XEI 2.0 CVT",
+      "titulo": "Toyota Corolla XEi 2.0 CVT",
       "marca": "Toyota",
       "modelo": "Corolla",
-      "versao": "XEI 2.0 CVT",
+      "versao": "XEi 2.0 CVT",
       "anoFabricacao": 2023,
       "anoModelo": 2023,
       "anoTexto": "2023",
@@ -1133,7 +1133,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a18e66-1d8b-7a49-9030-505d8c0e9dc0/305b5d91-33b8-4ffc-955e-885cf2093b38/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-corolla-xei-2-0-cvt-2023-rio-do-sul-178894",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -1218,7 +1218,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a0c143-2c00-713e-9e6e-30d0c92de531/016f5e66-e800-7510-a383-f7f6ddb53fbd/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/honda-city-hatch-exl-1-5-automatico-2025-rio-do-sul-179181",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -1226,10 +1226,10 @@
       "codigo": "V3-004",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Fiat Strada FREEDOM 1.3 C.S",
+      "titulo": "Fiat Strada Freedom 1.3 CS",
       "marca": "Fiat",
       "modelo": "Strada",
-      "versao": "FREEDOM 1.3 C.S",
+      "versao": "Freedom 1.3 CS",
       "anoFabricacao": 2025,
       "anoModelo": 2025,
       "anoTexto": "2025",
@@ -1288,7 +1288,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/fiat-strada-freedom-1-3-c-s-2025-rio-do-sul-172498",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -1296,9 +1296,9 @@
       "codigo": "MV-004",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "BYD SEAL (Elétrico) 2024",
+      "titulo": "BYD Seal (Elétrico)",
       "marca": "BYD",
-      "modelo": "SEAL",
+      "modelo": "Seal",
       "versao": "(Elétrico)",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
@@ -1372,7 +1372,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/74e1e4e1-ab46-46af-a481-ff6254471606/93eff3fac9eb4506879e0035d259176d_1794944754655.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/byd-seal-eletrico-preta-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -1466,7 +1466,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a0f9e9-2000-7a17-9d83-03b354df54c3/016f5e66-e800-7083-a2bd-8604e912b21a/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/fiat-strada-cd-1-3-volcano-2022-rio-do-sul-176469",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -1526,7 +1526,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17f60-ccb1-74d1-8c7c-8de394c483de/25f49b1d-7aa5-459b-9a41-b015dc6750e4/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/volkswagen-saveiro-robust-1-6-total-flex-16v-2025-rio-do-sul-01a16558-3220-76d6-885a-b2433aeca1a0",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -1534,10 +1534,10 @@
       "codigo": "V3-005",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen Polo TRACK 1.0",
+      "titulo": "Volkswagen Polo Track 1.0",
       "marca": "Volkswagen",
       "modelo": "Polo",
-      "versao": "TRACK 1.0",
+      "versao": "Track 1.0",
       "anoFabricacao": 2025,
       "anoModelo": 2025,
       "anoTexto": "2025",
@@ -1593,7 +1593,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-polo-track-1-0-2025-rio-do-sul-175336",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -1601,9 +1601,9 @@
       "codigo": "MV-005",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "BYD DOLPHIN EV GS (Elétrico) 2027",
+      "titulo": "BYD Dolphin EV GS (Elétrico)",
       "marca": "BYD",
-      "modelo": "DOLPHIN EV",
+      "modelo": "Dolphin EV",
       "versao": "GS (Elétrico)",
       "anoFabricacao": 2026,
       "anoModelo": 2027,
@@ -1673,7 +1673,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/fc883632-40c9-436a-a70c-3f1f877f0937/c3007a61dd2848299325a51e6daa7081_1794341391543.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/byd-dolphin-ev-gs-eletrico-bege-2026-2027/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -1681,10 +1681,10 @@
       "codigo": "RA-005",
       "lojaSlug": "rosa-automoveis",
       "lojaNome": "Rosa Automóveis",
-      "titulo": "Volkswagen T-Cross Comfor. 200 TSI 1.0 Flex 5p Aut.",
+      "titulo": "Volkswagen T-Cross Comfor. 200 TSI 1.0 Flex 5p Automático",
       "marca": "Volkswagen",
       "modelo": "T-Cross",
-      "versao": "Comfor. 200 TSI 1.0 Flex 5p Aut.",
+      "versao": "Comfor. 200 TSI 1.0 Flex 5p Automático",
       "anoFabricacao": 2021,
       "anoModelo": 2021,
       "anoTexto": "2021",
@@ -1765,7 +1765,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a0e54f-b000-76ac-9bc9-29893fa3e356/016f5e66-e800-73e3-9829-8c8122a24962/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/volkswagen-t-cross-comfor-200-tsi-1-0-flex-5p-aut-2021-rio-do-sul-01a13c8b-f779-7068-a4b5-eece04ab8247",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -1833,7 +1833,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a1ad72-c6bf-7595-b949-a18dae4ed78c/d4ef1ae0-7963-4b88-ae46-e5db6faf8242/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/fiat-strada-freedom-1-3-flex-8v-cs-plus-2025-rio-do-sul-01a1d444-3327-7861-80fa-ab84c13dac05",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -1841,10 +1841,10 @@
       "codigo": "V3-006",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Hyundai HB20 Sedan 1.0 TURBO CONFORT. AUTOMÁTICO",
+      "titulo": "Hyundai HB20 Sedan 1.0 Turbo Confort. Automático",
       "marca": "Hyundai",
       "modelo": "HB20 Sedan",
-      "versao": "1.0 TURBO CONFORT. AUTOMÁTICO",
+      "versao": "1.0 Turbo Confort. Automático",
       "anoFabricacao": 2025,
       "anoModelo": 2025,
       "anoTexto": "2025",
@@ -1915,7 +1915,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/hyundai-hb20-sedan-1-0-turbo-confort-automatico-2025-rio-do-sul-01a18884-d812-7a88-a67f-33e640e9f780",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -1923,10 +1923,10 @@
       "codigo": "MV-006",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Fiat Strada Working HARD 1.4 Fire Flex 8V CD 2017",
+      "titulo": "Fiat Strada Working Hard 1.4 Fire Flex 8V CD",
       "marca": "Fiat",
       "modelo": "Strada",
-      "versao": "Working HARD 1.4 Fire Flex 8V CD",
+      "versao": "Working Hard 1.4 Fire Flex 8V CD",
       "anoFabricacao": 2017,
       "anoModelo": 2017,
       "anoTexto": "2017",
@@ -1966,7 +1966,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/8bd05bf0-5241-4272-be9c-3466565c4dec/bbde4507208c4c29968ac2ce66065762_1794341037093.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/fiat-strada-working-hard-1-4-fire-flex-8v-cd-branca-2017-2017/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -1974,10 +1974,10 @@
       "codigo": "RA-006",
       "lojaSlug": "rosa-automoveis",
       "lojaNome": "Rosa Automóveis",
-      "titulo": "Toyota Corolla XEi 2.0 Flex 16V Aut.",
+      "titulo": "Toyota Corolla XEi 2.0 Flex 16V Automático",
       "marca": "Toyota",
       "modelo": "Corolla",
-      "versao": "XEi 2.0 Flex 16V Aut.",
+      "versao": "XEi 2.0 Flex 16V Automático",
       "anoFabricacao": 2018,
       "anoModelo": 2018,
       "anoTexto": "2018",
@@ -2056,7 +2056,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a03637-7800-7c4c-905b-86efc3a88dc0/016f5e66-e800-7706-9382-6fd433f319a4/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-corolla-xei-2-0-flex-16v-aut-2018-rio-do-sul-01a13c80-3084-7f98-9315-29172a6d5745",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -2145,7 +2145,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a118cf-4800-7548-8679-ff329c16b9fd/016f5e66-e800-76eb-b6ec-25289fba2f08/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-hilux-srx-2-8-4x4-automatica-2024-rio-do-sul-168950",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -2153,10 +2153,10 @@
       "codigo": "V3-007",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "GWM Haval H6 HAVAL H6 1.5 PHEV 34 AWD E-TRACTION",
+      "titulo": "GWM Haval H6 1.5 PHEV 34 AWD e-Traction",
       "marca": "GWM",
       "modelo": "Haval H6",
-      "versao": "HAVAL H6 1.5 PHEV 34 AWD E-TRACTION",
+      "versao": "Haval H6 1.5 PHEV 34 AWD e-Traction",
       "anoFabricacao": 2025,
       "anoModelo": 2025,
       "anoTexto": "2025",
@@ -2165,7 +2165,7 @@
       "km": 32860,
       "kmFormatado": "32.860 km",
       "cambio": "Automático",
-      "combustivel": "Flex",
+      "combustivel": "Híbrido",
       "cor": "Preta",
       "portas": 4,
       "categoria": "SUV",
@@ -2239,7 +2239,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/gwm-haval-h6-haval-h6-1-5-phev-34-awd-e-traction-2025-rio-do-sul-01a19263-b1f2-7851-a933-7ccf62383a2e",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -2247,10 +2247,10 @@
       "codigo": "MV-007",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "GWM Haval H6 34 1.5 AWD (Hibrido) 2025",
+      "titulo": "GWM Haval H6 34 1.5 AWD (Híbrido)",
       "marca": "GWM",
       "modelo": "Haval",
-      "versao": "H6 34 1.5 AWD (Hibrido)",
+      "versao": "H6 34 1.5 AWD (Híbrido)",
       "anoFabricacao": 2024,
       "anoModelo": 2025,
       "anoTexto": "2024/2025",
@@ -2259,7 +2259,7 @@
       "km": 29000,
       "kmFormatado": "29.000 km",
       "cambio": "Automático",
-      "combustivel": "Gasolina",
+      "combustivel": "Híbrido",
       "cor": "Preta",
       "portas": 4,
       "categoria": "SUV",
@@ -2327,7 +2327,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/cf723943-f4cf-42d1-90ed-8a20a58d598b/d7f31e052da5452384e786d0eaf29752_1794340457211.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/gwm-haval-h6-34-1-5-awd-hibrido-preta-2024-2025/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -2335,10 +2335,10 @@
       "codigo": "RA-007",
       "lojaSlug": "rosa-automoveis",
       "lojaNome": "Rosa Automóveis",
-      "titulo": "Chevrolet Cruze LTZ 1.4 16V Turbo Flex 4p Aut.",
+      "titulo": "Chevrolet Cruze LTZ 1.4 16V Turbo Flex 4p Automático",
       "marca": "Chevrolet",
       "modelo": "Cruze",
-      "versao": "LTZ 1.4 16V Turbo Flex 4p Aut.",
+      "versao": "LTZ 1.4 16V Turbo Flex 4p Automático",
       "anoFabricacao": 2018,
       "anoModelo": 2018,
       "anoTexto": "2018",
@@ -2428,7 +2428,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019f8c45-9c00-7f27-b26b-da15290baaf3/016f5e66-e800-723c-9c39-252c7c1c24e7/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/chevrolet-cruze-ltz-1-4-16v-turbo-flex-4p-aut-2018-rio-do-sul-01a1ad3a-af6d-7fb1-8a1c-b5a0f10d62b5",
-      "atualizadoEm": "2026-11-24T12:48:43.466Z",
+      "atualizadoEm": "2026-11-24T16:44:39.443Z",
       "pronta_entrega": false
     },
     {
@@ -2506,7 +2506,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019f442c-9400-77df-922f-f8df131a640d/016f5e66-e800-7107-9c8e-9202a8933419/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-yaris-xs-1-5-automatico-2024-rio-do-sul-178690",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -2514,10 +2514,10 @@
       "codigo": "V3-008",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "GWM Haval H6 GT 1.5 AWD (HIBRIDO)",
+      "titulo": "GWM Haval H6 GT 1.5 AWD (Híbrido)",
       "marca": "GWM",
       "modelo": "Haval H6",
-      "versao": "GT 1.5 AWD (HIBRIDO)",
+      "versao": "GT 1.5 AWD (Híbrido)",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -2596,7 +2596,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a17eed-ddf4-7ed5-9a29-de36da31dd73/41003e08-2afb-4627-bc73-3976c2fb3b0c/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/gwm-haval-h6-gt-1-5-awd-hibrido-2024-rio-do-sul-01a16b36-5203-77a0-8657-ef9e26b3cb30",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -2604,10 +2604,10 @@
       "codigo": "MV-008",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut. 2021",
+      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut.",
       "marca": "Volkswagen",
       "modelo": "Nivus",
-      "versao": "Highline 1.0 200 TSI Flex Aut.",
+      "versao": "Highline 1.0 200 TSI Flex Automático",
       "anoFabricacao": 2021,
       "anoModelo": 2021,
       "anoTexto": "2021",
@@ -2679,7 +2679,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/8505ac74-9bee-4b1e-ba80-5353bdfbc2ce/fc7af597477a4d8f8c0127468bbbc14d_1793281503576.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-nivus-highline-1-0-200-tsi-flex-aut-cinza-2021-2021/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -2687,10 +2687,10 @@
       "codigo": "NA-009",
       "lojaSlug": "nenem-autos",
       "lojaNome": "Neném Autos",
-      "titulo": "GWM Haval H6 GT 1.5 TURBO HÍBRIDO PHEV AWD",
+      "titulo": "GWM Haval H6 GT 1.5 Turbo Híbrido PHEV AWD",
       "marca": "GWM",
       "modelo": "Haval H6",
-      "versao": "GT 1.5 TURBO HÍBRIDO PHEV AWD",
+      "versao": "GT 1.5 Turbo Híbrido PHEV AWD",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -2764,7 +2764,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16ad9-981e-724e-b7f3-1e82165d3fe7/1a9d6004-72e1-4967-98c1-72573afd812f/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/gwm-haval-h6-gt-1-5-turbo-hibrido-phev-awd-2024-rio-do-sul-01a1d44b-c4c8-75a1-b638-a7dc3d9e4bde",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -2772,10 +2772,10 @@
       "codigo": "V3-009",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut.",
+      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Automático",
       "marca": "Volkswagen",
       "modelo": "Nivus",
-      "versao": "Highline 1.0 200 TSI Flex Aut.",
+      "versao": "Highline 1.0 200 TSI Flex Automático",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -2845,7 +2845,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-nivus-highline-1-0-200-tsi-flex-aut-2024-rio-do-sul-01a17eed-ddf4-7ed5-9a29-de36da31dd73",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -2853,10 +2853,10 @@
       "codigo": "MV-009",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut. 2024",
+      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut.",
       "marca": "Volkswagen",
       "modelo": "Nivus",
-      "versao": "Highline 1.0 200 TSI Flex Aut.",
+      "versao": "Highline 1.0 200 TSI Flex Automático",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
       "anoTexto": "2023/2024",
@@ -2927,7 +2927,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/e7519041-a7c9-4225-a0ca-1eef5cbb8d91/1cc0925c90ad4211bc7546c13b788a3f_1793280993656.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-nivus-highline-1-0-200-tsi-flex-aut-branca-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -3013,7 +3013,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a1b5f3-c470-77d3-a13a-5615237d9472/7812e82a-5c5a-4968-80d9-035bd92760c9/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-corolla-cross-xre-2-0-automatico-2023-rio-do-sul-175776",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -3021,10 +3021,10 @@
       "codigo": "V3-010",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Toyota Corolla Cross XRX 1.8 HÍBRIDO AUTOMÁTICO",
+      "titulo": "Toyota Corolla Cross XRX 1.8 Híbrido Automático",
       "marca": "Toyota",
       "modelo": "Corolla Cross",
-      "versao": "XRX 1.8 HÍBRIDO AUTOMÁTICO",
+      "versao": "XRX 1.8 Híbrido Automático",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -3098,7 +3098,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/toyota-corolla-cross-xrx-1-8-hibrido-automatico-2024-rio-do-sul-01a1cc13-81d2-78ab-a0f4-f8b126dade33",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -3106,10 +3106,10 @@
       "codigo": "MV-010",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Dafra NH 190 dafra 2023",
+      "titulo": "Dafra NH 190 Dafra",
       "marca": "Dafra",
       "modelo": "NH 190",
-      "versao": "dafra",
+      "versao": "Dafra",
       "anoFabricacao": 2022,
       "anoModelo": 2023,
       "anoTexto": "2022/2023",
@@ -3141,7 +3141,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/cc3ab4be-296d-4830-a496-098075a5fd6d/475abefdd24d4929b5d499956b34f08f_1793280669149.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/dafra-nh-190-dafra-branca-2022-2023/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -3229,7 +3229,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019fab2b-c400-7136-833f-3f5f70e4914d/016f5e66-e800-72aa-bc1d-1b4173f0d5f4/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/jeep-compass-longitude-1-3-t270-automatico-2023-rio-do-sul-178694",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -3237,10 +3237,10 @@
       "codigo": "V3-011",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Fiat Fiorino Endurance EVO 1.4 Flex 8V 2p",
+      "titulo": "Fiat Fiorino Endurance Evo 1.4 Flex 8V 2p",
       "marca": "Fiat",
       "modelo": "Fiorino",
-      "versao": "Endurance EVO 1.4 Flex 8V 2p",
+      "versao": "Endurance Evo 1.4 Flex 8V 2p",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -3304,7 +3304,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/fiat-fiorino-endurance-evo-1-4-flex-8v-2p-2024-rio-do-sul-01a1cc2d-10ee-7137-9645-6ac2df2b59a2",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -3312,10 +3312,10 @@
       "codigo": "MV-011",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Aut. 2024",
+      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Aut.",
       "marca": "Jeep",
       "modelo": "Renegade",
-      "versao": "Long. T270 1.3 TB 4x2 Flex Aut.",
+      "versao": "Long. T270 1.3 TB 4x2 Flex Automático",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
       "anoTexto": "2023/2024",
@@ -3389,7 +3389,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/22c4c080-085c-41d9-bac0-7501776f5c3c/556bfa1ca7d64357858efb71e58d093f_1793025677155.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/jeep-renegade-long-t270-1-3-tb-4x2-flex-aut-cinza-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -3453,13 +3453,13 @@
         "https://fotos.altovaleveiculos.com.br/v/01a1ad83-1b82-72c8-9fab-af976c3b8aa5/35c4078d-09d3-4c3e-ab0b-94855c486247/800.webp",
         "https://fotos.altovaleveiculos.com.br/v/01a1857c-fb60-7e3f-bd5d-01d67307d2c1/2d62640d-315e-4cd0-98a9-b42bab264175/800.webp",
         "https://fotos.altovaleveiculos.com.br/v/01a16aa2-b33a-76ac-8940-1249f4018978/647def02-5b26-4ed4-999f-e72927197a2b/800.webp",
-        "https://fotos.altovaleveiculos.com.br/v/01a1657c-57ec-7274-b7d2-7044dc54f976/818a89c8-ed0b-43c1-80da-5573e88f810d/800.webp",
         "https://fotos.altovaleveiculos.com.br/v/01a15609-385d-7ce6-b883-582fe6e6245a/20b53e2a-bf13-4fc5-b16e-f8b1725e6f22/800.webp",
         "https://fotos.altovaleveiculos.com.br/v/01a15609-383b-7a06-8b80-2fdd1314bbd7/d535596a-09e2-4fd8-a50e-9f13b8d7f4dd/800.webp",
-        "https://fotos.altovaleveiculos.com.br/v/01a131e8-07f5-7c52-8acf-91bcf167ddf2/fdac81d3-c220-4ed1-9472-bde1f012afd3/800.webp"
+        "https://fotos.altovaleveiculos.com.br/v/01a131e8-07f5-7c52-8acf-91bcf167ddf2/fdac81d3-c220-4ed1-9472-bde1f012afd3/800.webp",
+        "https://fotos.altovaleveiculos.com.br/v/01a10e82-9000-7f2f-886c-4b79d4f82e5a/b523bcd3-d086-4a76-a813-ab6bd34ec0fb/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/fiat-argo-1-0-2023-rio-do-sul-179182",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -3467,10 +3467,10 @@
       "codigo": "V3-012",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut.",
+      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Automático",
       "marca": "Volkswagen",
       "modelo": "Nivus",
-      "versao": "Highline 1.0 200 TSI Flex Aut.",
+      "versao": "Highline 1.0 200 TSI Flex Automático",
       "anoFabricacao": 2022,
       "anoModelo": 2022,
       "anoTexto": "2022",
@@ -3550,7 +3550,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-nivus-highline-1-0-200-tsi-flex-aut-2022-rio-do-sul-01a1cc5b-f057-7e19-bf7a-06cf52587755",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -3558,7 +3558,7 @@
       "codigo": "MV-012",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Yamaha Fluo 125 ABS 2024",
+      "titulo": "Yamaha Fluo 125 ABS",
       "marca": "Yamaha",
       "modelo": "Fluo",
       "versao": "125 ABS",
@@ -3573,7 +3573,7 @@
       "combustivel": "Flex",
       "cor": "Preta",
       "portas": null,
-      "categoria": "Hatch",
+      "categoria": "Moto",
       "finalPlaca": "1",
       "cidade": "Rio do Sul",
       "descricao": "Preço promocional para venda sem troca. Consulte condições para negociação com troca.",
@@ -3593,7 +3593,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/610ff5d7-f6b8-4004-bda1-cc73518a16e8/d79af6b30163477bb7b0b9b64a2acc4a_1793023565453.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/yamaha-fluo-125-abs-preta-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -3670,7 +3670,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019f442c-9400-77df-922f-f8df131a640d/016f5e66-e800-7107-9c8e-9202a8933419/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/toyota-yaris-xl-plus-connect-1-5-at-2022-rio-do-sul-176498",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -3678,10 +3678,10 @@
       "codigo": "V3-013",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Aut.",
+      "titulo": "Jeep Renegade Long. T270 1.3 TB 4x2 Flex Automático",
       "marca": "Jeep",
       "modelo": "Renegade",
-      "versao": "Long. T270 1.3 TB 4x2 Flex Aut.",
+      "versao": "Long. T270 1.3 TB 4x2 Flex Automático",
       "anoFabricacao": 2022,
       "anoModelo": 2022,
       "anoTexto": "2022",
@@ -3754,7 +3754,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/jeep-renegade-long-t270-1-3-tb-4x2-flex-aut-2022-rio-do-sul-01a1f07f-a6ad-72f7-aa7d-1b87cec64812",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -3762,10 +3762,10 @@
       "codigo": "MV-013",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Fiat Argo DRIVE 1.0 6V Flex 2020",
+      "titulo": "Fiat Argo Drive 1.0 6V Flex",
       "marca": "Fiat",
       "modelo": "Argo",
-      "versao": "DRIVE 1.0 6V Flex",
+      "versao": "Drive 1.0 6V Flex",
       "anoFabricacao": 2020,
       "anoModelo": 2020,
       "anoTexto": "2020",
@@ -3809,7 +3809,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/925d4228-ffd2-42ed-bfed-6801f8d668af/44215c48fd2943ac9eacedc99a3534fd_1793022887840.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/fiat-argo-drive-1-0-6v-flex-preta-2020-2020/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -3817,10 +3817,10 @@
       "codigo": "NA-014",
       "lojaSlug": "nenem-autos",
       "lojaNome": "Neném Autos",
-      "titulo": "Chevrolet Tracker LT 1.0 Turbo 12V Flex Aut.",
+      "titulo": "Chevrolet Tracker LT 1.0 Turbo 12V Flex Automático",
       "marca": "Chevrolet",
       "modelo": "Tracker",
-      "versao": "LT 1.0 Turbo 12V Flex Aut.",
+      "versao": "LT 1.0 Turbo 12V Flex Automático",
       "anoFabricacao": 2022,
       "anoModelo": 2022,
       "anoTexto": "2022",
@@ -3888,7 +3888,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a0e54f-b000-7340-a8bd-99a1d7e3eaed/016f5e66-e800-7ece-a80e-d5bed04a3d2c/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/chevrolet-tracker-lt-1-0-turbo-12v-flex-aut-2022-rio-do-sul-01a1655b-0b98-77b9-8739-979119164dea",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -3896,10 +3896,10 @@
       "codigo": "V3-014",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen T-Cross Hig. 250 TSI 1.4 Flex 16V 5p Aut",
+      "titulo": "Volkswagen T-Cross Hig. 250 TSI 1.4 Flex 16V 5p Aut.",
       "marca": "Volkswagen",
       "modelo": "T-Cross",
-      "versao": "Hig. 250 TSI 1.4 Flex 16V 5p Aut",
+      "versao": "Hig. 250 TSI 1.4 Flex 16V 5p Aut.",
       "anoFabricacao": 2020,
       "anoModelo": 2020,
       "anoTexto": "2020",
@@ -3979,7 +3979,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-t-cross-hig-250-tsi-1-4-flex-16v-5p-aut-2020-rio-do-sul-01a18773-8390-7f54-a79e-9b19b5966052",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -3987,10 +3987,10 @@
       "codigo": "MV-014",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda Civic Sedan LXR 2.0 Flexone 16V Aut. 4p 2014",
+      "titulo": "Honda Civic Sedan Lxr 2.0 Flexone 16V Aut. 4p",
       "marca": "Honda",
       "modelo": "Civic",
-      "versao": "Sedan LXR 2.0 Flexone 16V Aut. 4p",
+      "versao": "Sedan Lxr 2.0 Flexone 16V Aut. 4p",
       "anoFabricacao": 2014,
       "anoModelo": 2014,
       "anoTexto": "2014",
@@ -4061,7 +4061,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/9d76defd-d510-4543-a9f5-7b7918f34fc1/aea1a35041ab4b19b957af981e331de3_1792507292728.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-civic-sedan-lxr-2-0-flexone-16v-aut-4p-cinza-2014-2014/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -4069,10 +4069,10 @@
       "codigo": "NA-015",
       "lojaSlug": "nenem-autos",
       "lojaNome": "Neném Autos",
-      "titulo": "Nissan Kicks UCL 1.6 Automático",
+      "titulo": "Nissan Kicks Ucl 1.6 Automático",
       "marca": "Nissan",
       "modelo": "Kicks",
-      "versao": "UCL 1.6 Automático",
+      "versao": "Ucl 1.6 Automático",
       "anoFabricacao": 2019,
       "anoModelo": 2019,
       "anoTexto": "2019",
@@ -4139,7 +4139,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a092e9-f000-7eeb-8563-e95220554686/016f5e66-e800-73c3-8590-674e963ae2e3/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/nissan-kicks-ucl-1-6-automatico-2019-rio-do-sul-01a137cf-2bf0-7467-b0b7-49777ca50e4c",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -4147,10 +4147,10 @@
       "codigo": "V3-015",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Chery QQ 1.0 SMILE 12V Flex 5p",
+      "titulo": "Chery QQ 1.0 Smile 12V Flex 5p",
       "marca": "CAOA Chery",
       "modelo": "QQ",
-      "versao": "Chery QQ 1.0 SMILE 12V Flex 5p",
+      "versao": "Chery QQ 1.0 Smile 12V Flex 5p",
       "anoFabricacao": 2019,
       "anoModelo": 2019,
       "anoTexto": "2019",
@@ -4202,7 +4202,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/chery-qq-1-0-smile-12v-flex-5p-2019-rio-do-sul-01a17026-d355-7e4f-a0ba-853bda759578",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -4210,10 +4210,10 @@
       "codigo": "MV-015",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen T-Cross VW/T CROSS CL TSI AD 2021",
+      "titulo": "Volkswagen T-Cross Vw/t Cross CL TSI AD",
       "marca": "Volkswagen",
       "modelo": "T-Cross",
-      "versao": "VW/T CROSS CL TSI AD",
+      "versao": "Vw/t Cross CL TSI AD",
       "anoFabricacao": 2020,
       "anoModelo": 2021,
       "anoTexto": "2020/2021",
@@ -4285,7 +4285,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/20de0584-6582-48b0-874c-9c2872d62607/e0a660045c6c4144a2455e2b8686295e_1792437033888.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-t-cross-vw-t-cross-cl-tsi-ad-branca-2020-2021/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -4352,7 +4352,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01994aab-d800-7087-bb5e-4638d9ad0ba1/016f5e66-e800-7768-bf73-12bda30173d1/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/ford-fiesta-se-1-6-2017-rio-do-sul-178689",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -4360,10 +4360,10 @@
       "codigo": "V3-016",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Ford Fusion TITANIUM AWD 2.0 TURBO",
+      "titulo": "Ford Fusion Titanium AWD 2.0 Turbo",
       "marca": "Ford",
       "modelo": "Fusion",
-      "versao": "TITANIUM AWD 2.0 TURBO",
+      "versao": "Titanium AWD 2.0 Turbo",
       "anoFabricacao": 2017,
       "anoModelo": 2017,
       "anoTexto": "2017",
@@ -4435,7 +4435,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/ford-fusion-titanium-awd-2-0-turbo-2017-rio-do-sul-179018",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -4443,10 +4443,10 @@
       "codigo": "MV-016",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "GWM Haval H6 GT 1.5 AWD (Hibrido) 2024",
+      "titulo": "GWM Haval H6 GT 1.5 AWD (Híbrido)",
       "marca": "GWM",
       "modelo": "Haval",
-      "versao": "H6 GT 1.5 AWD (Hibrido)",
+      "versao": "H6 GT 1.5 AWD (Híbrido)",
       "anoFabricacao": 2024,
       "anoModelo": 2024,
       "anoTexto": "2024",
@@ -4455,7 +4455,7 @@
       "km": 49000,
       "kmFormatado": "49.000 km",
       "cambio": "Automático",
-      "combustivel": "Gasolina",
+      "combustivel": "Híbrido",
       "cor": "Cinza",
       "portas": 4,
       "categoria": "SUV",
@@ -4499,7 +4499,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/34414c06ff29413f87a0032a0758397e_1793458712694.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/gwm-haval-h6-gt-1-5-awd-hibrido-cinza-2023-2024-2/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -4571,7 +4571,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a1d436-8583-7eeb-b3ab-9337f88f9260/c9ddafee-3d53-4448-b6c6-f87df708dd17/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/volkswagen-fox-comfortline-1-0-flex-12v-5p-2017-rio-do-sul-01a18e4a-b3ab-75d4-a733-280d26e2de8c",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -4579,10 +4579,10 @@
       "codigo": "V3-017",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Volkswagen Saveiro CROSS 1.6 CD",
+      "titulo": "Volkswagen Saveiro Cross 1.6 CD",
       "marca": "Volkswagen",
       "modelo": "Saveiro",
-      "versao": "CROSS 1.6 CD",
+      "versao": "Cross 1.6 CD",
       "anoFabricacao": 2021,
       "anoModelo": 2017,
       "anoTexto": "2021/2017",
@@ -4645,7 +4645,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-saveiro-cross-1-6-cd-2017-rio-do-sul-179344",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -4653,10 +4653,10 @@
       "codigo": "MV-017",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda Civic Sedan LXS 1.8/1.8 Flex 16V Aut. 4p 2012",
+      "titulo": "Honda Civic Sedan Lxs 1.8/1.8 Flex 16V Aut. 4p",
       "marca": "Honda",
       "modelo": "Civic",
-      "versao": "Sedan LXS 1.8/1.8 Flex 16V Aut. 4p",
+      "versao": "Sedan Lxs 1.8/1.8 Flex 16V Aut. 4p",
       "anoFabricacao": 2012,
       "anoModelo": 2012,
       "anoTexto": "2012",
@@ -4701,7 +4701,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/e9ac8732-4ccf-4ac6-be2e-362fbb5629ca/4efa1d6b12684013bf7cb353a494a427_1792006655958.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-civic-sedan-lxs-1-8-1-8-flex-16v-aut-4p-prata-2012-2012/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -4771,7 +4771,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a10e82-9000-7a2e-a196-e9baff285e67/016f5e66-e800-7164-9211-5e81201be51e/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/honda-fit-lx-1-4-2013-rio-do-sul-173477",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -4779,10 +4779,10 @@
       "codigo": "V3-018",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Kia Soul KIA SOUL EX2 1.6 AUTOMÁTICO + COURO",
+      "titulo": "Kia Soul EX2 1.6 Automático + Couro",
       "marca": "Kia",
       "modelo": "Soul",
-      "versao": "KIA SOUL EX2 1.6 AUTOMÁTICO + COURO",
+      "versao": "Kia Soul EX2 1.6 Automático + Couro",
       "anoFabricacao": 2016,
       "anoModelo": 2016,
       "anoTexto": "2016",
@@ -4849,7 +4849,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/kia-soul-kia-soul-ex2-1-6-automatico-couro-2016-rio-do-sul-176005",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -4857,10 +4857,10 @@
       "codigo": "MV-018",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volvo XC 60 T-5 R-DESIGN 2.0 FWD 5p 2016",
+      "titulo": "Volvo XC 60 T-5 R-Design 2.0 FWD 5p",
       "marca": "Volvo",
       "modelo": "XC",
-      "versao": "60 T-5 R-DESIGN 2.0 FWD 5p",
+      "versao": "60 T-5 R-Design 2.0 FWD 5p",
       "anoFabricacao": 2015,
       "anoModelo": 2016,
       "anoTexto": "2015/2016",
@@ -4872,7 +4872,7 @@
       "combustivel": "Gasolina",
       "cor": "Cinza",
       "portas": 4,
-      "categoria": "Hatch",
+      "categoria": "SUV",
       "finalPlaca": "9",
       "cidade": "Rio do Sul",
       "descricao": "Preço promocional para venda sem troca. Consulte condições para negociação com troca.",
@@ -4923,7 +4923,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/e38fa072-3e77-4321-a00e-ab41921f5021/1b35c3c5c8884b0b923dc29ef0378765_1791223604180.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volvo-xc-60-t-5-r-design-2-0-fwd-5p-cinza-2015-2016/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -4988,7 +4988,7 @@
         "https://fotos.altovaleveiculos.com.br/v/019d8949-ac00-7367-a47a-924f19e69a23/016f5e66-e800-7de5-b16f-5fa6bff95ab4/800.webp"
       ],
       "urlOriginal": "https://altovaleveiculos.com.br/carros/volkswagen-polo-1-6-2010-rio-do-sul-178701",
-      "atualizadoEm": "2026-11-24T12:48:43.638Z",
+      "atualizadoEm": "2026-11-24T16:44:39.659Z",
       "pronta_entrega": false
     },
     {
@@ -5066,7 +5066,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-gol-trendline-1-0-flex-8v-5p-2015-rio-do-sul-01a1ab54-eb68-7e22-8d92-04b8ed716d32",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5074,10 +5074,10 @@
       "codigo": "MV-019",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda HR-V EX 1.8 Flexone 16V 5p Aut. 2020",
+      "titulo": "Honda HR-V EX 1.8 Flexone 16V 5p Aut.",
       "marca": "Honda",
       "modelo": "HR-V",
-      "versao": "EX 1.8 Flexone 16V 5p Aut.",
+      "versao": "EX 1.8 Flexone 16V 5p Automático",
       "anoFabricacao": 2020,
       "anoModelo": 2020,
       "anoTexto": "2020",
@@ -5123,7 +5123,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/25d122f8-e3d6-4948-9a06-37d4a7c034c4/b4f650ac694d40dc9d62744cf2f95a96_1791463197364.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-hr-v-ex-1-8-flexone-16v-5p-aut-prata-2020-2020/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5131,10 +5131,10 @@
       "codigo": "V3-020",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Renault Fluence Sed. Dynamique 2.0 16V FLEX Aut.",
+      "titulo": "Renault Fluence Sed. Dynamique 2.0 16V Flex Automático",
       "marca": "Renault",
       "modelo": "Fluence",
-      "versao": "Sed. Dynamique 2.0 16V FLEX Aut.",
+      "versao": "Sed. Dynamique 2.0 16V Flex Automático",
       "anoFabricacao": 2014,
       "anoModelo": 2014,
       "anoTexto": "2014",
@@ -5201,7 +5201,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/renault-fluence-sed-dynamique-2-0-16v-flex-aut-2014-rio-do-sul-01a1cc81-b692-7815-a48a-f6dd5c0f5a5d",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5209,10 +5209,10 @@
       "codigo": "MV-020",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen T-Cross Hig. 250 TSI 1.4 Flex 16V 5p Aut 2024",
+      "titulo": "Volkswagen T-Cross Hig. 250 TSI 1.4 Flex 16V 5p Aut.",
       "marca": "Volkswagen",
       "modelo": "T-Cross",
-      "versao": "Hig. 250 TSI 1.4 Flex 16V 5p Aut",
+      "versao": "Hig. 250 TSI 1.4 Flex 16V 5p Aut.",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
       "anoTexto": "2023/2024",
@@ -5286,7 +5286,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/9724811d-08fe-4222-baf7-7c58041aada6/ef4fd0d91c4c47a08c0648f60614404d_1791405108594.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-t-cross-hig-250-tsi-1-4-flex-16v-5p-aut-azul-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5294,10 +5294,10 @@
       "codigo": "V3-021",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Fiat Palio ATTRACTIVE 1.0 EVO Fire Flex 8v 5p",
+      "titulo": "Fiat Palio Attractive 1.0 Evo Fire Flex 8V 5p",
       "marca": "Fiat",
       "modelo": "Palio",
-      "versao": "ATTRACTIVE 1.0 EVO Fire Flex 8v 5p",
+      "versao": "Attractive 1.0 Evo Fire Flex 8V 5p",
       "anoFabricacao": 2013,
       "anoModelo": 2013,
       "anoTexto": "2013",
@@ -5347,7 +5347,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/fiat-palio-attractive-1-0-evo-fire-flex-8v-5p-2013-rio-do-sul-01a1cc67-7fe7-7f94-8b0d-136b18aa9638",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5355,10 +5355,10 @@
       "codigo": "MV-021",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut. 2021",
+      "titulo": "Volkswagen Nivus Highline 1.0 200 TSI Flex Aut.",
       "marca": "Volkswagen",
       "modelo": "Nivus",
-      "versao": "Highline 1.0 200 TSI Flex Aut.",
+      "versao": "Highline 1.0 200 TSI Flex Automático",
       "anoFabricacao": 2020,
       "anoModelo": 2021,
       "anoTexto": "2020/2021",
@@ -5429,7 +5429,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/a2cb591a-8e43-470f-9e8e-f1585e9a6922/1e7b376866b842dcb36f7878bfd5ae37_1791311451010.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-nivus-highline-1-0-200-tsi-flex-aut-branca-2020-2021/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5437,10 +5437,10 @@
       "codigo": "V3-022",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "Chevrolet Corsa HATCH MAXX 1.4",
+      "titulo": "Chevrolet Corsa Hatch Maxx 1.4",
       "marca": "Chevrolet",
       "modelo": "Corsa",
-      "versao": "HATCH MAXX 1.4",
+      "versao": "Hatch Maxx 1.4",
       "anoFabricacao": 2012,
       "anoModelo": 2012,
       "anoTexto": "2012",
@@ -5487,7 +5487,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/chevrolet-corsa-hatch-maxx-1-4-2012-rio-do-sul-179345",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5495,10 +5495,10 @@
       "codigo": "MV-022",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Renault Captur Intense 1.6 16V Flex 5p Aut. 2019",
+      "titulo": "Renault Captur Intense 1.6 16V Flex 5p Aut.",
       "marca": "Renault",
       "modelo": "Captur",
-      "versao": "Intense 1.6 16V Flex 5p Aut.",
+      "versao": "Intense 1.6 16V Flex 5p Automático",
       "anoFabricacao": 2019,
       "anoModelo": 2019,
       "anoTexto": "2019",
@@ -5569,7 +5569,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/563612ad-f7c8-4da2-bfbd-847e2b3d5d20/449d3693bf5b440886fe014a9f4f745b_1791223185869.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/renault-captur-intense-1-6-16v-flex-5p-aut-branca-2019-2019/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5577,10 +5577,10 @@
       "codigo": "V3-023",
       "lojaSlug": "v3-automoveis",
       "lojaNome": "V3 Automóveis",
-      "titulo": "BMW 535 I GT + TETO E COURO",
+      "titulo": "BMW 535 I GT + Teto e Couro",
       "marca": "BMW",
       "modelo": "535",
-      "versao": "I GT + TETO E COURO",
+      "versao": "I GT + Teto e Couro",
       "anoFabricacao": 2011,
       "anoModelo": 2011,
       "anoTexto": "2011",
@@ -5592,7 +5592,7 @@
       "combustivel": "Gasolina",
       "cor": "Branca",
       "portas": 4,
-      "categoria": "Hatch",
+      "categoria": "Sedan",
       "finalPlaca": null,
       "cidade": "Rio do Sul",
       "descricao": "TETO SOLAR; AR DIGITAL; BANCOS EM COURO E COM REGULAGEM ELÉTRICA; CENTRAL MULTIMÍDIA; CÂMBIO AUTOMÁTICO; 306 CVs.",
@@ -5651,7 +5651,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/bmw-535-i-gt-teto-e-couro-2011-rio-do-sul-176240",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5659,10 +5659,10 @@
       "codigo": "MV-023",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Chevrolet Cruze Sport LTZ 1.4 16V TB Flex 5p Aut. 2018",
+      "titulo": "Chevrolet Cruze Sport LTZ 1.4 16V TB Flex 5p Aut.",
       "marca": "Chevrolet",
       "modelo": "Cruze",
-      "versao": "Sport LTZ 1.4 16V TB Flex 5p Aut.",
+      "versao": "Sport LTZ 1.4 16V TB Flex 5p Automático",
       "anoFabricacao": 2018,
       "anoModelo": 2018,
       "anoTexto": "2018",
@@ -5734,7 +5734,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/af8fb636-6a01-445d-b87c-e08cb9565e73/c89b2e2776544c8eb1ab71a3f48f43e9_1790699679609.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/chevrolet-cruze-sport-ltz-1-4-16v-tb-flex-5p-aut-branca-2018-2018/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5794,7 +5794,7 @@
         "https://fotos.altovaleveiculos.com.br/v/01a16b36-5203-77a0-8657-ef9e26b3cb30/5c0f2479-45ba-4998-8819-137b487433a3/800.webp"
       ],
       "urlOriginal": "https://www.v3automoveis.com.br/veiculo/volkswagen-fox-1-0-2004-rio-do-sul-179346",
-      "atualizadoEm": "2026-11-24T12:48:43.797Z",
+      "atualizadoEm": "2026-11-24T16:44:39.574Z",
       "pronta_entrega": false
     },
     {
@@ -5802,10 +5802,10 @@
       "codigo": "MV-024",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Jeep Compass LIMITED 2.0 4x2 Flex 16V Aut. 2019",
+      "titulo": "Jeep Compass Limited 2.0 4x2 Flex 16V Aut.",
       "marca": "Jeep",
       "modelo": "Compass",
-      "versao": "LIMITED 2.0 4x2 Flex 16V Aut.",
+      "versao": "Limited 2.0 4x2 Flex 16V Automático",
       "anoFabricacao": 2019,
       "anoModelo": 2019,
       "anoTexto": "2019",
@@ -5876,7 +5876,7 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/31e6bd47-559d-48f2-bb87-82a71b002d33/e9f84ec1ee414a6e96ba64fa28e0b781_1790427428832.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/jeep-compass-limited-2-0-4x2-flex-16v-aut-prata-2019-2019/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
@@ -5884,10 +5884,10 @@
       "codigo": "MV-025",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen Polo Highline 200 TSI 1.0 Flex 12V Aut. 2019",
+      "titulo": "Volkswagen Polo Highline 200 TSI 1.0 Flex 12V Aut.",
       "marca": "Volkswagen",
       "modelo": "Polo",
-      "versao": "Highline 200 TSI 1.0 Flex 12V Aut.",
+      "versao": "Highline 200 TSI 1.0 Flex 12V Automático",
       "anoFabricacao": 2018,
       "anoModelo": 2019,
       "anoTexto": "2018/2019",
@@ -5956,101 +5956,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/9d40d24c-3961-4043-ae8f-a78fe4b35716/caa4e30cfd144d59b4e715d2f3d72a31_1790362208288.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-polo-highline-200-tsi-1-0-flex-12v-aut-preta-2018-2019/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
-      "pronta_entrega": false
-    },
-    {
-      "id": "manos-veiculos-hyundai-hb20x-evolution-1-6-flex-16v-aut-branca-",
-      "codigo": "MV-026",
-      "lojaSlug": "manos-veiculos",
-      "lojaNome": "Manos Veículos",
-      "titulo": "Hyundai HB20X Evolution 1.6 Flex 16V Aut. 2022",
-      "marca": "Hyundai",
-      "modelo": "HB20X",
-      "versao": "Evolution 1.6 Flex 16V Aut.",
-      "anoFabricacao": 2021,
-      "anoModelo": 2022,
-      "anoTexto": "2021/2022",
-      "preco": 79900,
-      "precoFormatado": "R$ 79.900",
-      "km": 62000,
-      "kmFormatado": "62.000 km",
-      "cambio": "Automático",
-      "combustivel": "Flex",
-      "cor": "Branca",
-      "portas": 4,
-      "categoria": "Hatch",
-      "finalPlaca": "8",
-      "cidade": "Rio do Sul",
-      "descricao": "Preço promocional para venda sem troca. Consulte condições para negociação com troca.",
-      "opcionais": [
-        "ABS",
-        "Airbag",
-        "Airbag Duplo",
-        "Alarme",
-        "Apoio de Braço",
-        "Ar Condicionado",
-        "Ar Condicionado Digital",
-        "Ar Quente",
-        "Banco do Motorista com Ajuste de Altura",
-        "Bancos em Couro",
-        "Central Multimídia",
-        "Chave Reserva",
-        "Computador de bordo",
-        "Controle Som no Volante",
-        "Desembaçador Traseiro",
-        "Faróis Auxiliares",
-        "Insulfilm",
-        "Limpador Traseiro",
-        "Manual do Proprietário",
-        "Painel Digital",
-        "Película Solar",
-        "Piloto Automático",
-        "Protetor de Cárter",
-        "Relógio Digital",
-        "Retrovisores Elétricos",
-        "Rodas de liga leve",
-        "Sensor de ré",
-        "Som Original",
-        "Trava elétrica",
-        "Vidro elétrico",
-        "Vidros Elétricos Dianteiro",
-        "Vidros Elétricos Traseiro",
-        "Volante Escamoteável"
-      ],
-      "fotoCapa": "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/d556726457624d518afaf7fd88999b37_1790349161461.jpg",
-      "fotos": [
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/d556726457624d518afaf7fd88999b37_1790349161461.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/9cfe01791452406e97c057b0763c6742_1790349161477.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/9033e2affb0d405e9b69154a3da68bf5_1790349161493.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/59c0a054fa9b44f6af3e137c13221f08_1790349161505.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/d0ddfcb686e0477385106759f6f9bc03_1790349161519.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/e673d1933ce744a4afea5ec6662b6a16_1790349161531.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/bcb2022734f941329961c9e7377da91f_1790349161545.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/d7845a5f6f4547f0b7ddeb3fd1bcef97_1790349161554.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/3f0c681128724c4aae6178aa45265394_1790349161582.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/ba195af352bc45dfaf899f3b48ff5e6c_1790349161595.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/6656da9ce48a4b3f8215ab5929becd91_1790349161614.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/65c8e650fe9a471f92bf01188707ed55_1790349161633.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/7aace5cccd854c89b661bb5c595339fa_1790349161655.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/e0283e78108044d5965633e5a8179690_1790349161672.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/3ac9b886c3eb42e5b77f4848855a08e2_1790349161682.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/ecaf041f725b4f2e9b5c7f92c83bd8c7_1790349161702.jpg",
-        "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/ae5945a7-0394-461d-b7da-2e326b339cb1/1e93e144b35a42698be83d3fcb0a2e9d_1790349161719.jpg"
-      ],
-      "urlOriginal": "https://manosveiculos.com.br/veiculos/hyundai-hb20x-evolution-1-6-flex-16v-aut-branca-2021-2022/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-honda-biz-125-125-ex-125-ex-flex-branca-2021-202",
-      "codigo": "MV-027",
+      "codigo": "MV-026",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda Biz 125 125 EX/ 125 EX FLEX 2022",
+      "titulo": "Honda Biz 125 Ex/ 125 EX Flex",
       "marca": "Honda",
       "modelo": "Biz 125",
-      "versao": "125 EX/ 125 EX FLEX",
+      "versao": "125 Ex/ 125 EX Flex",
       "anoFabricacao": 2021,
       "anoModelo": 2022,
       "anoTexto": "2021/2022",
@@ -6080,18 +5997,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/3983e49e8f794d3d8593da48785a42ea_1790079594597.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-biz-125-125-ex-125-ex-flex-branca-2021-2022/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-honda-pcx-160-dlx-azul-2023-2023",
-      "codigo": "MV-028",
+      "codigo": "MV-027",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda PCX 160 DLX 2023",
+      "titulo": "Honda Pcx 160 Dlx",
       "marca": "Honda",
-      "modelo": "PCX",
-      "versao": "160 DLX",
+      "modelo": "Pcx",
+      "versao": "160 Dlx",
       "anoFabricacao": 2023,
       "anoModelo": 2023,
       "anoTexto": "2023",
@@ -6122,18 +6039,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/a1fd57f3-16f0-4934-a11e-b3b5cd1973a1/8949bf94324f4d1b8a831dc7870e0610_1790079456593.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-pcx-160-dlx-azul-2023-2023/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-ford-fusion-2-5l-i-vct-flex-aut-branca-2014-2014",
-      "codigo": "MV-029",
+      "codigo": "MV-028",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Ford Fusion 2.5L I-VCT Flex Aut. 2014",
+      "titulo": "Ford Fusion 2.5l I-Vct Flex Aut.",
       "marca": "Ford",
       "modelo": "Fusion",
-      "versao": "2.5L I-VCT Flex Aut.",
+      "versao": "2.5l I-Vct Flex Automático",
       "anoFabricacao": 2014,
       "anoModelo": 2014,
       "anoTexto": "2014",
@@ -6180,18 +6097,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/598d959d-9644-489c-ab38-9765b9e77b69/85ba07fa81d34a25aed92fc7224168ca_1789762576345.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/ford-fusion-2-5l-i-vct-flex-aut-branca-2014-2014/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-ford-focus-1-6-s-se-se-plus-flex-8v-16v-5p-branc",
-      "codigo": "MV-030",
+      "codigo": "MV-029",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Ford Focus 1.6 S/SE/SE Plus Flex 8V/16V 5p 2012",
+      "titulo": "Ford Focus 1.6 S/se/se Plus Flex 8v/16v 5p",
       "marca": "Ford",
       "modelo": "Focus",
-      "versao": "1.6 S/SE/SE Plus Flex 8V/16V 5p",
+      "versao": "1.6 S/se/se Plus Flex 8v/16v 5p",
       "anoFabricacao": 2011,
       "anoModelo": 2012,
       "anoTexto": "2011/2012",
@@ -6233,18 +6150,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/13bfde90-f3c6-43fc-abe1-0efb74a0e383/82edbd3cb5da4bdf96b90f816c3ca288_1789472976986.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/ford-focus-1-6-s-se-se-plus-flex-8v-16v-5p-branca-2011-2012/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-chevrolet-onix-hatch-prem-pii-1-0-12v-tb-flex-5p",
-      "codigo": "MV-031",
+      "codigo": "MV-030",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Chevrolet Onix HATCH PREM. PII 1.0 12V TB Flex 5p Aut. 2025",
+      "titulo": "Chevrolet Onix Hatch Prem. Pii 1.0 12V TB Flex 5p Aut.",
       "marca": "Chevrolet",
       "modelo": "Onix",
-      "versao": "HATCH PREM. PII 1.0 12V TB Flex 5p Aut.",
+      "versao": "Hatch Prem. Pii 1.0 12V TB Flex 5p Automático",
       "anoFabricacao": 2024,
       "anoModelo": 2025,
       "anoTexto": "2024/2025",
@@ -6286,18 +6203,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/a4290ff1-1ca4-47cf-96b7-e542ad8e02cb/e70e8656ce45470798a15a3249622146_1788550321793.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/chevrolet-onix-hatch-prem-pii-1-0-12v-tb-flex-5p-aut-prata-2024-2025/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-gwm-haval-h6-gt-1-5-awd-hibrido-cinza-2023-2024",
-      "codigo": "MV-032",
+      "codigo": "MV-031",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "GWM Haval H6 GT 1.5 AWD (Hibrido) 2024",
+      "titulo": "GWM Haval H6 GT 1.5 AWD (Híbrido)",
       "marca": "GWM",
       "modelo": "Haval",
-      "versao": "H6 GT 1.5 AWD (Hibrido)",
+      "versao": "H6 GT 1.5 AWD (Híbrido)",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
       "anoTexto": "2023/2024",
@@ -6306,7 +6223,7 @@
       "km": 22600,
       "kmFormatado": "22.600 km",
       "cambio": "Automático",
-      "combustivel": "Gasolina",
+      "combustivel": "Híbrido",
       "cor": "Cinza",
       "portas": 4,
       "categoria": "SUV",
@@ -6375,15 +6292,15 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/09701ef1-2170-4864-871d-cc37321b2431/cf480506e1fa4533aae83febfa84b444_1787854772653.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/gwm-haval-h6-gt-1-5-awd-hibrido-cinza-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-volvo-ex30-e60-plus-eletrico-branca-2024-2024",
-      "codigo": "MV-033",
+      "codigo": "MV-032",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volvo EX30 E60 Plus (Elétrico) 2024",
+      "titulo": "Volvo EX30 E60 Plus (Elétrico)",
       "marca": "Volvo",
       "modelo": "EX30",
       "versao": "E60 Plus (Elétrico)",
@@ -6398,7 +6315,7 @@
       "combustivel": "Elétrico",
       "cor": "Branca",
       "portas": 4,
-      "categoria": "Hatch",
+      "categoria": "SUV",
       "finalPlaca": "3",
       "cidade": "Rio do Sul",
       "descricao": "Preço promocional para venda sem troca. Consulte condições para negociação com troca.",
@@ -6434,18 +6351,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/555d8ebf-62ec-4a10-ae9c-18fdf26a973e/b94fc0ef20bd43a3a9c95279dcfb552a_1787688656972.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volvo-ex30-e60-plus-eletrico-branca-2024-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-honda-cb-650f-honda-cb-650f-preta-2015-2015",
-      "codigo": "MV-034",
+      "codigo": "MV-033",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Honda CB 650F HONDA CB 650F 2015",
+      "titulo": "Honda CB 650f Honda CB 650f",
       "marca": "Honda",
-      "modelo": "CB 650F",
-      "versao": "HONDA CB 650F",
+      "modelo": "CB 650f",
+      "versao": "Honda CB 650f",
       "anoFabricacao": 2015,
       "anoModelo": 2015,
       "anoTexto": "2015",
@@ -6477,18 +6394,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/68ed3f28-902e-4a0c-9418-6c7acaba1966/5c30e6c31b58410ebae1ec0934ba26f5_1786191039651.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/honda-cb-650f-honda-cb-650f-preta-2015-2015/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-toyota-corolla-cross-gr-s-2-0-16v-flex-aut-preta",
-      "codigo": "MV-035",
+      "codigo": "MV-034",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Toyota Corolla Cross GR-S 2.0 16V Flex Aut. 2024",
+      "titulo": "Toyota Corolla Cross GR-S 2.0 16V Flex Aut.",
       "marca": "Toyota",
       "modelo": "Corolla",
-      "versao": "Cross GR-S 2.0 16V Flex Aut.",
+      "versao": "Cross GR-S 2.0 16V Flex Automático",
       "anoFabricacao": 2023,
       "anoModelo": 2024,
       "anoTexto": "2023/2024",
@@ -6568,18 +6485,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/f58aab26-cbaf-4299-b1e3-577a9b1510fe/df9cf1c7c75748d0af70d391b1684e63_1786190116768.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/toyota-corolla-cross-gr-s-2-0-16v-flex-aut-preta-2023-2024/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-volkswagen-new-beetle-2-0-mi-mec-aut-prata-2007-",
-      "codigo": "MV-036",
+      "codigo": "MV-035",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen New Beetle 2.0 Mi Mec./Aut. 2008",
+      "titulo": "Volkswagen New Beetle 2.0 Mi Aut.",
       "marca": "Volkswagen",
       "modelo": "New Beetle",
-      "versao": "2.0 Mi Mec./Aut.",
+      "versao": "2.0 Mi Automático",
       "anoFabricacao": 2007,
       "anoModelo": 2008,
       "anoTexto": "2007/2008",
@@ -6621,18 +6538,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/c1736d4964aa419d9d4c618c81deda40_1764249956244.jpeg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-new-beetle-2-0-mi-mec-aut-prata-2007-2008/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-kia-soul-1-6-1-6-16v-flex-aut-vermelha-2015-2016",
-      "codigo": "MV-037",
+      "codigo": "MV-036",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Kia Soul 1.6/ 1.6 16V FLEX Aut. 2016",
+      "titulo": "Kia Soul 1.6/ 1.6 16V Flex Aut.",
       "marca": "Kia",
       "modelo": "Soul",
-      "versao": "1.6/ 1.6 16V FLEX Aut.",
+      "versao": "1.6/ 1.6 16V Flex Automático",
       "anoFabricacao": 2015,
       "anoModelo": 2016,
       "anoTexto": "2015/2016",
@@ -6705,18 +6622,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/bd7a83284b984e3b8b683e78f9a6a9a1_1783423687726.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/kia-soul-1-6-1-6-16v-flex-aut-vermelha-2015-2016/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-nissan-frontier-sv-attack-cd-4x2-2-5-tb-diesel-v",
-      "codigo": "MV-038",
+      "codigo": "MV-037",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Nissan Frontier SV ATTACK CD 4x2 2.5 TB Diesel 2014",
+      "titulo": "Nissan Frontier SV Attack CD 4x2 2.5 TB Diesel",
       "marca": "Nissan",
       "modelo": "Frontier",
-      "versao": "SV ATTACK CD 4x2 2.5 TB Diesel",
+      "versao": "SV Attack CD 4x2 2.5 TB Diesel",
       "anoFabricacao": 2013,
       "anoModelo": 2014,
       "anoTexto": "2013/2014",
@@ -6754,18 +6671,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/2989c0fefbd64be2840eb5f68a22552a_1751916756409.jpg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/nissan-frontier-sv-attack-cd-4x2-2-5-tb-diesel-verde-2013-2014/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-bmw-z4-roadster-sdrive-20i-2-0-16v-2p-aut-preta-",
-      "codigo": "MV-039",
+      "codigo": "MV-038",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "BMW Z4 Roadster sDRIVE 20i 2.0 16V 2p Aut. 2015",
+      "titulo": "BMW Z4 Roadster sDrive 20i 2.0 16V 2p Aut.",
       "marca": "BMW",
       "modelo": "Z4",
-      "versao": "Roadster sDRIVE 20i 2.0 16V 2p Aut.",
+      "versao": "Roadster sDrive 20i 2.0 16V 2p Automático",
       "anoFabricacao": 2014,
       "anoModelo": 2015,
       "anoTexto": "2014/2015",
@@ -6849,18 +6766,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/bdf7a88754bf4a6d8fc72cb7db1fa21a_1772467604407.jpeg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/bmw-z4-roadster-sdrive-20i-2-0-16v-2p-aut-preta-2014-2015/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-volkswagen-fox-prime-hghi-imotion-1-6-t-flex-8v-",
-      "codigo": "MV-040",
+      "codigo": "MV-039",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Volkswagen Fox PRIME/Hghi. IMOTION 1.6 T.Flex 8V 5p 2010",
+      "titulo": "Volkswagen Fox PRIME/Hghi. Imotion 1.6 T.Flex 8V 5p",
       "marca": "Volkswagen",
       "modelo": "Fox",
-      "versao": "PRIME/Hghi. IMOTION 1.6 T.Flex 8V 5p",
+      "versao": "PRIME/Hghi. Imotion 1.6 T.Flex 8V 5p",
       "anoFabricacao": 2010,
       "anoModelo": 2010,
       "anoTexto": "2010",
@@ -6903,18 +6820,18 @@
         "https://s3.amazonaws.com/altimus2.arquivos.prod/62e73fd0-7c20-415c-a30f-5fdaf1af6028/fotos/veiculo/5071ddf83bf94e86968384322f046907_1772467115617.jpeg"
       ],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/volkswagen-fox-prime-hghi-imotion-1-6-t-flex-8v-5p-vermelha-2010-2010/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     },
     {
       "id": "manos-veiculos-chevrolet-s-10-pick-up-rodeio-2-4-mpfi-f-power-c",
-      "codigo": "MV-041",
+      "codigo": "MV-040",
       "lojaSlug": "manos-veiculos",
       "lojaNome": "Manos Veículos",
-      "titulo": "Chevrolet S-10 Pick-up RODEIO 2.4 MPFI F.Power CD 2011",
+      "titulo": "Chevrolet S-10 Pick-up Rodeio 2.4 MPFI F.Power CD",
       "marca": "Chevrolet",
       "modelo": "S-10 Pick-up",
-      "versao": "RODEIO 2.4 MPFI F.Power CD",
+      "versao": "Rodeio 2.4 MPFI F.Power CD",
       "anoFabricacao": 2011,
       "anoModelo": 2011,
       "anoTexto": "2011",
@@ -6944,7 +6861,7 @@
       "fotoCapa": "",
       "fotos": [],
       "urlOriginal": "https://manosveiculos.com.br/veiculos/chevrolet-s-10-pick-up-rodeio-2-4-mpfi-f-power-cd-preta-2011-2011/",
-      "atualizadoEm": "2026-11-24T12:48:47.945Z",
+      "atualizadoEm": "2026-11-24T16:44:41.273Z",
       "pronta_entrega": false
     }
   ]

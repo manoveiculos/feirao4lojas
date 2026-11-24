@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { jsonError, jsonOk, optionsResponse } from '@/lib/api-helpers';
 import { loadEstoque, saveEstoque } from '@/lib/estoque';
+import { mergeAndNormalizeSync } from '@/lib/normalize';
 import { syncAllStores } from '@/lib/scraper';
 
 export async function OPTIONS() {
@@ -29,13 +30,28 @@ export async function POST(request: NextRequest) {
   }
 
   const start = Date.now();
-  const db = await syncAllStores();
-  saveEstoque(db);
+  const previousDb = loadEstoque();
+  const freshDb = await syncAllStores();
+  const { db, diff } = mergeAndNormalizeSync(
+    previousDb.veiculos.length > 0 ? previousDb : null,
+    freshDb
+  );
+
+  if (diff.houveMudanca) {
+    saveEstoque(db);
+  }
+
   const duracaoSegundos = Number(((Date.now() - start) / 1000).toFixed(1));
 
   return jsonOk({
-    status: 'sincronizado',
+    status: diff.houveMudanca ? 'sincronizado' : 'sem_alteracoes',
     duracaoSegundos,
+    resumo: {
+      novos: diff.adicionados.length,
+      vendidosOuRemovidos: diff.removidos.length,
+      precosAlterados: diff.precoAlterado.length,
+      lojasEmFallback: diff.lojasEmFallback,
+    },
     metadata: db.metadata,
   });
 }

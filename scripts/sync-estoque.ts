@@ -1,34 +1,57 @@
-import { saveEstoque } from '../src/lib/estoque';
+import fs from 'node:fs';
+import { DATA_FILE_PATH, loadEstoque, saveEstoque } from '../src/lib/estoque';
+import { mergeAndNormalizeSync } from '../src/lib/normalize';
 import { syncAllStores } from '../src/lib/scraper';
 
 async function main() {
-  console.log('🚗 Iniciando extração unificada das 4 lojas do Feirão...');
+  console.log('🚗 Iniciando sincronização automática das 4 lojas do ACELERA V3...');
   const start = Date.now();
-  const db = await syncAllStores();
-  saveEstoque(db);
-  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
 
-  console.log(`\n✅ Extração concluída em ${elapsed}s!`);
-  console.log(`Total de veículos extraídos: ${db.metadata.totalVeiculos}`);
-  console.log('Por loja:', db.metadata.porLoja);
+  const previousDb = fs.existsSync(DATA_FILE_PATH) ? loadEstoque() : null;
+  const freshDb = await syncAllStores();
+  const { db, diff } = mergeAndNormalizeSync(previousDb, freshDb);
 
-  const semFoto = db.veiculos.filter((v) => !v.fotoCapa).length;
-  const semPreco = db.veiculos.filter((v) => !v.preco).length;
-  console.log(`Qualidade -> Sem foto: ${semFoto} | Sem preço: ${semPreco}`);
-
-  if (db.metadata.erros.length > 0) {
-    console.log(`\n⚠️ Avisos/Erros (${db.metadata.erros.length}):`);
-    db.metadata.erros.forEach((e) => console.log(' -', e));
+  // Only rewrite file when real inventory data changed (keeps git clean on scheduled runs)
+  if (diff.houveMudanca || !previousDb) {
+    saveEstoque(db);
   }
 
-  console.log('\nAmostra de 1 veículo por loja:');
-  for (const loja of db.lojas) {
-    const sample = db.veiculos.find((v) => v.lojaSlug === loja.slug);
-    if (sample) {
-      console.log(
-        `  [${sample.codigo}] ${loja.nome}: ${sample.titulo} | ${sample.anoTexto} | ${sample.precoFormatado} | ${sample.kmFormatado} | ${sample.cambio} | ${sample.combustivel} | ${sample.fotos.length} fotos | ${sample.opcionais.length} opcionais`
-      );
-    }
+  const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+  console.log(`\n✅ Sincronização concluída em ${elapsed}s!`);
+  console.log(`Total de veículos ativos: ${db.metadata.totalVeiculos}`);
+  console.log('Por loja:', db.metadata.porLoja);
+  console.log(
+    `Alterações -> +${diff.adicionados.length} novos | -${diff.removidos.length} vendidos/removidos | ${diff.precoAlterado.length} preços alterados | Mudança gravada: ${diff.houveMudanca ? 'SIM' : 'NÃO'}`
+  );
+
+  if (diff.adicionados.length > 0) {
+    console.log('\n🆕 Novos veículos encontrados:');
+    diff.adicionados.forEach((v) =>
+      console.log(`  + [${v.codigo}] ${v.lojaNome}: ${v.titulo} (${v.anoTexto}) — ${v.precoFormatado}`)
+    );
+  }
+
+  if (diff.removidos.length > 0) {
+    console.log('\n🏷️ Veículos vendidos/removidos dos sites:');
+    diff.removidos.forEach((v) =>
+      console.log(`  - [${v.codigo}] ${v.lojaNome}: ${v.titulo} (${v.anoTexto}) — ${v.precoFormatado}`)
+    );
+  }
+
+  if (diff.precoAlterado.length > 0) {
+    console.log('\n💲 Alterações de preço:');
+    diff.precoAlterado.forEach(({ veiculo, precoAnterior, precoNovo }) =>
+      console.log(`  ~ [${veiculo.codigo}] ${veiculo.titulo}: ${precoAnterior} -> ${precoNovo}`)
+    );
+  }
+
+  if (diff.lojasEmFallback.length > 0) {
+    console.log('\n🛡️ Lojas protegidas por fallback (site instável):', diff.lojasEmFallback);
+  }
+
+  if (db.metadata.erros.length > 0) {
+    console.log(`\n⚠️ Avisos (${db.metadata.erros.length}):`);
+    db.metadata.erros.forEach((e) => console.log('  -', e));
   }
 }
 
