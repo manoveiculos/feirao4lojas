@@ -5,6 +5,7 @@ import type { LojaSigla, Veiculo } from './types';
 
 export type LeadTipo =
   | 'lista_vip'
+  | 'saida'
   | 'simulacao'
   | 'troca'
   | 'carro'
@@ -17,6 +18,7 @@ export type LeadOrigem =
   | 'simulador'
   | 'troca'
   | 'lojas'
+  | 'saida'
   | 'flutuante'
   | 'header';
 
@@ -354,6 +356,12 @@ export function triggerWhatsappLead(params: {
     veiculo: params.veiculo,
   });
 
+  // quem já chamou no WhatsApp não recebe o pedido de saída
+  try {
+    window.localStorage.setItem('av3_converted', String(Date.now()));
+  } catch {
+    // ignora
+  }
   const sid = getSid();
   const url = buildWhatsappUrl(sid ? `${params.message} [#${sid}]` : params.message);
   if (params.openWindow !== false && typeof window !== 'undefined') {

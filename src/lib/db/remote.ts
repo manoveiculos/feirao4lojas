@@ -1,0 +1,229 @@
+import type { Clique, Evento, Lead, Mensagem, Settings } from './types';
+
+/**
+ * Espelho em Postgres (Supabase / PostgREST) do store em memória.
+ * - Ativado por SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (tabelas av3_*, ver supabase/schema.sql).
+ * - Escritas em fila, em lote e na ordem (lead antes da mensagem), com retry: falha de rede não perde dado.
+ * - Leads de teste (simulador) nunca vão para o banco.
+ */
+
+const URL_BASE = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+export const bancoConfigurado = (): boolean => Boolean(URL_BASE && KEY);
+
+interface Fila {
+  leads: Map<string, Lead>;
+  mensagens: Mensagem[];
+  eventos: Evento[];
+  cliques: Map<string, Clique>;
+  settings: Settings | null;
+  timer: NodeJS.Timeout | null;
+  enviando: boolean;
+  falhas: number;
+}
+
+const g = globalThis as unknown as { __feiraoFila?: Fila };
+const fila = (): Fila =>
+  (g.__feiraoFila ??= { leads: new Map(), mensagens: [], eventos: [], cliques: new Map(), settings: null, timer: null, enviando: false, falhas: 0 });
+
+async function rest(
+  path: string,
+  init: { method?: string; body?: unknown; prefer?: string; headers?: Record<string, string> } = {}
+): Promise<Response> {
+  return fetch(`${URL_BASE}/rest/v1/${path}`, {
+    method: init.method ?? 'GET',
+    headers: {
+      apikey: KEY,
+      Authorization: `Bearer ${KEY}`,
+      'Content-Type': 'application/json',
+      ...(init.prefer ? { Prefer: init.prefer } : {}),
+      ...init.headers,
+    },
+    body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    signal: AbortSignal.timeout(20_000),
+  });
+}
+
+async function exigirOk(r: Response, o: string): Promise<void> {
+  if (!r.ok) throw new Error(`${o}: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
+}
+
+const upsert = (tabela: string, linhas: unknown[], conflito: string) =>
+  rest(`${tabela}?on_conflict=${conflito}`, { method: 'POST', body: linhas, prefer: 'resolution=merge-duplicates,return=minimal' });
+
+const inserirIgnorando = (tabela: string, linhas: unknown[], conflito: string) =>
+  rest(`${tabela}?on_conflict=${conflito}`, { method: 'POST', body: linhas, prefer: 'resolution=ignore-duplicates,return=minimal' });
+
+// ───────────────────────── Fila de escrita ─────────────────────────
+
+function agendar(): void {
+  const f = fila();
+  if (f.timer || !bancoConfigurado()) return;
+  const espera = f.falhas ? Math.min(60_000, 2000 * 2 ** f.falhas) : 600;
+  f.timer = setTimeout(() => {
+    f.timer = null;
+    void descarregar();
+  }, espera);
+}
+
+async function descarregar(): Promise<void> {
+  const f = fila();
+  if (f.enviando) return;
+  f.enviando = true;
+  try {
+    // snapshot: o que chegar durante o envio vai no próximo ciclo
+    const leads = [...f.leads.values()];
+    const mensagens = f.mensagens.splice(0);
+    const eventos = f.eventos.splice(0);
+    const cliques = [...f.cliques.values()];
+    const settings = f.settings;
+    f.leads.clear();
+    f.cliques.clear();
+    f.settings = null;
+
+    try {
+      if (leads.length) {
+        await exigirOk(
+          await upsert(
+            'av3_leads',
+            leads.map((l) => ({
+              id: l.id,
+              telefone: l.telefone,
+              nome: l.nome,
+              status: l.status,
+              score: l.score,
+              temperatura: l.temperatura,
+              loja_slug: l.lojaSlug,
+              qualificado_em: l.qualificadoEm,
+              criado_em: l.criadoEm,
+              atualizado_em: l.atualizadoEm,
+              dados: l,
+            })),
+            'id'
+          ),
+          'leads'
+        );
+      }
+      if (cliques.length) {
+        await exigirOk(
+          await upsert('av3_cliques', cliques.map((c) => ({ sid: c.sid, dados: c, usado: c.usado, ts: c.ts })), 'sid'),
+          'cliques'
+        );
+      }
+      if (mensagens.length) {
+        await exigirOk(
+          await inserirIgnorando(
+            'av3_mensagens',
+            mensagens.map((m) => ({ id: m.id, lead_id: m.leadId, autor: m.autor, texto: m.texto, midias: m.midias, wa_id: m.waId || null, ts: m.ts })),
+            'id'
+          ),
+          'mensagens'
+        );
+      }
+      if (eventos.length) {
+        await exigirOk(
+          await inserirIgnorando(
+            'av3_eventos',
+            eventos.map((e) => ({ id: e.id, tipo: e.tipo, lead_id: e.leadId, loja_slug: e.lojaSlug, meta: e.meta, ts: e.ts })),
+            'id'
+          ),
+          'eventos'
+        );
+      }
+      if (settings) {
+        await exigirOk(await upsert('av3_settings', [{ id: 1, dados: settings, atualizado_em: settings.atualizadoEm }], 'id'), 'settings');
+      }
+      f.falhas = 0;
+    } catch (e) {
+      // devolve tudo à fila (sem sobrescrever versões mais novas) e tenta de novo com backoff
+      for (const l of leads) if (!f.leads.has(l.id)) f.leads.set(l.id, l);
+      for (const c of cliques) if (!f.cliques.has(c.sid)) f.cliques.set(c.sid, c);
+      f.mensagens.unshift(...mensagens);
+      f.eventos.unshift(...eventos);
+      if (settings && !f.settings) f.settings = settings;
+      f.falhas += 1;
+      console.error(`[supabase] falha ao gravar (tentativa ${f.falhas}); mantido na fila:`, e instanceof Error ? e.message : e);
+    }
+  } finally {
+    f.enviando = false;
+    const f2 = fila();
+    if (f2.leads.size || f2.mensagens.length || f2.eventos.length || f2.cliques.size || f2.settings) agendar();
+  }
+}
+
+export function espelharLead(l: Lead): void {
+  if (!bancoConfigurado() || l.teste) return;
+  fila().leads.set(l.id, { ...l });
+  agendar();
+}
+export function espelharMensagem(m: Mensagem, lead: Lead | undefined): void {
+  if (!bancoConfigurado() || lead?.teste) return;
+  fila().mensagens.push(m);
+  agendar();
+}
+export function espelharEvento(e: Evento): void {
+  if (!bancoConfigurado()) return;
+  fila().eventos.push(e);
+  agendar();
+}
+export function espelharClique(c: Clique): void {
+  if (!bancoConfigurado()) return;
+  fila().cliques.set(c.sid, { ...c });
+  agendar();
+}
+export function espelharSettings(s: Settings): void {
+  if (!bancoConfigurado()) return;
+  fila().settings = s;
+  agendar();
+}
+
+/** Envia o que estiver pendente (usado no desligamento e em testes). */
+export async function esvaziarFila(): Promise<void> {
+  const f = fila();
+  if (f.timer) clearTimeout(f.timer), (f.timer = null);
+  await descarregar();
+}
+
+// ───────────────────────── Leitura (hidratação no boot) ─────────────────────────
+
+async function lerTudo<T>(path: string): Promise<T[]> {
+  const out: T[] = [];
+  for (let de = 0; ; de += 1000) {
+    const r = await rest(path, { headers: { Range: `${de}-${de + 999}`, 'Range-Unit': 'items' } });
+    await exigirOk(r, path);
+    const lote = (await r.json()) as T[];
+    out.push(...lote);
+    if (lote.length < 1000) return out;
+  }
+}
+
+export interface DadosDoBanco {
+  leads: Lead[];
+  mensagens: Mensagem[];
+  eventos: Evento[];
+  cliques: Clique[];
+  settings: Settings | null;
+}
+
+export async function carregarDoBanco(): Promise<DadosDoBanco> {
+  const corte = new Date(Date.now() - 180 * 86400_000).toISOString();
+  const [leads, msgs, evs, cliques, settings] = await Promise.all([
+    lerTudo<{ dados: Lead }>('av3_leads?select=dados&order=criado_em.asc'),
+    lerTudo<{ id: string; lead_id: string; autor: Mensagem['autor']; texto: string; midias: string[]; wa_id: string | null; ts: string }>(
+      `av3_mensagens?select=id,lead_id,autor,texto,midias,wa_id,ts&ts=gte.${corte}&order=ts.asc`
+    ),
+    lerTudo<{ id: string; tipo: Evento['tipo']; lead_id: string | null; loja_slug: Evento['lojaSlug']; meta: Evento['meta']; ts: string }>(
+      `av3_eventos?select=id,tipo,lead_id,loja_slug,meta,ts&ts=gte.${corte}&order=ts.asc`
+    ),
+    lerTudo<{ dados: Clique }>(`av3_cliques?select=dados&ts=gte.${corte}`),
+    lerTudo<{ dados: Settings }>('av3_settings?select=dados&id=eq.1'),
+  ]);
+  return {
+    leads: leads.map((r) => r.dados),
+    mensagens: msgs.map((m) => ({ id: m.id, leadId: m.lead_id, autor: m.autor, texto: m.texto, midias: m.midias ?? [], waId: m.wa_id ?? '', ts: m.ts })),
+    eventos: evs.map((e) => ({ id: e.id, tipo: e.tipo, leadId: e.lead_id, lojaSlug: e.loja_slug, meta: e.meta ?? {}, ts: e.ts })),
+    cliques: cliques.map((c) => c.dados),
+    settings: settings[0]?.dados ?? null,
+  };
+}

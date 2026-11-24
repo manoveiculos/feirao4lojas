@@ -4,7 +4,7 @@ import { addEvento, getLead, getSettings, updateLead } from '../db/store';
 import { enviarImagem, enviarTexto, marcarProximoFollowup } from '../whatsapp/outbound';
 
 /**
- * Primeiro contato ativo para quem deixou o WhatsApp no site (lista VIP, formulário).
+ * Primeiro contato ativo para quem deixou o WhatsApp no site (captura de saída, formulários).
  * Velocidade importa: o lead recebe a mensagem em segundos, ainda com a página aberta.
  */
 export async function boasVindasProativas(leadId: string, interesse = ''): Promise<void> {
@@ -20,7 +20,7 @@ export async function boasVindasProativas(leadId: string, interesse = ''): Promi
     st.mode === 'encerrado'
       ? `O ${FEIRAO_CONFIG.nome} já terminou, mas você vai ser um dos primeiros a saber do próximo feirão das 4 lojas.`
       : st.mode === 'pre_lancamento'
-        ? `Você está na lista VIP do ${FEIRAO_CONFIG.nome}, que abre dia 14/12 em Rio do Sul, e já pode adiantar sua simulação por aqui.`
+        ? `Você pediu para ser avisado do ${FEIRAO_CONFIG.nome}, que abre dia 14/12 em Rio do Sul, e já pode adiantar sua simulação por aqui.`
         : `O ${FEIRAO_CONFIG.nome} está rolando agora em Rio do Sul (até 23/12) e dá pra adiantar tudo por aqui.`;
 
   const abertura =

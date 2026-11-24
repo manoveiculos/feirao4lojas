@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   const origem: Origem = {
     ...origemVazia(),
-    canal: d.tipo === 'lista_vip' ? 'lista_vip' : 'site',
+    canal: d.tipo === 'saida' ? 'saida_site' : d.tipo === 'lista_vip' ? 'lista_vip' : 'site',
     ref: d.ref.toUpperCase(),
     sid: d.sid,
     utm_source: d.utm_source,

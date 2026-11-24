@@ -11,6 +11,15 @@ import {
   origemVazia,
   perfilVazio,
 } from './types';
+import {
+  bancoConfigurado,
+  carregarDoBanco,
+  espelharClique,
+  espelharEvento,
+  espelharLead,
+  espelharMensagem,
+  espelharSettings,
+} from './remote';
 
 /**
  * Store local em arquivos (JSON + JSONL), em memória + persistência.
@@ -200,6 +209,7 @@ export function createLead(input: Partial<Lead> & { telefone: string }): Lead {
   s.leads.set(lead.id, lead);
   s.porTelefone.set(lead.telefone, lead.id);
   schedule('leads');
+  espelharLead(lead);
   return lead;
 }
 
@@ -208,6 +218,7 @@ export function updateLead(id: string, patch: Partial<Lead>): Lead | undefined {
   if (!lead) return undefined;
   Object.assign(lead, patch, { atualizadoEm: nowIso() });
   schedule('leads');
+  espelharLead(lead);
   return lead;
 }
 
@@ -253,7 +264,9 @@ export function addMensagem(
       lead.totalMensagensLead += 1;
     }
     schedule('leads');
+    espelharLead(lead);
   }
+  espelharMensagem(msg, lead);
   return msg;
 }
 
@@ -263,6 +276,7 @@ export function addEvento(input: Omit<Evento, 'id' | 'ts'>): Evento {
   const ev: Evento = { id: randomUUID(), ts: nowIso(), ...input };
   state().eventos.push(ev);
   appendJsonl('eventos.jsonl', ev);
+  if (!(ev.leadId && state().leads.get(ev.leadId)?.teste)) espelharEvento(ev);
   return ev;
 }
 
@@ -275,6 +289,7 @@ export function listEventos(): Evento[] {
 export function saveClique(c: Clique): void {
   const s = state();
   s.cliques.set(c.sid, c);
+  espelharClique(c);
   // limpeza: mantém apenas 14 dias
   if (s.cliques.size > 5000) {
     const corte = Date.now() - 14 * 86400_000;
@@ -288,6 +303,7 @@ export function takeClique(sid: string): Clique | undefined {
   if (c) {
     c.usado = true;
     schedule('cliques');
+    espelharClique(c);
   }
   return c;
 }
@@ -302,5 +318,53 @@ export function saveSettings(patch: Partial<Settings>): Settings {
   const s = state();
   s.settings = { ...s.settings, ...patch, atualizadoEm: nowIso() };
   writeAtomic('settings.json', s.settings);
+  espelharSettings(s.settings);
   return s.settings;
+}
+
+// ───────────────────────── Banco (Supabase) ─────────────────────────
+
+/**
+ * Chamado na subida do servidor. Com o banco configurado, ele é a fonte da verdade:
+ * carrega leads/conversas para a memória. Se o banco estiver vazio e houver dados
+ * locais (arquivos), eles são enviados ao banco (migração única).
+ */
+export async function hidratarDoBanco(): Promise<{ origem: 'banco' | 'arquivos' | 'desligado'; leads: number }> {
+  if (!bancoConfigurado()) return { origem: 'desligado', leads: state().leads.size };
+  const s = state();
+  try {
+    const d = await carregarDoBanco();
+    if (d.leads.length === 0 && s.leads.size > 0) {
+      for (const l of s.leads.values()) espelharLead(l);
+      for (const arr of s.mensagens.values()) for (const m of arr) espelharMensagem(m, s.leads.get(m.leadId));
+      for (const e of s.eventos) espelharEvento(e);
+      for (const c of s.cliques.values()) espelharClique(c);
+      espelharSettings(s.settings);
+      return { origem: 'arquivos', leads: s.leads.size };
+    }
+
+    const testes = [...s.leads.values()].filter((l) => l.teste);
+    s.leads.clear();
+    s.porTelefone.clear();
+    s.mensagens.clear();
+    s.waIds.clear();
+    s.cliques.clear();
+    for (const l of [...d.leads, ...testes]) {
+      s.leads.set(l.id, l);
+      s.porTelefone.set(l.telefone, l.id);
+    }
+    for (const m of d.mensagens) {
+      const arr = s.mensagens.get(m.leadId) ?? [];
+      arr.push(m);
+      s.mensagens.set(m.leadId, arr);
+      if (m.waId) s.waIds.add(m.waId);
+    }
+    s.eventos = d.eventos;
+    for (const c of d.cliques) s.cliques.set(c.sid, c);
+    if (d.settings) s.settings = { ...SETTINGS_PADRAO, ...d.settings };
+    return { origem: 'banco', leads: s.leads.size };
+  } catch (e) {
+    console.error('[supabase] não foi possível carregar do banco; seguindo com os arquivos locais:', e instanceof Error ? e.message : e);
+    return { origem: 'arquivos', leads: s.leads.size };
+  }
 }

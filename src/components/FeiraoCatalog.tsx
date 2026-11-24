@@ -52,11 +52,12 @@ import type {
   Veiculo,
 } from '@/lib/types';
 import { CountdownBanner } from './CountdownBanner';
+import { ExitIntentModal } from './ExitIntentModal';
+import { HeroCountdown } from './HeroCountdown';
 import { SimulatorSection } from './SimulatorSection';
 import { TooltipHint, TooltipProviderRoot } from './TooltipHint';
 import { TradeInSection } from './TradeInSection';
 import { VehicleModal } from './VehicleModal';
-import { VipListForm } from './VipListForm';
 import { WhatsappIcon } from './WhatsappIcon';
 
 interface FeiraoCatalogProps {
@@ -443,78 +444,71 @@ export function FeiraoCatalog({
             <div className="hero-streak-delay absolute left-0 top-[68%] h-[2px] w-56 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
           </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12">
-            <div className="grid items-center gap-8 lg:grid-cols-12">
-              <div className={isPreLaunch || isClosed ? 'lg:col-span-7' : 'lg:col-span-8'}>
-                <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-orange-400/40 bg-orange-500/15 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-orange-300">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-orange-400" />
-                  <span>
-                    {isClosed ? 'Edição encerrada' : CAMPAIGN_COPY.selo}
-                  </span>
-                </div>
-
-                <h1 className="mt-4 text-3xl font-black italic leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-[54px]">
-                  {heroTitle}
-                </h1>
-
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-200 sm:text-lg">
-                  {isClosed
-                    ? CAMPAIGN_COPY.encerradoSubtitulo
-                    : CAMPAIGN_COPY.subtitulo}
-                </p>
-
-                {/* Primary & Secondary CTAs */}
-                {!isClosed ? (
-                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <a
-                      href={isPreLaunch ? '#lista-vip' : '#simulador'}
-                      className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3.5 text-base font-extrabold uppercase tracking-wide text-white shadow-xl shadow-orange-600/35 transition hover:bg-orange-600 active:scale-[0.98]"
-                    >
-                      <Zap className="h-5 w-5 shrink-0" />
-                      {CAMPAIGN_COPY.ctaPrincipal}
-                    </a>
-                    <a
-                      href="#estoque"
-                      className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98]"
-                    >
-                      <Car className="h-5 w-5 shrink-0" />
-                      {CAMPAIGN_COPY.ctaSecundario}
-                    </a>
-                  </div>
-                ) : (
-                  <div className="mt-6">
-                    <a
-                      href="#estoque"
-                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20"
-                    >
-                      <Car className="h-5 w-5 shrink-0" />
-                      Ver carros disponíveis nas lojas
-                    </a>
-                  </div>
-                )}
-
-                {/* Trust Strip inside Hero */}
-                {!isClosed && (
-                  <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-slate-100 sm:text-sm">
-                    {CAMPAIGN_COPY.faixaConfianca.map((item) => (
-                      <li key={item} className="inline-flex items-center gap-1.5">
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-400" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Right Column: VIP List Form (PRÉ-LANÇAMENTO or ENCERRADO) */}
-              {(isPreLaunch || isClosed) && (
-                <div className="lg:col-span-5">
-                  <VipListForm
-                    variant={isClosed ? 'encerrado' : 'pre_lancamento'}
-                  />
-                </div>
-              )}
+          <div className="relative mx-auto max-w-5xl px-4 pb-10 pt-8 text-center sm:px-6 sm:pb-16 sm:pt-12">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-orange-400/40 bg-orange-500/15 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-orange-300">
+              <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-orange-400" />
+              <span>{isClosed ? 'Edição encerrada' : CAMPAIGN_COPY.selo}</span>
             </div>
+
+            <h1 className="mx-auto mt-4 max-w-4xl text-3xl font-black italic leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              {heroTitle}
+            </h1>
+
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-200 sm:text-lg">
+              {isClosed ? CAMPAIGN_COPY.encerradoSubtitulo : CAMPAIGN_COPY.subtitulo}
+            </p>
+
+            {/* Contagem regressiva em tela grande */}
+            <HeroCountdown state={campaignState} />
+
+            {/* CTAs: o principal leva direto ao WhatsApp */}
+            {!isClosed ? (
+              <div className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleGeneralWhatsapp('hero')}
+                  className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2.5 rounded-xl bg-orange-500 px-6 py-3.5 text-base font-extrabold uppercase tracking-wide text-white shadow-xl shadow-orange-600/40 transition hover:bg-orange-600 active:scale-[0.98] cursor-pointer"
+                >
+                  <WhatsappIcon className="h-6 w-6 shrink-0" />
+                  Quero meu carro no feirão
+                </button>
+                <a
+                  href="#estoque"
+                  className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98]"
+                >
+                  <Car className="h-5 w-5 shrink-0" />
+                  {CAMPAIGN_COPY.ctaSecundario}
+                </a>
+              </div>
+            ) : (
+              <div className="mt-6">
+                <a
+                  href="#estoque"
+                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+                >
+                  <Car className="h-5 w-5 shrink-0" />
+                  Ver carros disponíveis nas lojas
+                </a>
+              </div>
+            )}
+
+            {!isClosed && (
+              <a href="#simulador" className="mt-3 inline-block text-sm font-bold text-orange-300 underline underline-offset-4 hover:text-orange-200">
+                {CAMPAIGN_COPY.ctaPrincipal} →
+              </a>
+            )}
+
+            {/* Faixa de confiança */}
+            {!isClosed && (
+              <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-100 sm:text-sm">
+                {CAMPAIGN_COPY.faixaConfianca.map((item) => (
+                  <li key={item} className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-400" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Legal notice right below Hero */}
@@ -1247,6 +1241,8 @@ export function FeiraoCatalog({
             </div>
           </div>
         </footer>
+
+        <ExitIntentModal encerrado={isClosed} />
 
         {/* Mobile Fixed Bottom Bar (Filter + WhatsApp Floating CTA) */}
         <div className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-3.5 pt-2.5 shadow-[0_-8px_24px_rgba(6,40,53,0.14)] backdrop-blur-md md:hidden">

@@ -14,7 +14,7 @@ export type Temperatura = 'frio' | 'morno' | 'quente';
 
 export interface Origem {
   /** Canal que trouxe o lead */
-  canal: 'site' | 'whatsapp_direto' | 'anuncio_ctwa' | 'lista_vip' | 'outro';
+  canal: 'site' | 'whatsapp_direto' | 'anuncio_ctwa' | 'lista_vip' | 'saida_site' | 'outro';
   ref: string;
   sid: string;
   utm_source: string;
@@ -137,7 +137,7 @@ export interface Clique {
 
 export interface Settings {
   agenteLigado: boolean;
-  /** Mensagem proativa para quem se cadastra na lista VIP */
+  /** Mensagem proativa para quem deixa o WhatsApp no site */
   boasVindasProativas: boolean;
   followupsAtivos: boolean;
   maxFollowups: number;
