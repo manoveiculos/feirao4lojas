@@ -26,6 +26,7 @@ const schema = z.object({
   maxFollowups: z.number().int().min(0).max(5),
   followupHoras: z.array(z.number().min(0.5).max(240)).max(5),
   modelo: z.string().min(3).max(80),
+  nomeAgente: z.string().trim().min(2).max(30).default('Val'),
   instrucoesExtras: z.string().max(4000),
   gerenteTelefone: tel,
   lojaTelefones: z.object({

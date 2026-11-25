@@ -166,10 +166,15 @@ function Conversa({ id, admin, onVoltar, onMudou }: { id: string; admin: boolean
                 : m.autor === 'agente' ? 'bg-sky-600 text-white'
                 : m.autor === 'humano' ? 'bg-emerald-600 text-white'
                 : 'bg-amber-100 text-amber-900 text-xs'}`}>
-                {m.midias.map((u) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={u} src={`/api/media/foto?u=${encodeURIComponent(u)}`} alt="" className="mb-1 max-h-48 rounded-lg" loading="lazy" />
-                ))}
+                {m.midias.map((u) =>
+                  u.startsWith('midia:') && !/\.(jpg|png|webp)$/.test(u) ? (
+                    <audio key={u} controls preload="none" src={`/api/painel/midia?f=${encodeURIComponent(u)}`} className="mb-1 h-10 max-w-full" />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={u} alt="" loading="lazy" className="mb-1 max-h-48 rounded-lg"
+                      src={u.startsWith('midia:') ? `/api/painel/midia?f=${encodeURIComponent(u)}` : `/api/media/foto?u=${encodeURIComponent(u)}`} />
+                  )
+                )}
                 {m.texto}
                 <div className={`mt-1 text-[10px] ${m.autor === 'lead' ? 'text-slate-400' : 'text-white/70'}`}>
                   {m.autor === 'agente' ? '🤖 agente · ' : m.autor === 'humano' ? '👤 loja · ' : ''}{hora(m.ts)}

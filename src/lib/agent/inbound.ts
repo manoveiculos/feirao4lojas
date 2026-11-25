@@ -10,15 +10,16 @@ import {
   jaProcessouWaId,
   normalizarTelefone,
   takeClique,
+  takeCliquePorMensagem,
   updateLead,
 } from '../db/store';
 import type { Lead, Origem } from '../db/types';
 import { origemVazia } from '../db/types';
+import { loadEstoque } from '../estoque';
+import { processarMidiaRecebida } from '../whatsapp/midia';
 import { enviarTexto, sleep } from '../whatsapp/outbound';
 import type { Entrada } from '../whatsapp/provider';
 import { responderLead } from './engine';
-
-const DEBOUNCE_MS = Number(process.env.AGENT_DEBOUNCE_MS || 5000);
 
 const RE_REF = /\[Ref:\s*(AV3-[A-Z0-9-]+)\]/i;
 const RE_SID = /\[#([a-z0-9]{6,16})\]/i;
@@ -84,24 +85,47 @@ export async function processarEntrada(e: Entrada, agendar: (fn: () => Promise<v
   }
 
   // ── Mensagem do cliente ──
-  const { ref, sid, limpo } = extrairRefESid(e.texto);
-  const texto =
-    limpo ||
-    (e.midia === 'audio' ? '[áudio]' : e.midia === 'imagem' ? '[imagem]' : e.midia ? `[${e.midia}]` : '');
-  if (!texto) return;
+  // Mensagens antigas do site ainda podem trazer [Ref:…]/[#…]; as novas chegam limpas e casam pelo texto.
+  const { ref: refTexto, sid, limpo } = extrairRefESid(e.texto);
+  const marcador = e.midia === 'audio' ? '[áudio]' : e.midia === 'imagem' ? '[imagem]' : e.midia ? `[${e.midia}]` : '';
+  if (!limpo && !marcador) return;
+  if (e.waId) {
+    if (emProcesso.has(e.waId)) return; // webhook repetido enquanto a mídia baixa
+    emProcesso.add(e.waId);
+  }
 
+  try {
+    await processarMensagemCliente(e, refTexto, sid, limpo, marcador, agendar);
+  } finally {
+    if (e.waId) emProcesso.delete(e.waId);
+  }
+}
+
+const emProcesso = new Set<string>();
+
+async function processarMensagemCliente(
+  e: Entrada,
+  refTexto: string,
+  sid: string,
+  limpo: string,
+  marcador: string,
+  agendar: (fn: () => Promise<void>) => void
+): Promise<void> {
   const existente = findLeadByTelefone(e.telefone);
   let lead: Lead;
   let novo = false;
 
+  // clique do site que abriu esta mensagem (pelo sid antigo ou pelo texto idêntico)
+  const clique = sid ? takeClique(sid) : limpo ? takeCliquePorMensagem(limpo) : undefined;
+  const ref = refTexto || clique?.ref || '';
+
   if (existente) {
     lead = existente;
   } else {
-    const clique = sid ? takeClique(sid) : undefined;
     const origem: Origem = {
       ...(clique?.origem ?? origemVazia()),
       canal: e.referral ? 'anuncio_ctwa' : clique ? 'site' : 'whatsapp_direto',
-      ref: ref || clique?.ref || '',
+      ref,
       sid: sid || clique?.sid || '',
       ad_id: e.referral?.ad_id ?? '',
       ctwa_clid: e.referral?.ctwa_clid ?? '',
@@ -112,7 +136,24 @@ export async function processarEntrada(e: Entrada, agendar: (fn: () => Promise<v
     novo = criado.novo;
   }
 
+  // ── Foto/áudio: baixa, guarda, transcreve (áudio) e o agente passa a enxergar a foto ──
+  let texto = limpo || marcador;
+  const midias: string[] = [];
+  if ((e.midia === 'imagem' || e.midia === 'audio') && e.midiaFonte) {
+    const m = await processarMidiaRecebida(lead.id, e.waId, e.midia, e.midiaFonte, limpo);
+    texto = m.texto;
+    if (m.ref) midias.push(m.ref);
+  }
+
   const patch: Partial<Lead> = { ...aplicarRef(lead, ref) };
+  // sem código: reconhece o carro pelo nome/ano que o site escreve na mensagem
+  if (!ref && limpo) {
+    const v = veiculoCitado(limpo);
+    if (v && !lead.perfil.veiculosInteresse.includes(v.codigo)) {
+      patch.perfil = { ...(patch.perfil ?? lead.perfil), veiculosInteresse: [...lead.perfil.veiculosInteresse, v.codigo].slice(-5) };
+      if (!lead.roteadoEm && !lead.lojaSugerida) patch.lojaSugerida = v.lojaSlug;
+    }
+  }
   if (!lead.nome && e.nome) patch.nome = e.nome;
   if (lead.status === 'perdido') patch.status = 'em_atendimento';
   // cliente voltou a falar: zera a cadência de follow-up
@@ -124,7 +165,7 @@ export async function processarEntrada(e: Entrada, agendar: (fn: () => Promise<v
   }
   updateLead(lead.id, patch);
 
-  const msg = addMensagem({ leadId: lead.id, autor: 'lead', texto, midias: [], waId: e.waId });
+  const msg = addMensagem({ leadId: lead.id, autor: 'lead', texto, midias, waId: e.waId });
   if (getMensagens(lead.id).filter((m) => m.autor === 'lead').length === 1) {
     addEvento({ tipo: 'primeira_resposta', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { canal: lead.origem.canal } });
   }
@@ -141,14 +182,55 @@ export async function processarEntrada(e: Entrada, agendar: (fn: () => Promise<v
   const atual = getLead(lead.id)!;
   if (!getSettings().agenteLigado || !atual.agenteAtivo || atual.humano || atual.status === 'optout') return;
 
-  // ── Debounce: espera o cliente terminar de digitar e responde uma única vez ──
+  // ── Agrupamento: espera o cliente terminar de digitar e responde UMA vez a tudo ──
   agendar(async () => {
-    await sleep(DEBOUNCE_MS);
-    const msgs = getMensagens(lead.id);
-    const ultima = msgs[msgs.length - 1];
-    if (!ultima || ultima.id !== msg.id) return; // chegou mensagem mais nova; ela cuida da resposta
-    const l = getLead(lead.id)!;
-    if (l.humano || !l.agenteAtivo) return;
-    await responderLead(lead.id);
+    await sleep(debounceMs());
+    if (ultimaDoCliente(lead.id) !== msg.id) return; // chegou mensagem mais nova; ela cuida da resposta
+    await rodarAgenteAgrupado(lead.id);
   });
+}
+
+const debounceMs = () => Number(process.env.AGENT_DEBOUNCE_MS || 8000);
+
+function ultimaDoCliente(leadId: string): string | undefined {
+  const msgs = getMensagens(leadId);
+  for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].autor === 'lead') return msgs[i].id;
+  return undefined;
+}
+
+/**
+ * Uma geração por lead de cada vez. Se o cliente mandar algo enquanto o agente pensa,
+ * a resposta em preparo é descartada (engine) e o agente roda de novo com tudo junto.
+ */
+const g = globalThis as unknown as { __feiraoAgenteEmCurso?: Map<string, boolean> };
+const emCurso = (g.__feiraoAgenteEmCurso ??= new Map<string, boolean>());
+
+async function rodarAgenteAgrupado(leadId: string): Promise<void> {
+  if (emCurso.has(leadId)) {
+    emCurso.set(leadId, true); // marca para refazer quando a geração atual terminar
+    return;
+  }
+  emCurso.set(leadId, false);
+  try {
+    for (let rodada = 0; rodada < 3; rodada++) {
+      const l = getLead(leadId);
+      if (!l || l.humano || !l.agenteAtivo || l.status === 'optout' || !getSettings().agenteLigado) return;
+      const r = await responderLead(leadId);
+      const refazer = emCurso.get(leadId) || r.descartada;
+      emCurso.set(leadId, false);
+      if (!refazer) return;
+      await sleep(debounceMs()); // deixa o cliente terminar a nova rajada
+    }
+  } finally {
+    emCurso.delete(leadId);
+  }
+}
+
+/** Reconhece "Vi o {titulo} {ano}" (texto que o site gera) no estoque. */
+function veiculoCitado(texto: string) {
+  const n = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ');
+  const t = n(texto);
+  if (!/\bvi o\b|\binteresse\b|disponivel/.test(t)) return undefined;
+  const achados = loadEstoque().veiculos.filter((v) => t.includes(n(`${v.titulo} ${v.anoTexto}`)));
+  return achados.length === 1 ? achados[0] : undefined;
 }

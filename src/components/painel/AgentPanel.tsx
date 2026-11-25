@@ -5,7 +5,7 @@ import { api, Card, hora, usePolling } from './ui';
 
 interface Settings {
   agenteLigado: boolean; boasVindasProativas: boolean; followupsAtivos: boolean; maxFollowups: number; followupHoras: number[];
-  modelo: string; instrucoesExtras: string; gerenteTelefone: string; scoreQualificado: number;
+  modelo: string; nomeAgente: string; instrucoesExtras: string; gerenteTelefone: string; scoreQualificado: number;
   lojaTelefones: Partial<Record<string, string>>;
 }
 interface Status {
@@ -88,6 +88,10 @@ export function AgentPanel() {
             <label className="block text-xs font-bold uppercase text-slate-500">Score mínimo para “qualificado” (0–100)
               <input type="number" min={20} max={95} value={cfg.scoreQualificado} onChange={(e) => set('scoreQualificado', Number(e.target.value))} className="mt-1 h-9 w-24 rounded-lg border border-slate-300 px-2 text-sm" />
             </label>
+            <label className="block text-xs font-bold uppercase text-slate-500">Nome da consultora virtual
+              <input value={cfg.nomeAgente ?? 'Val'} maxLength={30} onChange={(e) => set('nomeAgente', e.target.value)}
+                className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm normal-case" />
+            </label>
             <label className="block text-xs font-bold uppercase text-slate-500">Modelo de IA
               <input value={cfg.modelo} onChange={(e) => set('modelo', e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm normal-case" />
             </label>
@@ -104,7 +108,7 @@ export function AgentPanel() {
             Use número com DDD (ex.: 47 99999-9999) ou o ID de um grupo do WhatsApp (ex.: 120363000000000000@g.us).
           </p>
           <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase text-slate-500">Gerente geral (recebe todos)
+            <label className="block text-xs font-bold uppercase text-slate-500">Admin / gerente geral (recebe todos os leads e TODO pedido de atendimento humano)
               <input value={cfg.gerenteTelefone} onChange={(e) => set('gerenteTelefone', e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm" />
             </label>
             {LOJAS.map(([slug, nome]) => (

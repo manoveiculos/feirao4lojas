@@ -298,6 +298,8 @@ export async function excluirLeadDefinitivo(id: string): Promise<boolean> {
   // reescreve os arquivos sem os dados do lead
   writeAtomic('leads.json', [...s.leads.values()]);
   writeAtomic('lista_espera.json', [...s.espera.values()]);
+  // fotos e áudios do cliente
+  fs.rmSync(path.join(DATA_DIR, 'midia', id.replace(/[^a-zA-Z0-9-]/g, '')), { recursive: true, force: true });
   const todasMsgs = [...s.mensagens.values()].flat().sort((a, b) => a.ts.localeCompare(b.ts));
   fs.mkdirSync(DATA_DIR, { recursive: true });
   const jsonl = (rows: unknown[]) => rows.map((r) => JSON.stringify(r) + '\n').join('');

@@ -15,6 +15,32 @@ export function urlFotoWhatsapp(origem: string): string {
   return `${FEIRAO_CONFIG.siteUrl}/api/media/foto?u=${encodeURIComponent(origem)}`;
 }
 
+const COD = String.raw`(?:MV|NA|RA|V3)-\d{3}`;
+const RE_COD_PARENTESES = new RegExp(String.raw`\s*\((?:c[oó]d(?:igo)?\.?:?\s*)?${COD}(?:\s*(?:e|,|/|ou)\s*${COD})*\)`, 'gi');
+const RE_COD_ROTULO = new RegExp(String.raw`\s*[-–—,|]?\s*(?:🔖\s*)?c[oó]d(?:igo)?\.?:?\s*${COD}(?:\s*(?:e|,|/|ou)\s*${COD})*`, 'gi');
+// não mexe em código dentro de link (ex.: …/?carro=NA-001)
+const RE_COD_SOLTO = new RegExp(String.raw`(?<![=/\w-])${COD}\b`, 'gi');
+
+/**
+ * O cliente nunca vê códigos internos: "(MV-006)", "cód. NA-001", "[Ref: AV3-…]", "[#sid]".
+ * Os códigos continuam valendo por dentro (tools, painel, avisos às lojas).
+ */
+export function limparTextoCliente(texto: string): string {
+  return texto
+    .replace(/\s*\[Ref:[^\]]*\]/gi, '')
+    .replace(/\s*\[#[a-z0-9]{4,20}\]/gi, '')
+    .replace(RE_COD_PARENTESES, '')
+    .replace(RE_COD_ROTULO, '')
+    .replace(RE_COD_SOLTO, '')
+    .replace(/\(\s*[,;]\s*/g, '(')
+    .replace(/\s*\(\s*\)/g, '')
+    .replace(/^[ \t]*[—–-][ \t]+/gm, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/ +([,.;:!?])/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /** Quebra a resposta em até 3 balões naturais, por parágrafo. */
 export function quebrarEmBaloes(texto: string, max = 3): string[] {
   const partes = texto
@@ -39,7 +65,8 @@ export async function enviarTexto(
   opts: OpcoesEnvio = {}
 ): Promise<{ ok: boolean; erro?: string }> {
   const autor = opts.autor ?? 'agente';
-  const limpo = texto.trim();
+  // texto do agente passa pelo filtro de códigos; o que um humano digita sai como está
+  const limpo = autor === 'agente' ? limparTextoCliente(texto) : texto.trim();
   if (!limpo) return { ok: true };
   if (!getLead(lead.id)) return { ok: false, erro: 'lead excluído' };
 
@@ -75,6 +102,7 @@ export async function enviarImagem(
   opts: OpcoesEnvio = {}
 ): Promise<{ ok: boolean; erro?: string }> {
   const autor = opts.autor ?? 'agente';
+  if (autor === 'agente') legenda = limparTextoCliente(legenda);
   const url = urlFotoWhatsapp(fotoOrigem);
   if (!getLead(lead.id)) return { ok: false, erro: 'lead excluído' };
 

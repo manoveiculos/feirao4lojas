@@ -162,6 +162,8 @@ export interface Settings {
   /** Horas de espera para cada follow-up */
   followupHoras: number[];
   modelo: string;
+  /** Nome da consultora virtual (ex.: "Val") */
+  nomeAgente: string;
   instrucoesExtras: string;
   /** Telefones (55DDD...) que recebem aviso de lead qualificado, por loja */
   lojaTelefones: Partial<Record<LojaSlug, string>>;
@@ -216,6 +218,7 @@ export const SETTINGS_PADRAO: Settings = {
   maxFollowups: 3,
   followupHoras: [2, 24, 72],
   modelo: 'claude-sonnet-5-5',
+  nomeAgente: 'Val',
   instrucoesExtras: '',
   lojaTelefones: {},
   gerenteTelefone: '',

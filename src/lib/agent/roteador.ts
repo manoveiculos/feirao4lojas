@@ -189,7 +189,7 @@ export function textoAvisoLoja(lead: Lead, d: Pick<DecisaoRoteamento, 'veiculo' 
 export async function notificarLoja(
   leadId: string,
   d: Pick<DecisaoRoteamento, 'veiculo' | 'motivo'>,
-  opts: { titulo?: string; forcar?: boolean } = {}
+  opts: { titulo?: string; forcar?: boolean; semGerente?: boolean } = {}
 ): Promise<{ enviado: boolean; destinos: number; motivo?: string }> {
   const lead = getLead(leadId);
   if (!lead || lead.teste) return { enviado: false, destinos: 0, motivo: 'lead de teste' };
@@ -204,18 +204,54 @@ export async function notificarLoja(
   const destinos = new Set<string>();
   const daLoja = s.lojaTelefones[lead.lojaSlug];
   if (daLoja) destinos.add(daLoja);
-  if (s.gerenteTelefone) destinos.add(s.gerenteTelefone);
+  if (s.gerenteTelefone && !opts.semGerente) destinos.add(s.gerenteTelefone);
+  const liberarFlag = () => {
+    if (getLead(lead.id)?.lojaNotificadaEm === marcadoEm) updateLead(lead.id, { lojaNotificadaEm: null });
+  };
+  if (!daLoja) console.warn(`[roteador] ${LOJAS_BY_SLUG[lead.lojaSlug].nome} sem WhatsApp de notificação configurado (Agente & Config).`);
   if (!destinos.size) {
-    console.warn(`[roteador] ${LOJAS_BY_SLUG[lead.lojaSlug].nome} sem WhatsApp de notificação configurado (Agente & Config).`);
+    liberarFlag();
     return { enviado: false, destinos: 0, motivo: 'loja sem WhatsApp de notificação' };
   }
 
   const texto = textoAvisoLoja(getLead(lead.id)!, d, opts.titulo);
   let enviado = false;
-  for (const tel of destinos) enviado = (await enviarAvisoInterno(tel, texto)) || enviado;
-  // falhou em todos: libera a flag para uma nova tentativa (próxima aprovação/roteamento)
-  if (!enviado && getLead(lead.id)?.lojaNotificadaEm === marcadoEm) updateLead(lead.id, { lojaNotificadaEm: null });
+  let lojaRecebeu = false;
+  for (const tel of destinos) {
+    const ok = await enviarAvisoInterno(tel, texto);
+    enviado = ok || enviado;
+    if (ok && tel === daLoja) lojaRecebeu = true;
+  }
+  // a flag é "a LOJA foi avisada": se só o admin recebeu (ou tudo falhou), a loja ainda pode ser avisada depois
+  if (!lojaRecebeu) liberarFlag();
   return { enviado, destinos: destinos.size };
+}
+
+/**
+ * Cliente pediu uma pessoa: o ADMIN (gerenteTelefone, em Agente & Config) é SEMPRE avisado,
+ * com ou sem loja definida. Não usa a flag de aviso único: cada pedido gera um alerta.
+ */
+export async function avisarAdminHumano(leadId: string, motivo: string): Promise<boolean> {
+  const lead = getLead(leadId);
+  const admin = getSettings().gerenteTelefone;
+  if (!lead || lead.teste) return false;
+  if (!admin) {
+    console.warn('[roteador] pedido de atendimento humano sem telefone do admin configurado (Agente & Config).');
+    return false;
+  }
+  const loja = lead.lojaSlug ? LOJAS_BY_SLUG[lead.lojaSlug].nome : 'ainda sem loja (em triagem)';
+  const texto = [
+    '🙋 *Cliente pediu ATENDIMENTO HUMANO — Acelera V3*',
+    '',
+    `👤 *${lead.nome || 'Cliente'}* — wa.me/${lead.telefone}`,
+    `🏪 Loja: ${loja}`,
+    `💬 Motivo: ${motivo || '—'}`,
+    `📝 ${resumoDuasLinhas(lead)}`,
+    '',
+    `👉 ${linkConversa(lead.id)}`,
+    '_O agente está pausado nesta conversa até alguém assumir ou devolver._',
+  ].join('\n');
+  return enviarAvisoInterno(admin, texto);
 }
 
 export interface ResultadoRoteamento {
@@ -235,14 +271,14 @@ export interface ResultadoRoteamento {
  */
 export async function rotearLead(
   leadId: string,
-  opts: { motivoAprovacao: string; codigoPreferido?: string; lojaForcada?: LojaSlug; simulado?: boolean } = { motivoAprovacao: '' }
+  opts: { motivoAprovacao: string; codigoPreferido?: string; lojaForcada?: LojaSlug; simulado?: boolean; semGerente?: boolean } = { motivoAprovacao: '' }
 ): Promise<ResultadoRoteamento> {
   const lead = getLead(leadId);
   if (!lead) return { ok: false, erro: 'lead inexistente' };
 
   // Idempotência: lead já roteado não troca de loja sozinho (troca só pelo admin)
   if (lead.roteadoEm && lead.lojaSlug && !opts.lojaForcada) {
-    const r = lead.lojaNotificadaEm ? null : await notificarLoja(lead.id, { veiculo: null, motivo: (lead.roteamentoMotivo as MotivoRoteamento) || 'veiculo' });
+    const r = lead.lojaNotificadaEm ? null : await notificarLoja(lead.id, { veiculo: null, motivo: (lead.roteamentoMotivo as MotivoRoteamento) || 'veiculo' }, { semGerente: opts.semGerente });
     return { ok: true, jaRoteado: true, loja: lead.lojaSlug, lojaNome: LOJAS_BY_SLUG[lead.lojaSlug].nome, notificado: Boolean(lead.lojaNotificadaEm || r?.enviado) };
   }
 
@@ -277,7 +313,7 @@ export async function rotearLead(
     void enviarEventoQualificado(l);
   }
 
-  const n = await notificarLoja(lead.id, d);
+  const n = await notificarLoja(lead.id, d, { semGerente: opts.semGerente });
   console.log(`[roteador] lead ${lead.id} → ${d.loja} (${d.motivo}) · aviso ${n.enviado ? 'enviado' : `não enviado: ${n.motivo ?? 'falha'}`}`);
   return { ok: true, loja: d.loja, lojaNome: LOJAS_BY_SLUG[d.loja].nome, motivo: d.motivo, explicacao: d.explicacao, notificado: n.enviado };
 }

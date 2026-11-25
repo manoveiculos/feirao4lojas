@@ -50,7 +50,18 @@ Rede de segurança: se o lead atingir a qualificação forte (score ≥ `scoreQu
 
 ## Estilo no WhatsApp
 
-Mensagens curtas (≤ 3 linhas por parágrafo, ≤ 2 parágrafos), **uma pergunta por vez**, no máximo 1–2 emojis, sempre empurrando o próximo passo. Áudio aparece como `[áudio]`: pedir para escrever. Opt-out ("parar") é tratado no `inbound.ts` antes do agente.
+- Nome da consultora: **Val** (`settings.nomeAgente`, editável em Agente & Config). Apresenta-se só na 1ª resposta.
+- Pergunta e confirma o **nome do cliente** (o do perfil do WhatsApp não vale até ele confirmar).
+- Curto sempre: o texto só sai no FIM da rodada de ferramentas, no máx. **2 balões** (`MAX_BALOES`), `max_tokens` 700.
+- **Nunca mostra códigos** (MV-006, [Ref…], [#…]): o prompt proíbe e `limparTextoCliente()` em `whatsapp/outbound.ts` filtra tudo que o agente envia.
+- Modelo pedido = mostra o modelo, sem filtrar nem comentar preço.
+- Mapa só via `enviar_localizacao`, quando o cliente pede o endereço.
+- Agrupamento: espera `AGENT_DEBOUNCE_MS` (padrão 8000) depois da última mensagem; se chegar mensagem durante a geração, a resposta é descartada e o agente roda de novo com tudo (`rodarAgenteAgrupado` em `inbound.ts`).
+- Foto do cliente: baixada (Evolution `getBase64FromMediaMessage`, como no CRM da Manos), reduzida e entregue ao Claude como imagem (últimas 3). Áudio: transcrito pela OpenAI (`OPENAI_API_KEY`, modelo `gpt-4o-mini-transcribe`) — sem a chave, o agente pede para escrever. Ver `src/lib/whatsapp/midia.ts`.
+- Pedido de pessoa: `transferir_para_humano` pausa o agente, roteia/avisa a loja e **sempre** avisa o admin (`gerenteTelefone`).
+- Follow-up automático: 2 h / 24 h / 72 h sem resposta, 8h–20h, textos de 1–2 linhas (`followup.ts`).
+- Opt-out ("parar") é tratado no `inbound.ts` antes do agente.
+- Teste com rede simulada: `npm run test:agente`.
 
 ## Como testar sem disparar WhatsApp real
 

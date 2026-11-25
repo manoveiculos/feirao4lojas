@@ -24,7 +24,7 @@ export async function boasVindasProativas(leadId: string, interesse = ''): Promi
         : `O ${FEIRAO_CONFIG.nome} está rolando agora em Rio do Sul (até 23/12) e dá pra adiantar tudo por aqui.`;
 
   const abertura =
-    `${nome ? `Oi, ${nome}!` : 'Oi!'} Sou o assistente virtual do ${FEIRAO_CONFIG.nome} 🚗\n` +
+    `${nome ? `Oi, ${nome}!` : 'Oi!'} Aqui é a ${s.nomeAgente || 'Val'}, consultora virtual do ${FEIRAO_CONFIG.nome} 🚗\n` +
     `${gancho}`;
   const pergunta = interesse
     ? `Vi que seu interesse é em *${interesse}*. Qual faixa de valor você tem em mente? Já separo as melhores opções pra você.`

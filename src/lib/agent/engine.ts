@@ -14,11 +14,13 @@ import { filterVeiculos } from '../filters';
 import {
   enviarImagem,
   enviarTexto,
+  limparTextoCliente,
   marcarProximoFollowup,
   quebrarEmBaloes,
 } from '../whatsapp/outbound';
+import { imagemParaClaude } from '../whatsapp/midia';
 import { avisarVisita, criteriosMinimos, reavaliarLead } from './qualificacao';
-import { notificarLoja, rotearLead } from './roteador';
+import { avisarAdminHumano, notificarLoja, rotearLead } from './roteador';
 import { cadastrarEspera, marcarEsperaEmAtendimento } from '../espera/espera';
 import { LOJAS_BY_SLUG } from '../config';
 import { promptBase, promptLead } from './prompt';
@@ -30,7 +32,7 @@ const TOOLS = [
   {
     name: 'consultar_estoque',
     description:
-      'Busca carros reais no estoque consolidado das 4 lojas. Use SEMPRE antes de citar preço/ano/km/disponibilidade. Retorna até 5 veículos ordenados do mais barato ao mais caro. Se voltar vazio para o que o cliente quer, ofereça alternativas e/ou use cadastrar_lista_espera.',
+      'Busca carros reais no estoque consolidado das 4 lojas. Use SEMPRE antes de citar preço/ano/km/disponibilidade. Retorna até 5 veículos (até 8 com limite) do mais barato ao mais caro. Quando o cliente pedir um MODELO, busque só pelo modelo (q), SEM orcamento_max: mostre o que ele pediu, seja qual for o preço. Use orçamento só quando ele pedir "algo até X". Se voltar vazio, ofereça alternativas e/ou cadastrar_lista_espera.',
     input_schema: {
       type: 'object',
       properties: {
@@ -108,6 +110,12 @@ const TOOLS = [
       },
       required: ['descricao'],
     },
+  },
+  {
+    name: 'enviar_localizacao',
+    description:
+      'Envia o endereço do feirão com o link do Google Maps. Use SOMENTE quando o cliente perguntar onde fica, pedir o endereço, a localização ou como chegar.',
+    input_schema: { type: 'object', properties: {} },
   },
   {
     name: 'cadastrar_lista_espera',
@@ -272,7 +280,7 @@ export async function executarTool(
       for (let i = 0; i < fotos.length; i++) {
         const legenda =
           i === 0
-            ? `*${v.titulo}* ${v.anoTexto}\n💰 ${v.precoFormatado} | 🛣️ ${v.kmFormatado} | ⚙️ ${v.cambio}\n🔖 Cód: ${v.codigo} — ${v.lojaNome}`
+            ? `*${v.titulo}* ${v.anoTexto}\n💰 ${v.precoFormatado} | 🛣️ ${v.kmFormatado} | ⚙️ ${v.cambio}`
             : '';
         const r = await enviarImagem(lead, fotos[i], legenda, { simulado: ctx.simulado });
         if (r.ok) enviadas++;
@@ -296,7 +304,8 @@ export async function executarTool(
         `🚗 *ACELERA V3 — ${FEIRAO_CONFIG.periodo}*\n` +
         `📍 ${FEIRAO_CONFIG.localPrincipal.endereco}${horario}\n\n` +
         `✅ Saia rodando na hora\n✅ Se financiar, 1ª parcela só depois do Carnaval\n✅ Avaliamos seu usado na hora\n✅ Taxas especiais C6 Bank e Viacredi Alto Vale\n\n` +
-        `_Condições sujeitas à análise de crédito._\n🗺️ ${FEIRAO_CONFIG.localPrincipal.mapsUrl}`;
+        // sem link do mapa: o mapa só vai quando o cliente pede o endereço (tool enviar_localizacao)
+        `_Condições sujeitas à análise de crédito._`;
       const r = await enviarImagem(lead, `${FEIRAO_CONFIG.siteUrl}${FEIRAO_CONFIG.ogImage}`, legenda, {
         simulado: ctx.simulado,
       }).catch(() => ({ ok: false }));
@@ -344,6 +353,17 @@ export async function executarTool(
         roteado: Boolean(final?.roteadoEm),
         aprovavel: final ? criteriosMinimos(final, false) : undefined,
       };
+    }
+
+    case 'enviar_localizacao': {
+      const lead = lead_(ctx);
+      const horario = HORARIO_FEIRAO.startsWith('TODO') ? '' : `\n🕘 ${HORARIO_FEIRAO}`;
+      await enviarTexto(
+        lead,
+        `📍 ${FEIRAO_CONFIG.localPrincipal.referencia}\n${FEIRAO_CONFIG.localPrincipal.endereco}${horario}\n🗺️ ${FEIRAO_CONFIG.localPrincipal.mapsUrl}`,
+        { simulado: ctx.simulado }
+      );
+      return { ok: true, instrucao: 'Endereço e mapa já enviados. Não repita o endereço no texto.' };
     }
 
     case 'cadastrar_lista_espera': {
@@ -443,15 +463,18 @@ export async function executarTool(
         // pedir atendente é pedido explícito; o roteador escolhe a loja e já avisa
         if (atual.totalMensagensLead > 0) {
           if (!atual.resumo) updateLead(lead.id, { resumo: `Pediu atendimento humano: ${motivo}` });
-          await rotearLead(lead.id, { motivoAprovacao: `atendimento humano: ${motivo}`, simulado: ctx.simulado });
+          await rotearLead(lead.id, { motivoAprovacao: `atendimento humano: ${motivo}`, simulado: ctx.simulado, semGerente: true });
         }
       } else if (!ctx.simulado && !atual.teste) {
         // já roteado: avisa a loja responsável que o cliente aguarda uma pessoa
         await notificarLoja(atual.id, { veiculo: null, motivo: 'veiculo' }, {
           titulo: `🙋 *Cliente aguardando ATENDIMENTO HUMANO — Acelera V3*\nMotivo: ${motivo}`,
           forcar: true,
+          semGerente: true,
         });
       }
+      // pedido de pessoa SEMPRE chega ao admin, roteado ou não
+      if (!ctx.simulado) await avisarAdminHumano(lead.id, motivo);
       const final = getLead(lead.id)!;
       return { ok: true, loja: final.lojaSlug ? LOJAS_BY_SLUG[final.lojaSlug].nome : null };
     }
@@ -465,6 +488,7 @@ export async function executarTool(
 
 type Bloco =
   | { type: 'text'; text: string }
+  | { type: 'image'; source: { type: 'base64'; media_type: 'image/jpeg' | 'image/png' | 'image/webp'; data: string } }
   | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
   | { type: 'tool_result'; tool_use_id: string; content: string; is_error?: boolean };
 
@@ -491,7 +515,8 @@ async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]
     },
     body: JSON.stringify({
       model: getSettings().modelo,
-      max_tokens: 1024,
+      // respostas de WhatsApp são curtas; o teto também segura o "textão"
+      max_tokens: 700,
       system: [
         { type: 'text', text: system, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: dinamico },
@@ -506,20 +531,37 @@ async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]
   return json;
 }
 
-/** Converte o histórico em turnos alternados user/assistant. */
+/** Quantas fotos do cliente (as mais recentes) o Claude vê de verdade; as anteriores viram só texto. */
+const MAX_FOTOS_NO_CONTEXTO = 3;
+
+/** Converte o histórico em turnos alternados user/assistant (com as fotos do cliente como imagem). */
 export function montarHistorico(leadId: string, limite = 40): MsgApi[] {
   const msgs = getMensagens(leadId)
     .filter((m) => m.autor !== 'sistema')
     .slice(-limite);
-  const out: MsgApi[] = [];
+  const fotosVisiveis = new Set(
+    msgs
+      .filter((m) => m.autor === 'lead')
+      .flatMap((m) => m.midias.filter((r) => r.startsWith('midia:') && r.endsWith('.jpg')))
+      .slice(-MAX_FOTOS_NO_CONTEXTO)
+  );
+  const out: Array<{ role: MsgApi['role']; content: Bloco[] }> = [];
   for (const m of msgs) {
     const role: MsgApi['role'] = m.autor === 'lead' ? 'user' : 'assistant';
-    let texto = m.texto || (m.midias.length ? '[imagem enviada]' : '');
-    if (!texto) continue;
+    const blocos: Bloco[] = [];
+    if (role === 'user') {
+      for (const ref of m.midias) {
+        const img = fotosVisiveis.has(ref) ? imagemParaClaude(ref) : null;
+        if (img) blocos.push({ type: 'image', source: { type: 'base64', ...img } });
+      }
+    }
+    let texto = m.texto || (m.midias.length ? (role === 'user' ? '[imagem]' : '[fotos enviadas]') : '');
     if (m.autor === 'humano') texto = `[atendente humano da loja]: ${texto}`;
+    if (texto) blocos.push({ type: 'text', text: texto });
+    if (!blocos.length) continue;
     const last = out[out.length - 1];
-    if (last && last.role === role && typeof last.content === 'string') last.content += `\n${texto}`;
-    else out.push({ role, content: texto });
+    if (last && last.role === role) last.content.push(...blocos);
+    else out.push({ role, content: blocos });
   }
   while (out.length && out[0].role !== 'user') out.shift();
   return out;
@@ -528,7 +570,18 @@ export function montarHistorico(leadId: string, limite = 40): MsgApi[] {
 export interface ResultadoAgente {
   respondeu: boolean;
   erro?: string;
+  /** O cliente mandou mensagem nova enquanto o agente pensava: nada foi enviado; rode de novo. */
+  descartada?: boolean;
 }
+
+function idUltimaDoCliente(leadId: string): string | undefined {
+  const msgs = getMensagens(leadId);
+  for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].autor === 'lead') return msgs[i].id;
+  return undefined;
+}
+
+/** Resposta curta no WhatsApp: no máx. 2 balões, sem códigos internos. */
+export const MAX_BALOES = 2;
 
 /**
  * Roda o agente para um lead: lê o histórico, deixa o Claude usar as tools
@@ -546,9 +599,14 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
   const ctx: Ctx = { leadId, simulado };
   const system = promptBase();
   const messages = [...historico];
+  const ultimaNoInicio = idUltimaDoCliente(leadId);
+  const chegouNova = () => !simulado && idUltimaDoCliente(leadId) !== ultimaNoInicio;
+  // Texto só sai no FIM: frases soltas entre uma ferramenta e outra ("vou verificar…") não viram balões.
+  let ultimoTexto = '';
 
   try {
     for (let i = 0; i < 7; i++) {
+      if (chegouNova()) return { respondeu: false, descartada: true };
       const resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
 
       const texto = resp.content
@@ -556,12 +614,7 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
         .map((b) => b.text)
         .join('\n\n')
         .trim();
-
-      if (texto) {
-        for (const balao of quebrarEmBaloes(texto)) {
-          await enviarTexto(getLead(leadId)!, balao, { simulado });
-        }
-      }
+      if (texto) ultimoTexto = texto;
 
       const usos = resp.content.filter((b): b is Extract<Bloco, { type: 'tool_use' }> => b.type === 'tool_use');
       if (resp.stop_reason !== 'tool_use' || !usos.length) break;
@@ -582,6 +635,13 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
         }
       }
       messages.push({ role: 'user', content: resultados });
+    }
+
+    // o cliente escreveu de novo enquanto o agente pensava: descarta e responde a tudo junto
+    if (chegouNova()) return { respondeu: false, descartada: true };
+    const limpo = limparTextoCliente(ultimoTexto);
+    for (const balao of quebrarEmBaloes(limpo, MAX_BALOES)) {
+      await enviarTexto(getLead(leadId)!, balao, { simulado });
     }
   } catch (e) {
     const erro = e instanceof Error ? e.message : String(e);

@@ -17,31 +17,35 @@ function interesse(lead: Lead): string {
   const cod = lead.perfil.veiculosInteresse[lead.perfil.veiculosInteresse.length - 1];
   if (cod) {
     const v = loadEstoque().veiculos.find((x) => x.codigo === cod);
-    if (v) return `o ${v.titulo}`;
+    if (v) return `o ${v.marca} ${v.modelo} ${v.anoTexto}`.replace(/\s{2,}/g, ' ');
   }
   return lead.perfil.marca_modelo || (lead.perfil.categoria ? `um ${lead.perfil.categoria}` : 'o carro que você procura');
 }
 
-function textoFollowup(lead: Lead, etapa: number): string {
-  const nome = lead.nome ? lead.nome.split(/\s+/)[0] : '';
+/**
+ * Follow-up automático (padrão: 2 h, 24 h e 72 h sem resposta, só das 8h às 20h; ajustável em Agente & Config).
+ * Mensagens de 1–2 linhas, com o carro que o cliente olhou e uma pergunta só.
+ */
+export function textoFollowup(lead: Lead, etapa: number): string {
+  // só usa o nome que o cliente confirmou (o do perfil do WhatsApp pode ser apelido ou empresa)
+  const nome = lead.perfil.nomeConfirmado && lead.nome ? lead.nome.split(/\s+/)[0] : '';
   const oi = nome ? `Oi, ${nome}!` : 'Oi!';
   const st = getCampaignState(resolveEffectiveDate(null, 0).nowBrt);
   const evento =
     st.mode === 'encerrado'
       ? ''
       : st.mode === 'pre_lancamento'
-        ? `O ${FEIRAO_CONFIG.nome} abre dia 14/12 e dá pra já deixar tudo adiantado por aqui.`
+        ? `O ${FEIRAO_CONFIG.nome} abre dia 14/12.`
         : st.isLastCall
-          ? `O ${FEIRAO_CONFIG.nome} está nos últimos dias (vai até 23/12).`
-          : `O ${FEIRAO_CONFIG.nome} está acontecendo agora (até 23/12).`;
+          ? `O ${FEIRAO_CONFIG.nome} vai só até 23/12.`
+          : `O ${FEIRAO_CONFIG.nome} está rolando agora.`;
+  // não presume financiamento: o benefício da parcela só aparece para quem disse que vai financiar
+  const beneficio =
+    lead.perfil.formaPagamento === 'financiamento' ? 'a 1ª parcela fica só depois do Carnaval' : 'avaliamos seu usado na hora';
 
-  if (etapa === 0) {
-    return `${oi} Ficou alguma dúvida sobre ${interesse(lead)}? Posso te mandar mais fotos ou ver as melhores condições de pagamento pra você 😉`;
-  }
-  if (etapa === 1) {
-    return `${oi} ${evento} Avaliamos seu usado na hora e, se for financiar, a 1ª parcela fica só depois do Carnaval. Quer que eu reserve um horário pra você vir ver ${interesse(lead)}?`.replace('  ', ' ');
-  }
-  return `${oi} Vou deixar seu atendimento em espera por aqui. Se ainda quiser ver ${interesse(lead)} ou outro carro, é só me chamar que retomo de onde paramos. Se preferir não receber mais mensagens, é só responder "parar". 🙏`;
+  if (etapa === 0) return `${oi} Ainda quer ver ${interesse(lead)}? Te mando mais fotos 😉`;
+  if (etapa === 1) return `${oi} ${evento} E ${beneficio}. Quer reservar um horário pra ver ${interesse(lead)}?`.replace(/\s{2,}/g, ' ');
+  return `${oi} Vou pausar por aqui. Quando quiser retomar, é só me chamar 🙏 (Se não quiser mais mensagens, responda "parar".)`;
 }
 
 /**
