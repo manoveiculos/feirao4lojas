@@ -29,6 +29,7 @@ export default async function LojaLayout({
       subtitulo="Acelera V3 · Painel da loja"
       nav={[
         { href: `/loja/${slug}`, label: 'Visão geral' },
+        { href: `/loja/${slug}/leads`, label: 'Leads' },
         { href: `/loja/${slug}/conversas`, label: 'Conversas' },
       ]}
     >

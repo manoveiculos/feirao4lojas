@@ -13,6 +13,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       subtitulo="Acelera V3 · Admin"
       nav={[
         { href: '/admin', label: 'Visão geral' },
+        { href: '/admin/leads', label: 'Leads' },
         { href: '/admin/conversas', label: 'Conversas' },
         { href: '/admin/campanhas', label: 'Campanhas' },
         { href: '/admin/agente', label: 'Agente & Config' },
