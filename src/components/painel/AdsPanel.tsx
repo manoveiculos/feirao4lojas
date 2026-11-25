@@ -13,7 +13,7 @@ interface Ads {
   totais: { gasto: number; leads: number; qualificados: number; visitas: number; cpl: number | null; cpq: number | null };
   semAtribuicao: { leads: number; qualificados: number };
 }
-interface Status { urls: { feedMeta: string; webhookEvolution: string; webhookMeta: string } }
+interface Status { urls: { feedMeta: string; feedMetaVeiculos: string; feedMetaCsv: string; webhookEvolution: string; webhookMeta: string } }
 
 const PERIODOS: Array<[string, string]> = [
   ['today', 'Hoje'], ['yesterday', 'Ontem'], ['last_7d', '7 dias'], ['last_14d', '14 dias'], ['last_30d', '30 dias'], ['maximum', 'Tudo'],
@@ -100,11 +100,19 @@ export function AdsPanel() {
       <Card titulo="Estoque integrado ao catálogo da Meta">
         <p className="text-sm text-slate-600">
           Feed com todos os carros (foto, preço, km, loja) que atualiza sozinho a cada hora. Cadastre no Gerenciador de Comércio → Catálogo →
-          Fontes de dados → <i>Feed agendado</i> (CSV, a cada hora). Os grupos <code>custom_label_0..4</code> já separam por loja,
+          Fontes de dados → <i>Feed agendado</i> (XML, a cada hora). Os grupos <code>custom_label_0..4</code> já separam por loja,
           categoria, faixa de preço, pronta entrega e ano — prontos para conjuntos de produtos.
         </p>
-        <input readOnly value={st?.urls.feedMeta ?? ''} onFocus={(e) => e.target.select()}
-          className="mt-3 h-10 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 font-mono text-xs" />
+        {([
+          ['XML — catálogo de comércio (padrão)', st?.urls.feedMeta],
+          ['XML — catálogo de veículos (anúncios automotivos)', st?.urls.feedMetaVeiculos],
+          ['CSV (alternativo)', st?.urls.feedMetaCsv],
+        ] as const).map(([rotulo, url]) => (
+          <label key={rotulo} className="mt-3 block text-[11px] font-bold uppercase text-slate-500">{rotulo}
+            <input readOnly value={url ?? ''} onFocus={(e) => e.target.select()}
+              className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 font-mono text-xs normal-case" />
+          </label>
+        ))}
         <p className="mt-2 text-xs text-slate-500">
           Cada anúncio leva para <code>/?carro=CÓDIGO</code> (abre a ficha do carro) com UTMs do catálogo. Para campanhas click-to-WhatsApp,
           o agente recebe o ID do anúncio automaticamente.

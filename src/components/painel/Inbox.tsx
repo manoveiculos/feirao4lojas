@@ -233,6 +233,20 @@ function Conversa({ id, admin, onVoltar, onMudou }: { id: string; admin: boolean
           <Linha k="Origem" v={[lead.origem.canal, lead.origem.utm_campaign, lead.origem.ad_headline].filter(Boolean).join(' · ')} />
         </dl>
 
+        {admin && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (!window.confirm(`Excluir DEFINITIVAMENTE ${lead.nome || lead.telefone}, a conversa e o histórico? Use só a pedido do cliente (LGPD). Não pode ser desfeito.`)) return;
+              const r = await api<{ erro?: string }>(`/api/painel/leads/${id}`, 'DELETE');
+              if (r.ok) { onMudou(); onVoltar(); } else window.alert(r.data.erro || 'Falha ao excluir.');
+            }}
+            className="w-full rounded-lg border border-rose-200 px-2 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-50 cursor-pointer"
+          >
+            Excluir dados do cliente (LGPD)
+          </button>
+        )}
+
         <label className="block text-[11px] font-bold uppercase text-slate-500">Anotações da loja
           <textarea defaultValue={lead.notas} rows={3} onBlur={(e) => { if (e.target.value !== lead.notas) void patch({ notas: e.target.value }); }}
             className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm normal-case focus:border-orange-500 focus:outline-none" />

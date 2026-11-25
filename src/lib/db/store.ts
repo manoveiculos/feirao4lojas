@@ -19,6 +19,7 @@ import {
   espelharLead,
   espelharMensagem,
   espelharSettings,
+  removerLeadDoBanco,
 } from './remote';
 
 /**
@@ -233,6 +234,36 @@ export function deleteLeadTeste(id: string): void {
   schedule('leads');
 }
 
+/**
+ * Exclusão definitiva (pedido do titular — LGPD art. 18): remove o lead, a conversa
+ * e os eventos da memória, dos arquivos locais e do banco.
+ */
+export async function excluirLeadDefinitivo(id: string): Promise<boolean> {
+  const s = state();
+  const l = s.leads.get(id);
+  if (!l) return false;
+  for (const m of s.mensagens.get(id) ?? []) if (m.waId) s.waIds.delete(m.waId);
+  s.leads.delete(id);
+  s.porTelefone.delete(l.telefone);
+  s.mensagens.delete(id);
+  s.eventos = s.eventos.filter((e) => e.leadId !== id);
+
+  // reescreve os arquivos sem os dados do lead
+  writeAtomic('leads.json', [...s.leads.values()]);
+  const todasMsgs = [...s.mensagens.values()].flat().sort((a, b) => a.ts.localeCompare(b.ts));
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  const jsonl = (rows: unknown[]) => rows.map((r) => JSON.stringify(r) + '\n').join('');
+  const tmpM = file(`mensagens.jsonl.${process.pid}.tmp`);
+  fs.writeFileSync(tmpM, jsonl(todasMsgs), 'utf8');
+  fs.renameSync(tmpM, file('mensagens.jsonl'));
+  const tmpE = file(`eventos.jsonl.${process.pid}.tmp`);
+  fs.writeFileSync(tmpE, jsonl(s.eventos), 'utf8');
+  fs.renameSync(tmpE, file('eventos.jsonl'));
+
+  await removerLeadDoBanco(id);
+  return true;
+}
+
 // ───────────────────────── Mensagens ─────────────────────────
 
 export function getMensagens(leadId: string): Mensagem[] {
@@ -248,6 +279,8 @@ export function addMensagem(
 ): Mensagem {
   const s = state();
   const msg: Mensagem = { id: randomUUID(), ts: input.ts ?? nowIso(), ...input };
+  // lead excluído (ex.: pedido LGPD) enquanto um envio estava em andamento: não grava nada
+  if (!s.leads.has(msg.leadId)) return msg;
   const arr = s.mensagens.get(msg.leadId) ?? [];
   arr.push(msg);
   s.mensagens.set(msg.leadId, arr);

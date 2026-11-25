@@ -178,6 +178,17 @@ export function espelharSettings(s: Settings): void {
   agendar();
 }
 
+/** Exclusão definitiva no banco (mensagens e eventos saem por cascata). */
+export async function removerLeadDoBanco(id: string): Promise<void> {
+  if (!bancoConfigurado()) return;
+  const f = fila();
+  f.leads.delete(id);
+  f.mensagens = f.mensagens.filter((m) => m.leadId !== id);
+  f.eventos = f.eventos.filter((e) => e.leadId !== id);
+  const r = await rest(`av3_leads?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', prefer: 'return=minimal' });
+  await exigirOk(r, 'excluir lead');
+}
+
 /** Envia o que estiver pendente (usado no desligamento e em testes). */
 export async function esvaziarFila(): Promise<void> {
   const f = fila();

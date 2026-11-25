@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { marcarProximoFollowup } from '@/lib/whatsapp/outbound';
-import { addEvento, getMensagens, updateLead } from '@/lib/db/store';
+import { addEvento, excluirLeadDefinitivo, getMensagens, updateLead } from '@/lib/db/store';
 import { exigirApi, leadAcessivel } from '@/lib/painel';
 
 export const runtime = 'nodejs';
@@ -64,4 +64,17 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   }
   if (d.humano === false) marcarProximoFollowup(novo);
   return NextResponse.json({ ok: true, lead: novo });
+}
+
+/** Exclusão definitiva a pedido do cliente (LGPD). Somente o admin. */
+export async function DELETE(req: NextRequest, { params }: Ctx) {
+  const a = await exigirApi(req, 'admin');
+  if ('erro' in a) return a.erro;
+  const { id } = await params;
+  try {
+    const ok = await excluirLeadDefinitivo(id);
+    return ok ? NextResponse.json({ ok: true }) : NextResponse.json({ erro: 'não encontrado' }, { status: 404 });
+  } catch (e) {
+    return NextResponse.json({ erro: `Excluído do painel, mas falhou no banco: ${e instanceof Error ? e.message : e}` }, { status: 502 });
+  }
 }

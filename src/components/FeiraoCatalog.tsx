@@ -1237,6 +1237,10 @@ export function FeiraoCatalog({
               <p>{CAMPAIGN_COPY.legal}</p>
               <p>
                 © 2026 ACELERA V3 — Rio do Sul/SC. Todos os direitos reservados.
+                {' · '}
+                <a href="/privacidade" className="font-semibold text-slate-300 underline underline-offset-4 hover:text-white">
+                  Política de privacidade
+                </a>
               </p>
             </div>
           </div>

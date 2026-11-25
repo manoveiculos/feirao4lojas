@@ -318,7 +318,8 @@ export function ExitIntentModal({ encerrado }: { encerrado: boolean }) {
                 Não, obrigado
               </button>
               <p className="text-[11px] leading-relaxed text-slate-400">
-                Ao enviar, você aceita receber mensagens no WhatsApp sobre o Acelera V3 e seus carros de interesse. Para sair, responda “parar”.
+                Ao enviar, você aceita receber mensagens no WhatsApp sobre o Acelera V3 e seus carros de interesse. Para sair, responda “parar”.{' '}
+                <a href="/privacidade" target="_blank" className="underline underline-offset-2 hover:text-slate-200">Política de privacidade</a>.
               </p>
             </form>
           </>

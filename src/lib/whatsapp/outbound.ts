@@ -1,5 +1,5 @@
 import { FEIRAO_CONFIG } from '../config';
-import { addMensagem, getSettings, updateLead } from '../db/store';
+import { addMensagem, getLead, getSettings, updateLead } from '../db/store';
 import type { Lead, MensagemAutor } from '../db/types';
 import { digitandoWa, enviarImagemWa, enviarTextoWa } from './provider';
 
@@ -41,6 +41,7 @@ export async function enviarTexto(
   const autor = opts.autor ?? 'agente';
   const limpo = texto.trim();
   if (!limpo) return { ok: true };
+  if (!getLead(lead.id)) return { ok: false, erro: 'lead excluído' };
 
   if (opts.simulado) {
     addMensagem({ leadId: lead.id, autor, texto: limpo, midias: [], waId: '' });
@@ -75,6 +76,7 @@ export async function enviarImagem(
 ): Promise<{ ok: boolean; erro?: string }> {
   const autor = opts.autor ?? 'agente';
   const url = urlFotoWhatsapp(fotoOrigem);
+  if (!getLead(lead.id)) return { ok: false, erro: 'lead excluído' };
 
   if (opts.simulado) {
     addMensagem({ leadId: lead.id, autor, texto: legenda, midias: [fotoOrigem], waId: '' });

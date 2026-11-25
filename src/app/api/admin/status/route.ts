@@ -44,7 +44,9 @@ export async function GET(req: NextRequest) {
     urls: {
       webhookEvolution: `${site}/api/whatsapp/webhook?secret=SEU_WEBHOOK_SECRET`,
       webhookMeta: `${site}/api/whatsapp/webhook`,
-      feedMeta: `${site}/api/feed/meta${feedKey ? `?key=${feedKey}` : ''}`,
+      feedMeta: `${site}/api/feed/meta.xml${feedKey ? `?key=${feedKey}` : ''}`,
+      feedMetaVeiculos: `${site}/api/feed/meta.xml?${feedKey ? `key=${feedKey}&` : ''}tipo=veiculos`,
+      feedMetaCsv: `${site}/api/feed/meta${feedKey ? `?key=${feedKey}` : ''}`,
       estoqueJson: `${site}/api/veiculos`,
     },
   });
