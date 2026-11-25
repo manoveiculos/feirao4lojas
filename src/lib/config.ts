@@ -33,6 +33,21 @@ export const FEIRAO_LOCAL = {
     ),
 };
 
+const SITE_URL_PADRAO = 'https://vyro.drivvoo.com';
+
+/**
+ * URL pública do site. Usada em links do feed, fotos enviadas pelo WhatsApp, avisos às lojas e Open Graph.
+ * Em produção nunca aceita "localhost": esses links precisam abrir fora do servidor (Meta, Evolution, clientes).
+ * SITE_URL (lida em tempo de execução) tem prioridade sobre NEXT_PUBLIC_SITE_URL (fixada no build).
+ */
+function resolverSiteUrl(): string {
+  const bruta = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || '').trim().replace(/\/$/, '');
+  const local = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(bruta);
+  if (!bruta) return SITE_URL_PADRAO;
+  if (local && process.env.NODE_ENV === 'production') return SITE_URL_PADRAO;
+  return bruta;
+}
+
 export const FEIRAO_CONFIG = {
   nome: 'ACELERA V3',
   cidade: 'Rio do Sul/SC',
@@ -41,9 +56,7 @@ export const FEIRAO_CONFIG = {
   n8nWebhookUrl: N8N_WEBHOOK_URL,
   horarioFeirao: HORARIO_FEIRAO,
   localPrincipal: FEIRAO_LOCAL,
-  siteUrl: (
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://vyro.drivvoo.com'
-  ).replace(/\/$/, ''),
+  siteUrl: resolverSiteUrl(),
   /** Arte cinematográfica limpa (sem texto) otimizada em WebP para o fundo do Hero */
   campaignImage: '/campanha-acelera-v3.webp',
   /** Arte completa de campanha para compartilhamento OpenGraph (WhatsApp/Instagram) */
