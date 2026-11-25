@@ -222,6 +222,43 @@ async function main() {
     ok(!fus.join(' ').includes('Perfil WhatsApp'), 'follow-up não usa nome não confirmado');
   }
 
+  logOriginal('\n8) Incidente 25/11: resposta cortada (max_tokens) e fim sem texto não deixam o cliente sem resposta');
+  {
+    // a) 1ª chamada cortada com thinking + tool_use pela metade → refaz com mais espaço
+    const t1 = tel();
+    pedidosClaude = [];
+    respostasClaude = [
+      () => ({ stop_reason: 'max_tokens', content: [{ type: 'thinking', thinking: '...', signature: 'x' }, { type: 'tool_use', id: 'cortada', name: 'atualizar_ficha_lead', input: {} }] }),
+      textoClaude('Show! E com quem eu falo?'),
+    ];
+    const a1 = enviadosWa.length;
+    await (await chegar({ telefone: t1, texto: 'em 36' }))();
+    ok(enviadosWa.slice(a1).some((x) => x.numero === t1 && x.texto.includes('com quem eu falo')), 'resposta cortada é refeita e o cliente recebe o texto');
+    const tetos = pedidosClaude.map((p) => (p as unknown as { max_tokens: number }).max_tokens);
+    ok(tetos.length >= 2 && tetos[1] > tetos[0], `a nova tentativa usa teto maior (${tetos.join(" → ")})`);
+
+    // b) só ferramenta e depois fim sem texto → pede a resposta uma vez
+    const t2 = tel();
+    respostasClaude = [
+      toolClaude('atualizar_ficha_lead', { parcela_desejada: 1500 }),
+      () => ({ stop_reason: 'end_turn', content: [] }),
+      textoClaude('Anotei! Você tem carro na troca?'),
+    ];
+    const a2 = enviadosWa.length;
+    await (await chegar({ telefone: t2, texto: 'parcela de 1500' }))();
+    ok(enviadosWa.slice(a2).some((x) => x.numero === t2 && x.texto.includes('troca')), 'fim sem texto: agente é cobrado e responde');
+
+    // c) nada funciona → aviso no painel, nunca silêncio
+    const t3 = tel();
+    respostasClaude = [
+      () => ({ stop_reason: 'end_turn', content: [] }),
+      () => ({ stop_reason: 'end_turn', content: [] }),
+    ];
+    await (await chegar({ telefone: t3, texto: 'oi' }))();
+    const l3 = store.findLeadByTelefone(t3)!;
+    ok(store.getMensagens(l3.id).some((m) => m.autor === 'sistema' && m.texto.includes('não gerou resposta')), 'sem resposta: aviso de sistema no painel');
+  }
+
   logOriginal(falhas ? `\n❌ ${falhas} verificação(ões) falharam` : '\n✅ Tudo certo');
   fs.rmSync(process.env.DATA_DIR!, { recursive: true, force: true });
   process.exit(falhas ? 1 : 0);

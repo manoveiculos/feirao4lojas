@@ -503,7 +503,14 @@ interface RespostaApi {
   error?: { message: string };
 }
 
-async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]): Promise<RespostaApi> {
+/**
+ * Teto de tokens por chamada. Precisa sobrar espaço para o raciocínio interno do modelo
+ * (bloco "thinking") + ferramentas + texto: com 700 a resposta era cortada (stop_reason
+ * "max_tokens") e o cliente ficava sem resposta. A brevidade é garantida pelo prompt e por MAX_BALOES.
+ */
+const MAX_TOKENS = 2048;
+
+async function chamarClaude(system: string, dinamico: string, messages: MsgApi[], maxTokens = MAX_TOKENS): Promise<RespostaApi> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -515,8 +522,7 @@ async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]
     },
     body: JSON.stringify({
       model: getSettings().modelo,
-      // respostas de WhatsApp são curtas; o teto também segura o "textão"
-      max_tokens: 700,
+      max_tokens: maxTokens,
       system: [
         { type: 'text', text: system, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: dinamico },
@@ -604,16 +610,26 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
   // Texto só sai no FIM: frases soltas entre uma ferramenta e outra ("vou verificar…") não viram balões.
   let ultimoTexto = '';
 
+  const textoDe = (r: RespostaApi) =>
+    r.content
+      .filter((b): b is Extract<Bloco, { type: 'text' }> => b.type === 'text')
+      .map((b) => b.text)
+      .join('\n\n')
+      .trim();
+  let ultimaResp: RespostaApi | null = null;
+
   try {
     for (let i = 0; i < 7; i++) {
       if (chegouNova()) return { respondeu: false, descartada: true };
-      const resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
+      let resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
+      if (resp.stop_reason === 'max_tokens') {
+        // resposta cortada no meio: refaz UMA vez com o dobro de espaço (ferramenta truncada não é executada)
+        console.warn(`[agente] lead ${leadId}: resposta cortada (max_tokens); refazendo com ${MAX_TOKENS * 2}`);
+        resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages, MAX_TOKENS * 2);
+      }
+      ultimaResp = resp;
 
-      const texto = resp.content
-        .filter((b): b is Extract<Bloco, { type: 'text' }> => b.type === 'text')
-        .map((b) => b.text)
-        .join('\n\n')
-        .trim();
+      const texto = textoDe(resp);
       if (texto) ultimoTexto = texto;
 
       const usos = resp.content.filter((b): b is Extract<Bloco, { type: 'tool_use' }> => b.type === 'tool_use');
@@ -637,9 +653,32 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
       messages.push({ role: 'user', content: resultados });
     }
 
+    // Terminou sem texto (só ferramentas, ou resposta cortada): pede a resposta ao cliente uma vez
+    if (!limparTextoCliente(ultimoTexto) && ultimaResp && !chegouNova()) {
+      console.warn(`[agente] lead ${leadId}: terminou sem texto (stop_reason=${ultimaResp.stop_reason}); pedindo a resposta`);
+      const pedido: Bloco = { type: 'text', text: '[instrução interna] Escreva agora a sua resposta curta para o cliente, seguindo as regras de formato.' };
+      // turno do assistente só com texto (ferramenta cortada/pendente não volta ao histórico)
+      const textoAssistente = ultimaResp.content.filter((b) => b.type === 'text' && b.text.trim());
+      const ultimaMsg = messages[messages.length - 1];
+      if (textoAssistente.length) {
+        messages.push({ role: 'assistant', content: textoAssistente });
+        messages.push({ role: 'user', content: [pedido] });
+      } else if (ultimaMsg?.role === 'user') {
+        ultimaMsg.content = [...(typeof ultimaMsg.content === 'string' ? [{ type: 'text', text: ultimaMsg.content } as Bloco] : ultimaMsg.content), pedido];
+      }
+      const extra = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
+      ultimoTexto = textoDe(extra);
+    }
+
     // o cliente escreveu de novo enquanto o agente pensava: descarta e responde a tudo junto
     if (chegouNova()) return { respondeu: false, descartada: true };
     const limpo = limparTextoCliente(ultimoTexto);
+    if (!limpo) {
+      // nunca terminar em silêncio: o painel mostra o aviso para alguém atender
+      console.error(`[agente] lead ${leadId}: nenhuma resposta gerada (stop_reason=${ultimaResp?.stop_reason ?? '—'})`);
+      addMensagem({ leadId, autor: 'sistema', texto: '⚠️ O agente não gerou resposta para a última mensagem. Atenda este cliente manualmente.', midias: [], waId: '' });
+      return { respondeu: false, erro: 'resposta vazia' };
+    }
     for (const balao of quebrarEmBaloes(limpo, MAX_BALOES)) {
       await enviarTexto(getLead(leadId)!, balao, { simulado });
     }
