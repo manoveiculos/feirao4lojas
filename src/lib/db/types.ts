@@ -99,6 +99,8 @@ export interface Lead {
   totalMensagensLead: number;
   /** Lead criado pelo simulador do admin: fora de métricas e notificações. */
   teste?: boolean;
+  /** Instância do servidor que gravou esta versão no banco (sincronização entre instâncias). */
+  instancia?: string;
 }
 
 export type MensagemAutor = 'lead' | 'agente' | 'humano' | 'sistema';

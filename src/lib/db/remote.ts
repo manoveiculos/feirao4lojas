@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Clique, EsperaItem, Evento, Lead, Mensagem, Settings } from './types';
 import type { LojaSlug } from '../types';
 import { LOJAS } from '../config';
@@ -15,6 +16,13 @@ const URL_BASE = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_U
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export const bancoConfigurado = (): boolean => Boolean(URL_BASE && KEY);
+
+/**
+ * Identidade desta instância do servidor. Durante um deploy (ou com mais de um processo) duas
+ * instâncias convivem; cada uma marca o que grava para a outra saber o que precisa puxar.
+ */
+const gi = globalThis as unknown as { __feiraoInstancia?: { id: string; iniciadaEm: string } };
+export const INSTANCIA = (gi.__feiraoInstancia ??= { id: randomUUID().slice(0, 8), iniciadaEm: new Date().toISOString() });
 
 interface Fila {
   leads: Map<string, Lead>;
@@ -37,7 +45,7 @@ const fila = (): Fila =>
 
 async function rest(
   path: string,
-  init: { method?: string; body?: unknown; prefer?: string; headers?: Record<string, string> } = {}
+  init: { method?: string; body?: unknown; prefer?: string; headers?: Record<string, string>; timeoutMs?: number } = {}
 ): Promise<Response> {
   return fetch(`${URL_BASE}/rest/v1/${path}`, {
     method: init.method ?? 'GET',
@@ -49,7 +57,7 @@ async function rest(
       ...init.headers,
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(init.timeoutMs ?? 20_000),
   });
 }
 
@@ -106,7 +114,7 @@ async function descarregar(): Promise<void> {
               qualificado_em: l.qualificadoEm,
               criado_em: l.criadoEm,
               atualizado_em: l.atualizadoEm,
-              dados: l,
+              dados: { ...l, instancia: INSTANCIA.id },
             })),
             'id'
           ),
@@ -348,4 +356,82 @@ export async function carregarDoBanco(): Promise<DadosDoBanco> {
     cliques: cliques.map((c) => c.dados),
     settings: settings[0]?.dados ?? null,
   };
+}
+
+// ───────────────────────── Leitura incremental (sincronização entre instâncias) ─────────────────────────
+
+type LinhaMensagem = { id: string; lead_id: string; autor: Mensagem['autor']; texto: string; midias: string[]; wa_id: string | null; ts: string };
+type LinhaEvento = { id: string; tipo: Evento['tipo']; lead_id: string | null; loja_slug: Evento['lojaSlug']; meta: Evento['meta']; ts: string };
+
+const paraMensagem = (m: LinhaMensagem): Mensagem => ({ id: m.id, leadId: m.lead_id, autor: m.autor, texto: m.texto, midias: m.midias ?? [], waId: m.wa_id ?? '', ts: m.ts });
+const paraEvento = (e: LinhaEvento): Evento => ({ id: e.id, tipo: e.tipo, leadId: e.lead_id, lojaSlug: e.loja_slug, meta: e.meta ?? {}, ts: e.ts });
+
+async function lerJson<T>(path: string, timeoutMs: number): Promise<T[]> {
+  const r = await rest(path, { timeoutMs });
+  await exigirOk(r, path.split('?')[0]);
+  return (await r.json()) as T[];
+}
+
+const enc = encodeURIComponent;
+
+/** Leads gravados no banco a partir de `desde` (ISO). */
+export async function lerLeadsAlterados(desde: string, timeoutMs = 10_000): Promise<Lead[]> {
+  const linhas = await lerJson<{ dados: Lead }>(`av3_leads?select=dados&atualizado_em=gte.${enc(desde)}&order=atualizado_em.asc&limit=1000`, timeoutMs);
+  return linhas.map((l) => l.dados);
+}
+
+export async function lerLeadPorId(id: string, timeoutMs = 4000): Promise<Lead | null> {
+  const linhas = await lerJson<{ dados: Lead }>(`av3_leads?select=dados&id=eq.${enc(id)}`, timeoutMs);
+  return linhas[0]?.dados ?? null;
+}
+
+export async function lerLeadsPorTelefone(telefones: string[], timeoutMs = 4000): Promise<Lead[]> {
+  if (!telefones.length) return [];
+  const linhas = await lerJson<{ dados: Lead }>(`av3_leads?select=dados&telefone=in.(${telefones.map(enc).join(',')})`, timeoutMs);
+  return linhas.map((l) => l.dados);
+}
+
+/** Mensagens a partir de `desde` (de um lead ou de todos). */
+export async function lerMensagensDesde(desde: string, leadId?: string, timeoutMs = 10_000): Promise<Mensagem[]> {
+  const filtroLead = leadId ? `&lead_id=eq.${enc(leadId)}` : '';
+  const linhas = await lerJson<LinhaMensagem>(
+    `av3_mensagens?select=id,lead_id,autor,texto,midias,wa_id,ts&ts=gte.${enc(desde)}${filtroLead}&order=ts.asc&limit=2000`,
+    timeoutMs
+  );
+  return linhas.map(paraMensagem);
+}
+
+export async function lerEventosDesde(desde: string, timeoutMs = 10_000): Promise<Evento[]> {
+  const linhas = await lerJson<LinhaEvento>(`av3_eventos?select=id,tipo,lead_id,loja_slug,meta,ts&ts=gte.${enc(desde)}&order=ts.asc&limit=2000`, timeoutMs);
+  return linhas.map(paraEvento);
+}
+
+export async function lerSettingsDoBanco(timeoutMs = 10_000): Promise<Settings | null> {
+  const linhas = await lerJson<{ dados: Settings }>('av3_settings?select=dados&id=eq.1', timeoutMs);
+  return linhas[0]?.dados ?? null;
+}
+
+export async function lerEsperaAlterada(desde: string, timeoutMs = 10_000): Promise<EsperaItem[]> {
+  const todos = await carregarEsperaDoBanco();
+  void timeoutMs;
+  return todos.filter((e) => e.atualizadoEm >= desde);
+}
+
+/**
+ * Batimento desta instância (tabela av3_instancias) e quem é a líder: a instância MAIS NOVA vista
+ * nos últimos 45 s. Só a líder roda as tarefas automáticas (follow-up, lista de espera, sync do estoque),
+ * para nada sair em dobro quando duas instâncias convivem. Sem a tabela, cada instância se considera líder.
+ */
+export async function batimentoELider(): Promise<boolean> {
+  const agora = new Date().toISOString();
+  const r = await rest('av3_instancias?on_conflict=id', {
+    method: 'POST',
+    body: [{ id: INSTANCIA.id, iniciada_em: INSTANCIA.iniciadaEm, visto_em: agora }],
+    prefer: 'resolution=merge-duplicates,return=minimal',
+    timeoutMs: 8000,
+  });
+  if (!r.ok) throw new Error(`av3_instancias: HTTP ${r.status}`);
+  const corte = new Date(Date.now() - 45_000).toISOString();
+  const vivas = await lerJson<{ id: string }>(`av3_instancias?select=id&visto_em=gte.${enc(corte)}&order=iniciada_em.desc,id.desc&limit=1`, 8000);
+  return !vivas[0] || vivas[0].id === INSTANCIA.id;
 }

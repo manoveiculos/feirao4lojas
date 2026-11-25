@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { updateLead } from '@/lib/db/store';
 import { exigirApi, leadAcessivel } from '@/lib/painel';
+import { sincronizarLead } from '@/lib/db/sync';
 import { enviarTexto } from '@/lib/whatsapp/outbound';
 
 export const runtime = 'nodejs';
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const a = await exigirApi(req);
   if ('erro' in a) return a.erro;
   const { id } = await params;
+  await sincronizarLead(id); // versão mais recente, mesmo se outra instância mexeu
   const lead = leadAcessivel(a.sessao, id);
   if (!lead) return NextResponse.json({ erro: 'não encontrado' }, { status: 404 });
 

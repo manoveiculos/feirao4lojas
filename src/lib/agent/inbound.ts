@@ -20,6 +20,7 @@ import { processarMidiaRecebida } from '../whatsapp/midia';
 import { enviarTexto, sleep } from '../whatsapp/outbound';
 import type { Entrada } from '../whatsapp/provider';
 import { responderLead } from './engine';
+import { sincronizarLead, sincronizarPorTelefone } from '../db/sync';
 
 const RE_REF = /\[Ref:\s*(AV3-[A-Z0-9-]+)\]/i;
 const RE_SID = /\[#([a-z0-9]{6,16})\]/i;
@@ -70,6 +71,9 @@ export async function processarEntrada(e: Entrada, agendar: (fn: () => Promise<v
   if (e.waId && jaProcessouWaId(e.waId)) return;
 
   // ── Mensagem enviada por um humano pelo celular da loja ──
+  // o lead pode ter sido criado/alterado por outra instância do servidor: confere no banco antes
+  await sincronizarPorTelefone(e.telefone);
+
   if (e.tipo === 'eco_humano') {
     await sleep(1500); // dá tempo de o nosso próprio envio registrar o waId
     if (e.waId && jaProcessouWaId(e.waId)) return;
@@ -215,6 +219,10 @@ async function rodarAgenteAgrupado(leadId: string): Promise<void> {
     for (let rodada = 0; rodada < 3; rodada++) {
       const l = getLead(leadId);
       if (!l || l.humano || !l.agenteAtivo || l.status === 'optout' || !getSettings().agenteLigado) return;
+      // painel/roteamento podem ter mudado o lead em outra instância (ex.: humano assumiu)
+      await sincronizarLead(leadId);
+      const atual = getLead(leadId);
+      if (!atual || atual.humano || !atual.agenteAtivo || atual.status === 'optout') return;
       const r = await responderLead(leadId);
       const refazer = emCurso.get(leadId) || r.descartada;
       emCurso.set(leadId, false);

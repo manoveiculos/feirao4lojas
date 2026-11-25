@@ -11,7 +11,8 @@
     "audit:data": "tsx scripts/audit-data.ts",
     "test:api": "tsx scripts/test-api.ts",
     "test:roteamento": "tsx scripts/test-roteamento.ts",
-    "test:agente": "tsx scripts/test-agente.ts"
+    "test:agente": "tsx scripts/test-agente.ts",
+    "test:sync": "tsx scripts/test-sync.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

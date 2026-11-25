@@ -481,6 +481,90 @@ export function saveSettings(patch: Partial<Settings>): Settings {
   return s.settings;
 }
 
+// ───────────────────────── Sincronização entre instâncias ─────────────────────────
+// Recebe o que OUTRA instância gravou no banco. Nada aqui volta para a fila de escrita
+// (não espelha), senão as instâncias ficariam regravando uma a outra.
+
+const ts = (iso: string | null | undefined) => (iso ? Date.parse(iso) || 0 : 0);
+
+/** Troca o lead local pela versão do banco quando ela é mais nova. Devolve true se mudou algo. */
+export function incorporarLead(remoto: Lead): boolean {
+  if (!remoto?.id || remoto.teste) return false;
+  const s = state();
+  const local = s.leads.get(remoto.id);
+  if (local && ts(remoto.atualizadoEm) <= ts(local.atualizadoEm)) return false;
+  normalizarLeadLegado(remoto);
+  if (local) {
+    for (const k of Object.keys(local) as Array<keyof Lead>) if (!(k in remoto)) delete local[k];
+    Object.assign(local, remoto); // mantém a mesma referência para quem já segura o objeto
+  } else {
+    // mesmo telefone com outro id (as duas instâncias criaram o lead): fica o do banco
+    const outroId = s.porTelefone.get(remoto.telefone);
+    if (outroId && outroId !== remoto.id) s.leads.delete(outroId);
+    s.leads.set(remoto.id, remoto);
+  }
+  s.porTelefone.set(remoto.telefone, remoto.id);
+  schedule('leads');
+  return true;
+}
+
+/** Junta mensagens gravadas por outra instância (sem duplicar e na ordem). */
+export function incorporarMensagens(msgs: Mensagem[]): number {
+  const s = state();
+  let n = 0;
+  const tocados = new Set<string>();
+  for (const m of msgs) {
+    if (!s.leads.has(m.leadId)) continue;
+    const arr = s.mensagens.get(m.leadId) ?? [];
+    if (arr.some((x) => x.id === m.id || (m.waId && x.waId === m.waId))) continue;
+    arr.push(m);
+    s.mensagens.set(m.leadId, arr);
+    if (m.waId) s.waIds.add(m.waId);
+    appendJsonl('mensagens.jsonl', m);
+    tocados.add(m.leadId);
+    n++;
+  }
+  for (const id of tocados) s.mensagens.get(id)!.sort((a, b) => a.ts.localeCompare(b.ts));
+  return n;
+}
+
+export function incorporarEventos(evs: Evento[]): number {
+  const s = state();
+  const ids = new Set(s.eventos.slice(-5000).map((e) => e.id));
+  let n = 0;
+  for (const e of evs) {
+    if (ids.has(e.id)) continue;
+    s.eventos.push(e);
+    appendJsonl('eventos.jsonl', e);
+    n++;
+  }
+  if (n) s.eventos.sort((a, b) => a.ts.localeCompare(b.ts));
+  return n;
+}
+
+export function incorporarEspera(itens: EsperaItem[]): number {
+  const s = state();
+  let n = 0;
+  for (const e of itens) {
+    const local = s.espera.get(e.id);
+    if (local && ts(e.atualizadoEm) <= ts(local.atualizadoEm)) continue;
+    s.espera.set(e.id, e);
+    n++;
+  }
+  if (n) schedule('espera');
+  return n;
+}
+
+/** Configurações salvas por outra instância (ex.: agente ligado/desligado no topo do admin). */
+export function incorporarSettings(remoto: Settings | null): boolean {
+  if (!remoto) return false;
+  const s = state();
+  if (ts(remoto.atualizadoEm) <= ts(s.settings.atualizadoEm)) return false;
+  s.settings = { ...SETTINGS_PADRAO, ...remoto };
+  writeAtomic('settings.json', s.settings);
+  return true;
+}
+
 // ───────────────────────── Banco (Supabase) ─────────────────────────
 
 /**

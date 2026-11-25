@@ -1,6 +1,7 @@
 import { TZDate } from '@date-fns/tz';
 import { CAMPAIGN_TIMEZONE } from '../campaign';
-import { addEvento, getSettings, listEventos, listLeads, updateLead } from '../db/store';
+import { addEvento, getLead, getSettings, listEventos, listLeads, updateLead } from '../db/store';
+import { sincronizarLead } from '../db/sync';
 import type { Lead } from '../db/types';
 import { loadEstoque } from '../estoque';
 import { enviarTexto, marcarProximoFollowup } from '../whatsapp/outbound';
@@ -71,6 +72,10 @@ export async function executarTick(agora = new Date()): Promise<{ followups: num
       lead.followupsEnviados < s.maxFollowups &&
       !['comprou', 'perdido', 'visitou'].includes(lead.status)
     ) {
+      // o cliente pode ter respondido (ou um humano assumido) em outra instância
+      await sincronizarLead(lead.id);
+      const fresco = getLead(lead.id);
+      if (!fresco || fresco.humano || fresco.status === 'optout' || !fresco.proximoFollowupEm || Date.parse(fresco.proximoFollowupEm) > agora.getTime() || fresco.followupsEnviados !== lead.followupsEnviados) continue;
       const etapa = lead.followupsEnviados;
       const r = await enviarTexto(lead, textoFollowup(lead, etapa), { autor: 'agente' });
       if (r.ok) {

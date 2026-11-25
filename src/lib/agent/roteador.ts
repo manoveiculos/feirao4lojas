@@ -1,4 +1,5 @@
 import { enviarEventoQualificado } from '../ads/capi';
+import { sincronizarLead } from '../db/sync';
 import { FEIRAO_CONFIG, LOJAS, LOJAS_BY_SLUG, getSiglaFromCodigo } from '../config';
 import { addEvento, getLead, getMensagens, getSettings, listLeads, updateLead } from '../db/store';
 import type { Lead } from '../db/types';
@@ -273,6 +274,7 @@ export async function rotearLead(
   leadId: string,
   opts: { motivoAprovacao: string; codigoPreferido?: string; lojaForcada?: LojaSlug; simulado?: boolean; semGerente?: boolean } = { motivoAprovacao: '' }
 ): Promise<ResultadoRoteamento> {
+  if (!opts.simulado) await sincronizarLead(leadId); // outra instância pode já ter roteado/avisado
   const lead = getLead(leadId);
   if (!lead) return { ok: false, erro: 'lead inexistente' };
 

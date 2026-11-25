@@ -4,6 +4,7 @@ import { executarTick } from '@/lib/agent/followup';
 import { sincronizarEstoque } from '@/lib/sync-job';
 import { loadEstoque } from '@/lib/estoque';
 import { verificarEsperaNoTick } from '@/lib/espera/espera';
+import { souLider } from '@/lib/db/sync';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,8 @@ function autorizado(req: NextRequest): boolean {
 /** Follow-ups, lembretes de visita e sync horário do estoque. Chame a cada minuto. */
 async function handler(req: NextRequest) {
   if (!autorizado(req)) return NextResponse.json({ erro: 'não autorizado' }, { status: 401 });
+  // com duas instâncias no ar, só a líder dispara follow-ups/lista de espera (nada sai em dobro)
+  if (!(await souLider())) return NextResponse.json({ ok: true, ignorado: 'outra instância é a líder' });
   const resultado = await executarTick();
   let sync: unknown = null;
   const idade = Date.now() - Date.parse(loadEstoque().metadata.atualizadoEm);
