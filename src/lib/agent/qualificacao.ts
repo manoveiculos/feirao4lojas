@@ -1,11 +1,8 @@
-import { FEIRAO_CONFIG, LOJAS, LOJAS_BY_SLUG, getSiglaFromCodigo } from '../config';
-import { addEvento, getSettings, listLeads, updateLead } from '../db/store';
+import { FEIRAO_CONFIG, LOJAS_BY_SLUG } from '../config';
+import { getSettings, updateLead } from '../db/store';
 import type { Lead, Temperatura } from '../db/types';
-import { loadEstoque } from '../estoque';
-import { filterVeiculos } from '../filters';
 import { enviarAvisoInterno } from '../whatsapp/outbound';
-import { enviarEventoQualificado } from '../ads/capi';
-import type { LojaSlug } from '../types';
+import { rotearLead } from './roteador';
 
 /**
  * Score determinístico 0–100 calculado a partir do que o agente coletou.
@@ -46,45 +43,31 @@ export function estaQualificado(lead: Lead): boolean {
 }
 
 /**
- * Escolhe a loja responsável:
- * 1) loja do carro de interesse (prefixo do código);
- * 2) loja com mais carros compatíveis com o perfil;
- * 3) loja com menos leads em aberto (distribuição justa).
+ * Critério mínimo para o SDR aprovar o lead para roteamento (validado em código, não só no prompt):
+ * - o cliente RESPONDEU ativamente (curioso que não responde nunca chega a uma loja);
+ * - e: interesse claro + (orçamento/entrada/parcela/forma de pagamento OU troca definida),
+ *   ou pedido explícito de visita/simulação/atendimento humano,
+ *   ou resposta a um aviso da lista de espera.
  */
-export function escolherLoja(lead: Lead): LojaSlug {
-  const siglaPorCodigo = lead.perfil.veiculosInteresse
-    .map((c) => getSiglaFromCodigo(c))
-    .find(Boolean);
-  if (siglaPorCodigo) {
-    const loja = LOJAS.find((l) => l.sigla === siglaPorCodigo);
-    if (loja) return loja.slug;
-  }
-
+export function criteriosMinimos(
+  lead: Lead,
+  pedidoExplicito: boolean
+): { ok: boolean; faltando: string[] } {
   const p = lead.perfil;
-  const abertos = new Map<LojaSlug, number>(LOJAS.map((l) => [l.slug, 0]));
-  for (const l of listLeads()) {
-    if (l.lojaSlug && ['novo', 'em_atendimento', 'qualificado', 'visita_agendada'].includes(l.status)) {
-      abertos.set(l.lojaSlug, (abertos.get(l.lojaSlug) ?? 0) + 1);
-    }
-  }
+  const faltando: string[] = [];
+  const respondeu = lead.totalMensagensLead >= 1;
+  const interesse = p.veiculosInteresse.length > 0 || Boolean(p.categoria || p.marca_modelo);
+  const condicao =
+    p.orcamento !== null || p.entrada !== null || p.parcelaDesejada !== null || p.formaPagamento !== null || p.temTroca !== null;
+  const visita = Boolean(lead.visita.quando);
+  const espera = Boolean(lead.esperaAviso);
 
-  if (p.categoria || p.marca_modelo || p.orcamento) {
-    const db = loadEstoque();
-    const compat = filterVeiculos(db.veiculos, {
-      categoria: p.categoria ?? undefined,
-      q: p.marca_modelo ?? undefined,
-      precoMax: p.orcamento ? Math.round(p.orcamento * 1.1) : undefined,
-      excluirMotos: true,
-    });
-    const porLoja = new Map<LojaSlug, number>();
-    for (const v of compat) porLoja.set(v.lojaSlug, (porLoja.get(v.lojaSlug) ?? 0) + 1);
-    const ranking = [...porLoja.entries()].sort(
-      (a, b) => b[1] - a[1] || (abertos.get(a[0]) ?? 0) - (abertos.get(b[0]) ?? 0)
-    );
-    if (ranking[0]) return ranking[0][0];
+  if (!respondeu) faltando.push('o cliente ainda não respondeu');
+  if (!(pedidoExplicito || visita || espera)) {
+    if (!interesse) faltando.push('interesse (carro, modelo ou categoria)');
+    if (!condicao) faltando.push('condição: orçamento/entrada/parcela/forma de pagamento ou se tem troca');
   }
-
-  return [...abertos.entries()].sort((a, b) => a[1] - b[1])[0][0];
+  return { ok: faltando.length === 0, faltando };
 }
 
 function brl(n: number | null): string {
@@ -109,76 +92,41 @@ export function fichaDoLead(lead: Lead): string {
 }
 
 /**
- * Chamado após cada atualização do lead. Calcula score e, na primeira vez que
- * o lead qualifica, avisa a loja certa + gerente e dispara o evento p/ Meta.
+ * Chamado após cada atualização do lead. Só recalcula score/temperatura e o status de triagem.
+ * NÃO escolhe loja nem avisa ninguém: isso é do Agente Roteador, acionado pelo SDR
+ * (aprovar_para_roteamento). Rede de segurança: se o lead atingir a qualificação forte
+ * (score + prazo/visita) e já respondeu, o roteamento é disparado mesmo que o SDR esqueça.
  */
-export async function reavaliarLead(leadId: string, get: (id: string) => Lead | undefined): Promise<Lead | undefined> {
+export async function reavaliarLead(
+  leadId: string,
+  get: (id: string) => Lead | undefined,
+  opts: { simulado?: boolean } = {}
+): Promise<Lead | undefined> {
   const atual = get(leadId);
   if (!atual) return undefined;
 
   const { score, temperatura } = calcularScore(atual);
   const patch: Partial<Lead> = { score, temperatura };
-
-  if (!atual.lojaSlug && (atual.perfil.veiculosInteresse.length || atual.perfil.categoria || atual.perfil.marca_modelo)) {
-    patch.lojaSlug = escolherLoja(atual);
-  }
   if (atual.status === 'novo' && atual.totalMensagensLead > 0) patch.status = 'em_atendimento';
+  const lead = updateLead(leadId, patch)!;
 
-  let lead = updateLead(leadId, patch)!;
-
-  if (!lead.qualificadoEm && estaQualificado(lead)) {
-    const loja = lead.lojaSlug ?? escolherLoja(lead);
-    lead = updateLead(leadId, {
-      qualificadoEm: new Date().toISOString(),
-      status: lead.visita.quando ? 'visita_agendada' : 'qualificado',
-      lojaSlug: loja,
-    })!;
-    if (lead.teste) return lead;
-    addEvento({
-      tipo: 'qualificado',
-      leadId,
-      lojaSlug: loja,
-      meta: { score: lead.score, canal: lead.origem.canal, campanha: lead.origem.utm_campaign, ad_id: lead.origem.ad_id },
-    });
-    await notificarLojaQualificado(lead);
-    void enviarEventoQualificado(lead);
+  if (!lead.roteadoEm && lead.totalMensagensLead > 0 && estaQualificado(lead) && criteriosMinimos(lead, false).ok) {
+    await rotearLead(leadId, { motivoAprovacao: `rede de segurança: score ${lead.score}`, simulado: opts.simulado });
   }
-  return lead;
+  return get(leadId);
 }
 
+/** Visita marcada em lead já roteado e notificado: avisa a loja responsável (e o gerente). */
 export async function avisarVisita(lead: Lead): Promise<void> {
+  if (!lead.lojaSlug || !lead.roteadoEm) return;
   const s = getSettings();
-  const texto = `📅 *Visita agendada — Acelera V3*
+  const texto = `📅 *Visita agendada — Acelera V3* (${LOJAS_BY_SLUG[lead.lojaSlug].nome})
 
-${fichaDoLead(lead)}`;
+${fichaDoLead(lead)}
+
+👉 ${FEIRAO_CONFIG.siteUrl}/admin/conversas?lead=${lead.id}`;
   const destinos = new Set<string>();
-  if (lead.lojaSlug && s.lojaTelefones[lead.lojaSlug]) destinos.add(s.lojaTelefones[lead.lojaSlug]!);
+  if (s.lojaTelefones[lead.lojaSlug]) destinos.add(s.lojaTelefones[lead.lojaSlug]!);
   if (s.gerenteTelefone) destinos.add(s.gerenteTelefone);
   for (const tel of destinos) await enviarAvisoInterno(tel, texto);
-}
-
-export async function notificarLojaQualificado(
-  lead: Lead,
-  titulo = '🔔 *Lead QUALIFICADO — Acelera V3*'
-): Promise<void> {
-  const s = getSettings();
-  const loja = lead.lojaSlug ? LOJAS_BY_SLUG[lead.lojaSlug] : null;
-  const painel = `${FEIRAO_CONFIG.siteUrl}/loja/${lead.lojaSlug ?? ''}`;
-  const texto =
-    `${titulo}${loja ? ` (${loja.nome})` : ''}\n\n` +
-    `${fichaDoLead(lead)}\n\n` +
-    `👉 Abra a conversa no painel: ${painel}\n` +
-    (lead.humano
-      ? '_O agente está pausado: o cliente aguarda você._'
-      : '_O agente seguirá atendendo até você assumir._');
-
-  const destinos = new Set<string>();
-  if (lead.lojaSlug && s.lojaTelefones[lead.lojaSlug]) destinos.add(s.lojaTelefones[lead.lojaSlug]!);
-  if (s.gerenteTelefone) destinos.add(s.gerenteTelefone);
-
-  let enviado = false;
-  for (const tel of destinos) enviado = (await enviarAvisoInterno(tel, texto)) || enviado;
-  if (enviado || destinos.size === 0) {
-    updateLead(lead.id, { lojaNotificadaEm: new Date().toISOString() });
-  }
 }

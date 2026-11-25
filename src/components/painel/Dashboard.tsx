@@ -128,8 +128,8 @@ export function Dashboard({ baseConversas, escopoLoja }: { baseConversas: string
                 ))}
                 {s.semLoja > 0 && (
                   <tr className="border-t border-slate-100 text-slate-500">
-                    <td className="py-2">Sem loja definida</td><td>{s.semLoja}</td><td colSpan={3} />
-                    <td className="text-right"><Link className="text-xs font-bold text-sky-700 hover:underline" href={`${baseConversas}?loja=sem-loja`}>Distribuir</Link></td>
+                    <td className="py-2">Em triagem (sem loja)</td><td>{s.semLoja}</td><td colSpan={3} />
+                    <td className="text-right"><Link className="text-xs font-bold text-sky-700 hover:underline" href={`${baseConversas}?loja=sem-loja`}>Ver</Link></td>
                   </tr>
                 )}
               </tbody>

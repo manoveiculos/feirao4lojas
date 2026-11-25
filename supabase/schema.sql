@@ -133,3 +133,9 @@ revoke all on public.av3_vw_leads, public.av3_vw_funil_diario from anon, authent
 
 -- 5) Retenção: pg_cron "av3_limpeza_cliques" apaga cliques com mais de 30 dias, todo dia às 04h BRT
 -- select cron.schedule('av3_limpeza_cliques', '0 7 * * *', $$delete from public.av3_cliques where ts < now() - interval '30 days'$$);
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- Migration av3_multitenant_roteador_espera (arquivo: supabase/migrations/20261125150000_av3_multitenant_roteador_espera.sql)
+-- av3_lojas (whatsapp_notificacao), colunas de roteamento em av3_leads (loja_slug = loja_responsavel,
+-- roteado_em, notificado_loja_em, loja_sugerida), av3_lista_espera, av3_usuarios (super_admin/store_user) e RLS.
+-- ════════════════════════════════════════════════════════════════════════════

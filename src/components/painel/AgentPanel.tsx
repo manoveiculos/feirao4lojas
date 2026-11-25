@@ -75,7 +75,7 @@ export function AgentPanel() {
 
         <Card titulo="Comportamento do agente">
           <div className="space-y-2 text-sm">
-            <Toggle v={cfg.agenteLigado} on={(v) => set('agenteLigado', v)} l="Agente ligado (atende 24h)" />
+            <p className="rounded-lg bg-slate-50 p-2 text-xs text-slate-600">Para <b>ligar ou desligar o agente</b>, use o botão no topo da página (vale na hora, para todas as lojas).</p>
             <Toggle v={cfg.boasVindasProativas} on={(v) => set('boasVindasProativas', v)} l="Mandar boas-vindas + convite a quem se cadastra no site" />
             <Toggle v={cfg.followupsAtivos} on={(v) => set('followupsAtivos', v)} l="Follow-ups automáticos (8h–20h)" />
             <label className="block text-xs font-bold uppercase text-slate-500">Horas até cada follow-up (separadas por vírgula)
@@ -98,8 +98,11 @@ export function AgentPanel() {
           </div>
         </Card>
 
-        <Card titulo="Avisos de lead qualificado (WhatsApp interno)">
-          <p className="mb-2 text-xs text-slate-500">Número de quem recebe o aviso quando um lead qualifica. Formato com DDD (ex.: 47 99999-9999).</p>
+        <Card titulo="WhatsApp de notificação das lojas">
+          <p className="mb-2 text-xs text-slate-500">
+            Recebe o aviso do <b>Agente Roteador</b> quando um lead passa pela triagem e é atribuído à loja (nunca antes).
+            Use número com DDD (ex.: 47 99999-9999) ou o ID de um grupo do WhatsApp (ex.: 120363000000000000@g.us).
+          </p>
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase text-slate-500">Gerente geral (recebe todos)
               <input value={cfg.gerenteTelefone} onChange={(e) => set('gerenteTelefone', e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm" />

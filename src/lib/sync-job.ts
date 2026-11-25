@@ -16,11 +16,15 @@ async function executar() {
     };
   }
   saveEstoque(db);
+  // estoque mudou: cruza os veículos novos com a lista de espera
+  const { rodarMatchEspera } = await import('./espera/espera');
+  const espera = await rodarMatchEspera().catch((e) => ({ status: 'erro' as const, erro: String(e) }));
   return {
     status: 'sincronizado' as const,
     duracaoSegundos: Number(((Date.now() - inicio) / 1000).toFixed(1)),
     total: db.metadata.totalVeiculos,
     metadata: db.metadata,
+    espera,
   };
 }
 

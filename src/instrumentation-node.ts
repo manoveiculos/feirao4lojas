@@ -17,6 +17,7 @@ export async function iniciarAgendador() {
   const { executarTick } = await import('./lib/agent/followup');
   const { sincronizarEstoque } = await import('./lib/sync-job');
   const { loadEstoque } = await import('./lib/estoque');
+  const { verificarEsperaNoTick } = await import('./lib/espera/espera');
 
   let ocupado = false;
   g.__feiraoCron = setInterval(async () => {
@@ -28,6 +29,8 @@ export async function iniciarAgendador() {
       if (idade > 60 * 60_000 && process.env.AUTO_SYNC_ESTOQUE !== 'off') {
         await sincronizarEstoque().catch((e) => console.error('[cron] sync estoque', e));
       }
+      // lista de espera: cruza veículos novos (venham do sync, de /api/sync ou de um deploy)
+      await verificarEsperaNoTick().catch((e) => console.error('[cron] lista de espera', e));
     } catch (e) {
       console.error('[cron] tick', e);
     } finally {

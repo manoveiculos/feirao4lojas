@@ -3,6 +3,8 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import {
   type Clique,
+  type EsperaControle,
+  type EsperaItem,
   type Evento,
   type Lead,
   type Mensagem,
@@ -14,11 +16,15 @@ import {
 import {
   bancoConfigurado,
   carregarDoBanco,
+  carregarEsperaDoBanco,
+  carregarLojasDoBanco,
   espelharClique,
+  espelharEspera,
   espelharEvento,
   espelharLead,
   espelharMensagem,
   espelharSettings,
+  removerEsperaDoBanco,
   removerLeadDoBanco,
 } from './remote';
 
@@ -40,7 +46,34 @@ interface State {
   eventos: Evento[];
   cliques: Map<string, Clique>;
   settings: Settings;
+  espera: Map<string, EsperaItem>;
+  esperaControle: EsperaControle;
   timers: Record<string, NodeJS.Timeout | undefined>;
+}
+
+/**
+ * Leads gravados antes do Agente Roteador recebiam loja logo no 1º contato.
+ * Regra nova: loja só depois da triagem. Lead já qualificado/notificado é considerado roteado;
+ * os demais voltam para a triagem e a loja vira apenas uma sugestão. Idempotente.
+ */
+export function normalizarLeadLegado(l: Lead): Lead {
+  if (l.roteadoEm === undefined) {
+    const jaPassou = Boolean(l.qualificadoEm || l.lojaNotificadaEm);
+    if (l.lojaSlug && jaPassou) {
+      l.roteadoEm = l.qualificadoEm ?? l.lojaNotificadaEm;
+      l.roteamentoMotivo = l.roteamentoMotivo || 'legado';
+    } else {
+      l.roteadoEm = null;
+      if (l.lojaSlug) {
+        l.lojaSugerida = l.lojaSugerida ?? l.lojaSlug;
+        l.lojaSlug = null;
+      }
+    }
+  }
+  l.lojaSugerida ??= null;
+  l.roteamentoMotivo ??= '';
+  l.esperaAviso ??= null;
+  return l;
 }
 
 const g = globalThis as unknown as { __feiraoStore?: State };
@@ -87,6 +120,7 @@ function state(): State {
   const leads = new Map<string, Lead>();
   const porTelefone = new Map<string, string>();
   for (const l of readJson<Lead[]>('leads.json', [])) {
+    normalizarLeadLegado(l);
     leads.set(l.id, l);
     porTelefone.set(l.telefone, l.id);
   }
@@ -111,19 +145,24 @@ function state(): State {
     eventos: readJsonl<Evento>('eventos.jsonl'),
     cliques,
     settings: { ...SETTINGS_PADRAO, ...readJson<Partial<Settings>>('settings.json', {}) },
+    espera: new Map(readJson<EsperaItem[]>('lista_espera.json', []).map((e) => [e.id, e])),
+    esperaControle: readJson<EsperaControle>('espera_controle.json', { conhecidos: [], pendentes: [], ultimaVerificacao: null }),
     timers: {},
   };
   return g.__feiraoStore;
 }
 
-function schedule(key: 'leads' | 'cliques'): void {
+function schedule(key: 'leads' | 'cliques' | 'espera'): void {
   const s = state();
   if (s.timers[key]) return;
   s.timers[key] = setTimeout(() => {
     s.timers[key] = undefined;
     try {
       if (key === 'leads') writeAtomic('leads.json', [...s.leads.values()]);
-      else writeAtomic('cliques.json', [...s.cliques.values()]);
+      else if (key === 'espera') {
+        writeAtomic('lista_espera.json', [...s.espera.values()]);
+        writeAtomic('espera_controle.json', s.esperaControle);
+      } else writeAtomic('cliques.json', [...s.cliques.values()]);
     } catch (e) {
       console.error('[store] falha ao persistir', key, e);
     }
@@ -205,6 +244,10 @@ export function createLead(input: Partial<Lead> & { telefone: string }): Lead {
     ultimaMensagemLeadEm: null,
     naoLidas: 0,
     totalMensagensLead: 0,
+    lojaSugerida: null,
+    roteadoEm: null,
+    roteamentoMotivo: '',
+    esperaAviso: null,
     ...resto,
   };
   s.leads.set(lead.id, lead);
@@ -231,7 +274,9 @@ export function deleteLeadTeste(id: string): void {
   s.leads.delete(id);
   s.porTelefone.delete(l.telefone);
   s.mensagens.delete(id);
+  for (const e of [...s.espera.values()]) if (e.leadId === id) s.espera.delete(e.id);
   schedule('leads');
+  schedule('espera');
 }
 
 /**
@@ -247,9 +292,12 @@ export async function excluirLeadDefinitivo(id: string): Promise<boolean> {
   s.porTelefone.delete(l.telefone);
   s.mensagens.delete(id);
   s.eventos = s.eventos.filter((e) => e.leadId !== id);
+  const esperaDoLead = [...s.espera.values()].filter((e) => e.leadId === id);
+  for (const e of esperaDoLead) s.espera.delete(e.id);
 
   // reescreve os arquivos sem os dados do lead
   writeAtomic('leads.json', [...s.leads.values()]);
+  writeAtomic('lista_espera.json', [...s.espera.values()]);
   const todasMsgs = [...s.mensagens.values()].flat().sort((a, b) => a.ts.localeCompare(b.ts));
   fs.mkdirSync(DATA_DIR, { recursive: true });
   const jsonl = (rows: unknown[]) => rows.map((r) => JSON.stringify(r) + '\n').join('');
@@ -261,7 +309,60 @@ export async function excluirLeadDefinitivo(id: string): Promise<boolean> {
   fs.renameSync(tmpE, file('eventos.jsonl'));
 
   await removerLeadDoBanco(id);
+  if (esperaDoLead.length) await removerEsperaDoBanco(esperaDoLead.map((e) => e.id));
   return true;
+}
+
+// ───────────────────────── Lista de espera ─────────────────────────
+
+export function listEspera(): EsperaItem[] {
+  return [...state().espera.values()];
+}
+
+export function getEspera(id: string): EsperaItem | undefined {
+  return state().espera.get(id);
+}
+
+export function addEspera(
+  input: Omit<EsperaItem, 'id' | 'createdAt' | 'atualizadoEm' | 'status' | 'matchedVehicleId' | 'matchedCodigo' | 'veiculosAvisados' | 'notifiedAt'>
+): EsperaItem {
+  const s = state();
+  const ts = nowIso();
+  const item: EsperaItem = {
+    id: randomUUID(),
+    status: 'aguardando',
+    matchedVehicleId: null,
+    matchedCodigo: null,
+    veiculosAvisados: [],
+    notifiedAt: null,
+    createdAt: ts,
+    atualizadoEm: ts,
+    ...input,
+  };
+  s.espera.set(item.id, item);
+  schedule('espera');
+  if (!item.teste) espelharEspera(item);
+  return item;
+}
+
+export function updateEspera(id: string, patch: Partial<EsperaItem>): EsperaItem | undefined {
+  const item = state().espera.get(id);
+  if (!item) return undefined;
+  Object.assign(item, patch, { atualizadoEm: nowIso() });
+  schedule('espera');
+  if (!item.teste) espelharEspera(item);
+  return item;
+}
+
+export function getEsperaControle(): EsperaControle {
+  return state().esperaControle;
+}
+
+export function saveEsperaControle(patch: Partial<EsperaControle>): EsperaControle {
+  const s = state();
+  s.esperaControle = { ...s.esperaControle, ...patch };
+  schedule('espera');
+  return s.esperaControle;
 }
 
 // ───────────────────────── Mensagens ─────────────────────────
@@ -383,6 +484,7 @@ export async function hidratarDoBanco(): Promise<{ origem: 'banco' | 'arquivos' 
     s.waIds.clear();
     s.cliques.clear();
     for (const l of [...d.leads, ...testes]) {
+      normalizarLeadLegado(l);
       s.leads.set(l.id, l);
       s.porTelefone.set(l.telefone, l.id);
     }
@@ -395,9 +497,48 @@ export async function hidratarDoBanco(): Promise<{ origem: 'banco' | 'arquivos' 
     s.eventos = d.eventos;
     for (const c of d.cliques) s.cliques.set(c.sid, c);
     if (d.settings) s.settings = { ...SETTINGS_PADRAO, ...d.settings };
+    await hidratarExtrasDoBanco();
     return { origem: 'banco', leads: s.leads.size };
   } catch (e) {
     console.error('[supabase] não foi possível carregar do banco; seguindo com os arquivos locais:', e instanceof Error ? e.message : e);
     return { origem: 'arquivos', leads: s.leads.size };
+  }
+}
+
+/**
+ * Lista de espera e WhatsApp de notificação das lojas (av3_lista_espera / av3_lojas).
+ * Separado da carga principal: se a migração ainda não foi aplicada, nada do resto quebra.
+ */
+async function hidratarExtrasDoBanco(): Promise<void> {
+  const s = state();
+  try {
+    const itens = await carregarEsperaDoBanco();
+    if (itens.length) {
+      const testes = [...s.espera.values()].filter((e) => e.teste);
+      s.espera.clear();
+      for (const e of [...itens, ...testes]) s.espera.set(e.id, e);
+      schedule('espera');
+    } else {
+      for (const e of s.espera.values()) if (!e.teste) espelharEspera(e);
+    }
+  } catch (e) {
+    console.warn('[supabase] lista de espera não carregada do banco (migração aplicada?):', e instanceof Error ? e.message : e);
+  }
+  try {
+    const lojas = await carregarLojasDoBanco();
+    const tel = { ...s.settings.lojaTelefones };
+    let mudou = false;
+    for (const l of lojas) {
+      if (l.whatsapp_notificacao && tel[l.slug] !== l.whatsapp_notificacao) {
+        tel[l.slug] = l.whatsapp_notificacao;
+        mudou = true;
+      }
+    }
+    if (mudou) s.settings = { ...s.settings, lojaTelefones: tel };
+    // banco ainda sem números (migração recém-aplicada): publica os que já estão configurados no painel
+    const bancoVazio = !lojas.some((l) => l.whatsapp_notificacao);
+    if (bancoVazio && Object.values(s.settings.lojaTelefones).some(Boolean)) espelharSettings(s.settings);
+  } catch (e) {
+    console.warn('[supabase] av3_lojas não carregada (migração aplicada?):', e instanceof Error ? e.message : e);
   }
 }

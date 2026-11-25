@@ -93,11 +93,23 @@ export async function enviarImagem(
   return { ok: true };
 }
 
-/** Envia texto direto para um telefone que não é lead (aviso interno à loja). */
+/**
+ * Destino de aviso interno: número (55DDDNÚMERO) ou JID de grupo do WhatsApp (…@g.us, só Evolution).
+ * Devolve '' quando o valor não é utilizável.
+ */
+export function destinoAviso(raw: string): string {
+  const v = (raw || '').trim();
+  if (/^[0-9-]{10,40}@g\.us$/.test(v)) return v;
+  const d = v.replace(/\D/g, '');
+  return d.length >= 10 && d.length <= 15 ? d : '';
+}
+
+/** Envia texto direto para um telefone/grupo que não é lead (aviso interno à loja). */
 export async function enviarAvisoInterno(telefone: string, texto: string): Promise<boolean> {
-  if (!telefone) return false;
-  const r = await enviarTextoWa(telefone.replace(/\D/g, ''), texto);
-  if (!r.ok) console.error(`[aviso-interno] falha para ${telefone}: ${r.erro}`);
+  const destino = destinoAviso(telefone);
+  if (!destino) return false;
+  const r = await enviarTextoWa(destino, texto);
+  if (!r.ok) console.error(`[aviso-interno] falha para ${destino}: ${r.erro}`);
   return r.ok;
 }
 

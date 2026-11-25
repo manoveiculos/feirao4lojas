@@ -22,6 +22,7 @@ interface LeadDet {
   humano: boolean; humanoMotivo: string; agenteAtivo: boolean; notas: string; resumo: string; perfil: Perfil;
   visita: { quando: string | null; confirmada: boolean }; origem: { canal: string; ref: string; utm_source: string; utm_campaign: string; ad_headline: string };
   qualificadoEm: string | null; followupsEnviados: number; criadoEm: string;
+  lojaSugerida?: string | null; roteamentoMotivo?: string; lojaNotificadaEm: string | null;
 }
 interface Msg { id: string; autor: 'lead' | 'agente' | 'humano' | 'sistema'; texto: string; midias: string[]; ts: string }
 
@@ -71,7 +72,7 @@ export function Inbox({ admin, lojaFixa }: { admin: boolean; lojaFixa?: string }
             <select value={loja} onChange={(e) => nav({ loja: e.target.value })} className="h-9 w-full rounded-lg border border-slate-300 px-2 text-sm">
               <option value="">Todas as lojas</option>
               {LOJAS.map(([s, n]) => <option key={s} value={s}>{n}</option>)}
-              <option value="sem-loja">Sem loja definida</option>
+              <option value="sem-loja">Em triagem (sem loja)</option>
             </select>
           )}
         </div>
@@ -214,10 +215,21 @@ function Conversa({ id, admin, onVoltar, onMudou }: { id: string; admin: boolean
         </label>
         {admin && (
           <label className="block text-[11px] font-bold uppercase text-slate-500">Loja responsável
-            <select value={lead.lojaSlug ?? ''} onChange={(e) => patch({ lojaSlug: e.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm normal-case">
-              <option value="">— sem loja —</option>
+            <select value={lead.lojaSlug ?? ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v && !window.confirm('Atribuir este lead à loja escolhida? Ele aparece no painel dela e a loja recebe o aviso no WhatsApp.')) return;
+                void patch({ lojaSlug: v || null });
+              }}
+              className="mt-1 h-9 w-full rounded-lg border border-slate-300 px-2 text-sm normal-case">
+              <option value="">— em triagem (sem loja) —</option>
               {LOJAS.map(([s, n]) => <option key={s} value={s}>{n}</option>)}
             </select>
+            <span className="mt-1 block text-[11px] font-normal normal-case text-slate-500">
+              {lead.lojaSlug
+                ? `Roteado${lead.roteamentoMotivo ? ` (${lead.roteamentoMotivo.replace('_', ' ')})` : ''}${lead.lojaNotificadaEm ? ' · loja avisada' : ' · aviso pendente'}`
+                : `Em triagem com o agente SDR: nenhuma loja vê este lead${lead.lojaSugerida ? ` (pista: ${LOJAS.find(([s]) => s === lead.lojaSugerida)?.[1] ?? lead.lojaSugerida})` : ''}.`}
+            </span>
           </label>
         )}
 

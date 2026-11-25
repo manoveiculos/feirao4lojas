@@ -13,9 +13,14 @@ export async function GET(req: NextRequest) {
 }
 
 const tel = z.string().max(20).transform((v) => (v.trim() ? normalizarTelefone(v) : ''));
+/** WhatsApp da loja: número ou JID de grupo (ex.: 120363000000000000@g.us). */
+const telOuGrupo = z
+  .string()
+  .max(60)
+  .transform((v) => (/@g\.us$/i.test(v.trim()) ? v.trim().toLowerCase() : v.trim() ? normalizarTelefone(v) : ''))
+  .refine((v) => v === '' || /^[0-9]{10,15}$/.test(v) || /^[0-9-]{10,40}@g\.us$/.test(v), 'número ou grupo inválido');
 
 const schema = z.object({
-  agenteLigado: z.boolean(),
   boasVindasProativas: z.boolean(),
   followupsAtivos: z.boolean(),
   maxFollowups: z.number().int().min(0).max(5),
@@ -24,10 +29,10 @@ const schema = z.object({
   instrucoesExtras: z.string().max(4000),
   gerenteTelefone: tel,
   lojaTelefones: z.object({
-    'nenem-autos': tel.optional(),
-    'rosa-automoveis': tel.optional(),
-    'v3-automoveis': tel.optional(),
-    'manos-veiculos': tel.optional(),
+    'nenem-autos': telOuGrupo.optional(),
+    'rosa-automoveis': telOuGrupo.optional(),
+    'v3-automoveis': telOuGrupo.optional(),
+    'manos-veiculos': telOuGrupo.optional(),
   }),
   scoreQualificado: z.number().int().min(20).max(95),
 });

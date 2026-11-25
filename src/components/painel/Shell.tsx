@@ -7,11 +7,13 @@ export function Shell({
   titulo,
   subtitulo,
   nav,
+  acoes,
   children,
 }: {
   titulo: string;
   subtitulo: string;
   nav: Array<{ href: string; label: string }>;
+  acoes?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -40,6 +42,7 @@ export function Shell({
               );
             })}
           </nav>
+          {acoes}
           <button onClick={sair} className="rounded-lg px-3 py-1.5 text-sm font-bold text-slate-300 hover:bg-white/10 cursor-pointer">Sair</button>
         </div>
       </header>

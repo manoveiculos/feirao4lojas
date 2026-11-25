@@ -37,8 +37,13 @@ export async function POST(request: NextRequest) {
     freshDb
   );
 
+  let espera: unknown = null;
   if (diff.houveMudanca) {
     saveEstoque(db);
+    if (diff.adicionados.length) {
+      const { rodarMatchEspera } = await import('@/lib/espera/espera');
+      espera = await rodarMatchEspera().catch((e) => ({ status: 'erro', erro: String(e) }));
+    }
   }
 
   const duracaoSegundos = Number(((Date.now() - start) / 1000).toFixed(1));
@@ -52,6 +57,7 @@ export async function POST(request: NextRequest) {
       precosAlterados: diff.precoAlterado.length,
       lojasEmFallback: diff.lojasEmFallback,
     },
+    espera,
     metadata: db.metadata,
   });
 }

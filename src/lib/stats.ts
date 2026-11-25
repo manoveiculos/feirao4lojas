@@ -12,8 +12,16 @@ function inicioDoDia(ts: number): number {
   return d.getTime() + 3 * 3600_000;
 }
 
+/**
+ * Regra multi-tenant (espelha a política RLS av3_leads_leitura):
+ * a loja só enxerga lead atribuído a ela PELO ROTEADOR (ou pelo admin) e que já passou pela triagem.
+ */
+export function liberadoParaLoja(l: Lead, loja: LojaSlug): boolean {
+  return l.lojaSlug === loja && Boolean(l.roteadoEm || l.qualificadoEm);
+}
+
 export function leadsVisiveis(escopo: LojaSlug | null): Lead[] {
-  return listLeads().filter((l) => !l.teste && (!escopo || l.lojaSlug === escopo));
+  return listLeads().filter((l) => !l.teste && (!escopo || liberadoParaLoja(l, escopo)));
 }
 
 export function calcularStats(escopo: LojaSlug | null, dias = 14) {

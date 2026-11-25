@@ -119,7 +119,7 @@ export function LeadsTable({ admin, baseConversas }: { admin: boolean; baseConve
             <select value={sp.get('loja') ?? ''} onChange={(e) => mudar({ loja: e.target.value, pagina: '' })} className={`${sel} mt-1 w-full normal-case`}>
               <option value="">Todas</option>
               {LOJAS.map(([s, n]) => <option key={s} value={s}>{n}</option>)}
-              <option value="sem-loja">Sem loja</option>
+              <option value="sem-loja">Em triagem (sem loja)</option>
             </select>
           </label>
         )}

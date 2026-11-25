@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { marcarProximoFollowup } from '@/lib/whatsapp/outbound';
-import { addEvento, excluirLeadDefinitivo, getMensagens, updateLead } from '@/lib/db/store';
+import { rotearLead } from '@/lib/agent/roteador';
+import { addEvento, excluirLeadDefinitivo, getLead, getMensagens, updateLead } from '@/lib/db/store';
 import { exigirApi, leadAcessivel } from '@/lib/painel';
 
 export const runtime = 'nodejs';
@@ -49,7 +50,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ erro: 'apenas o admin pode trocar a loja' }, { status: 403 });
   }
 
-  const patch: Record<string, unknown> = { ...d };
+  const { lojaSlug: novaLoja, ...resto } = d;
+  const patch: Record<string, unknown> = { ...resto };
   if (d.humano === false) patch.humanoMotivo = '';
   if (d.humano === true) patch.proximoFollowupEm = null;
   if (d.status === 'optout') {
@@ -58,7 +60,18 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   }
   if (d.status && ['comprou', 'perdido'].includes(d.status)) patch.proximoFollowupEm = null;
 
-  const novo = updateLead(id, patch)!;
+  let novo = updateLead(id, patch)!;
+
+  // Admin atribui/troca a loja: passa pelo Agente Roteador (libera no painel e avisa a loja nova).
+  // null devolve o lead para a triagem.
+  if (novaLoja !== undefined && novaLoja !== lead.lojaSlug) {
+    if (novaLoja === null) {
+      novo = updateLead(id, { lojaSlug: null, roteadoEm: null, roteamentoMotivo: '', lojaNotificadaEm: null })!;
+    } else {
+      await rotearLead(id, { motivoAprovacao: 'atribuição manual do admin', lojaForcada: novaLoja });
+      novo = getLead(id)!;
+    }
+  }
   if (d.status && d.status !== lead.status) {
     addEvento({ tipo: 'lead_status', leadId: id, lojaSlug: novo.lojaSlug, meta: { de: lead.status, para: d.status, por: a.sessao.papel === 'admin' ? 'admin' : (a.sessao.loja ?? '') } });
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sessaoDaRequest, type Sessao } from './auth';
 import { getLead } from './db/store';
 import type { Lead } from './db/types';
+import { liberadoParaLoja } from './stats';
 import type { LojaSlug } from './types';
 
 export async function exigirApi(
@@ -25,5 +26,5 @@ export function leadAcessivel(sessao: Sessao, id: string): Lead | null {
   const lead = getLead(id);
   if (!lead) return null;
   if (sessao.papel === 'admin') return lead;
-  return lead.lojaSlug === sessao.loja ? lead : null;
+  return sessao.loja && !lead.teste && liberadoParaLoja(lead, sessao.loja) ? lead : null;
 }

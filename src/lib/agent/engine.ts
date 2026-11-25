@@ -17,7 +17,10 @@ import {
   marcarProximoFollowup,
   quebrarEmBaloes,
 } from '../whatsapp/outbound';
-import { avisarVisita, notificarLojaQualificado, reavaliarLead } from './qualificacao';
+import { avisarVisita, criteriosMinimos, reavaliarLead } from './qualificacao';
+import { notificarLoja, rotearLead } from './roteador';
+import { cadastrarEspera, marcarEsperaEmAtendimento } from '../espera/espera';
+import { LOJAS_BY_SLUG } from '../config';
 import { promptBase, promptLead } from './prompt';
 import type { Veiculo } from '../types';
 
@@ -25,9 +28,9 @@ import type { Veiculo } from '../types';
 
 const TOOLS = [
   {
-    name: 'buscar_estoque',
+    name: 'consultar_estoque',
     description:
-      'Busca carros reais no estoque das 4 lojas. Use SEMPRE antes de citar preço/ano/km. Retorna até 5 veículos ordenados do mais barato ao mais caro.',
+      'Busca carros reais no estoque consolidado das 4 lojas. Use SEMPRE antes de citar preço/ano/km/disponibilidade. Retorna até 5 veículos ordenados do mais barato ao mais caro. Se voltar vazio para o que o cliente quer, ofereça alternativas e/ou use cadastrar_lista_espera.',
     input_schema: {
       type: 'object',
       properties: {
@@ -63,9 +66,9 @@ const TOOLS = [
     input_schema: { type: 'object', properties: {} },
   },
   {
-    name: 'atualizar_lead',
+    name: 'atualizar_ficha_lead',
     description:
-      'Registra no CRM o que você descobriu sobre o cliente. Chame sempre que obtiver informação nova. Só preencha o que o cliente realmente disse.',
+      'Preenche a ficha lateral do lead no painel (interesse, orçamento, entrada, parcela, pagamento, troca, prazo) e recalcula o lead_score. Chame sempre que obtiver informação nova. Só preencha o que o cliente realmente disse.',
     input_schema: {
       type: 'object',
       properties: {
@@ -107,9 +110,42 @@ const TOOLS = [
     },
   },
   {
+    name: 'cadastrar_lista_espera',
+    description:
+      'Coloca o cliente na lista de espera prioritária quando consultar_estoque não encontrou nada compatível com o que ele quer. Ele será chamado automaticamente assim que entrar um carro compatível. Também use para atualizar o pedido (ex.: cliente recusou o carro avisado e quer outro perfil). Informe pelo menos modelo ou categoria.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        marca: { type: 'string', description: 'Ex: "Toyota"' },
+        modelo: { type: 'string', description: 'Modelo desejado, ex: "Corolla Cross", "HB20S"' },
+        categoria: { type: 'string', enum: ['suv', 'sedan', 'hatch', 'picape', 'moto', 'utilitario'] },
+        ano_minimo: { type: 'number', description: 'Ano mínimo aceito' },
+        preco_maximo: { type: 'number', description: 'Valor máximo em reais que o cliente pagaria' },
+        cambio: { type: 'string', enum: ['automatico', 'manual'] },
+        tem_troca: { type: 'boolean' },
+        observacoes: { type: 'string', description: 'Detalhes extras: cor, km máximo, versão, uso' },
+      },
+    },
+  },
+  {
+    name: 'aprovar_para_roteamento',
+    description:
+      'Aprova o lead triado e aciona o Agente Roteador, que escolhe a loja responsável e avisa o vendedor no WhatsApp. Chame SOMENTE quando o cliente respondeu ativamente E (tem interesse claro + orçamento/entrada/parcela/forma de pagamento ou troca definida) OU pediu explicitamente visita, simulação, negociação ou falar com um vendedor, OU aceitou o carro avisado pela lista de espera. Nunca chame para curioso, para quem só perguntou preço e sumiu, ou sem resposta do cliente. Antes, registre tudo com atualizar_ficha_lead.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        motivo: { type: 'string', description: 'Por que o lead está pronto, em uma frase. Ex: "Quer o Compass 2022, entrada de 30 mil e troca Onix 2019"' },
+        resumo: { type: 'string', description: 'Resumo de até 2 linhas para o vendedor: o que o cliente quer e em que ponto está.' },
+        codigo_veiculo: { type: 'string', description: 'Código do carro escolhido, se houver (ex: V3-005). Define a loja dona do carro.' },
+        pedido_explicito: { type: 'boolean', description: 'true se o cliente pediu visita, simulação, negociação ou vendedor.' },
+      },
+      required: ['motivo', 'resumo'],
+    },
+  },
+  {
     name: 'transferir_para_humano',
     description:
-      'Passa a conversa para um consultor humano da loja e pausa o agente. Use quando o cliente pedir, quiser fechar/negociar, reclamar ou você não souber responder com segurança.',
+      'Passa a conversa para um consultor humano e pausa o agente. Use quando o cliente pedir, quiser fechar/negociar, reclamar ou você não souber responder com segurança. O lead é roteado para uma loja (se ainda não foi) e a loja é avisada.',
     input_schema: {
       type: 'object',
       properties: { motivo: { type: 'string', description: 'Motivo em uma frase' } },
@@ -178,12 +214,31 @@ const atualizarSchema = z.object({
   resumo: z.string().optional(),
 });
 
+const esperaSchema = z.object({
+  marca: z.string().max(60).optional(),
+  modelo: z.string().max(80).optional(),
+  categoria: z.string().max(30).optional(),
+  ano_minimo: z.number().int().min(1950).max(2100).optional(),
+  preco_maximo: z.number().positive().optional(),
+  cambio: z.enum(['automatico', 'manual']).optional(),
+  tem_troca: z.boolean().optional(),
+  observacoes: z.string().max(500).optional(),
+});
+
+const aprovarSchema = z.object({
+  motivo: z.string().max(300),
+  resumo: z.string().max(400).optional(),
+  codigo_veiculo: z.string().max(20).optional(),
+  pedido_explicito: z.boolean().optional(),
+});
+
 export async function executarTool(
   nome: string,
   input: Record<string, unknown>,
   ctx: Ctx
 ): Promise<unknown> {
   switch (nome) {
+    case 'consultar_estoque':
     case 'buscar_estoque': {
       const a = buscarSchema.parse(input);
       const db = loadEstoque();
@@ -229,7 +284,7 @@ export async function executarTool(
         });
       }
       if (!ctx.simulado) addEvento({ tipo: 'fotos_enviadas', leadId: atual.id, lojaSlug: v.lojaSlug, meta: { codigo: v.codigo, qtd: enviadas } });
-      await reavaliarLead(atual.id, getLead);
+      await reavaliarLead(atual.id, getLead, { simulado: ctx.simulado });
       return enviadas ? { ok: true, enviadas } : { ok: false, erro: 'Falha no envio das fotos pelo WhatsApp.' };
     }
 
@@ -252,6 +307,7 @@ export async function executarTool(
       return { ok: true };
     }
 
+    case 'atualizar_ficha_lead':
     case 'atualizar_lead': {
       const a = atualizarSchema.parse(input);
       const lead = lead_(ctx);
@@ -280,45 +336,124 @@ export async function executarTool(
       }
       if (a.resumo) patch.resumo = a.resumo;
       updateLead(lead.id, patch);
-      const final = await reavaliarLead(lead.id, getLead);
-      return { ok: true, score: final?.score, temperatura: final?.temperatura, qualificado: Boolean(final?.qualificadoEm) };
+      const final = await reavaliarLead(lead.id, getLead, { simulado: ctx.simulado });
+      return {
+        ok: true,
+        score: final?.score,
+        temperatura: final?.temperatura,
+        roteado: Boolean(final?.roteadoEm),
+        aprovavel: final ? criteriosMinimos(final, false) : undefined,
+      };
+    }
+
+    case 'cadastrar_lista_espera': {
+      const a = esperaSchema.parse(input);
+      const lead = lead_(ctx);
+      const { item, atualizado } = cadastrarEspera(lead, {
+        marca: a.marca,
+        modelo: a.modelo,
+        categoria: a.categoria,
+        anoMinimo: a.ano_minimo,
+        precoMaximo: a.preco_maximo ?? lead.perfil.orcamento,
+        cambio: a.cambio,
+        temTroca: a.tem_troca,
+        observacoes: a.observacoes,
+      });
+      if (lead.esperaAviso) updateLead(lead.id, { esperaAviso: null });
+      return {
+        ok: true,
+        atualizado,
+        pedido: [item.marca, item.modelo, item.categoria, item.anoMinimo ? `a partir de ${item.anoMinimo}` : '', item.precoMaximo ? `até R$ ${item.precoMaximo.toLocaleString('pt-BR')}` : '']
+          .filter(Boolean)
+          .join(' '),
+        instrucao: 'Avise o cliente que ele está na lista prioritária e será chamado aqui no WhatsApp assim que entrar um carro compatível. Não prometa prazo.',
+      };
+    }
+
+    case 'aprovar_para_roteamento': {
+      const a = aprovarSchema.parse(input);
+      const lead = lead_(ctx);
+      if (a.resumo) updateLead(lead.id, { resumo: a.resumo });
+      const codigo = a.codigo_veiculo ? achar(a.codigo_veiculo)?.codigo : undefined;
+      if (codigo && !lead.perfil.veiculosInteresse.includes(codigo)) {
+        updateLead(lead.id, { perfil: { ...lead.perfil, veiculosInteresse: [...lead.perfil.veiculosInteresse, codigo].slice(-5) } });
+      }
+      const atual = (await reavaliarLead(lead.id, getLead, { simulado: ctx.simulado }))!;
+      if (atual.roteadoEm && atual.lojaSlug) {
+        return { ok: true, jaRoteado: true, loja: LOJAS_BY_SLUG[atual.lojaSlug].nome };
+      }
+      const crit = criteriosMinimos(atual, Boolean(a.pedido_explicito));
+      if (!crit.ok) {
+        return { ok: false, aprovado: false, faltando: crit.faltando, instrucao: 'Ainda não roteie. Continue a triagem com UMA pergunta curta sobre o que falta.' };
+      }
+      const espera = atual.esperaAviso;
+      const r = await rotearLead(lead.id, {
+        motivoAprovacao: a.motivo,
+        codigoPreferido: codigo ?? espera?.codigo,
+        simulado: ctx.simulado,
+      });
+      if (r.ok && espera) {
+        marcarEsperaEmAtendimento(espera.esperaId);
+        updateLead(lead.id, { esperaAviso: null });
+      }
+      return {
+        ok: r.ok,
+        aprovado: r.ok,
+        loja: r.lojaNome,
+        motivo: r.motivo,
+        instrucao: r.ok
+          ? `Diga ao cliente, de forma natural, que um consultor da ${r.lojaNome} já foi avisado e vai continuar o atendimento por aqui. Continue ajudando até ele assumir.`
+          : r.erro,
+      };
     }
 
     case 'agendar_visita': {
       const lead = lead_(ctx);
       const iso = typeof input.data_hora_iso === 'string' ? input.data_hora_iso : '';
       const valido = iso && !Number.isNaN(Date.parse(iso)) ? iso : null;
-      const loja = (input.loja as Lead['lojaSlug']) || lead.lojaSlug;
+      const lojaVisita = (input.loja as Lead['lojaSlug']) || lead.lojaSlug || null;
       updateLead(lead.id, {
-        visita: { quando: String(input.descricao ?? ''), iso: valido, confirmada: Boolean(valido), lojaSlug: loja ?? null },
+        visita: { quando: String(input.descricao ?? ''), iso: valido, confirmada: Boolean(valido), lojaSlug: lojaVisita },
         status: 'visita_agendada',
-        ...(loja && !lead.lojaSlug ? { lojaSlug: loja } : {}),
+        // a loja da visita é só uma pista para o roteador (a loja responsável quem define é ele)
+        ...(lojaVisita && !lead.roteadoEm && !lead.lojaSugerida ? { lojaSugerida: lojaVisita } : {}),
       });
-      if (!ctx.simulado) addEvento({ tipo: 'visita_agendada', leadId: lead.id, lojaSlug: loja ?? lead.lojaSlug, meta: { quando: String(input.descricao ?? '') } });
+      if (!ctx.simulado) addEvento({ tipo: 'visita_agendada', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { quando: String(input.descricao ?? '') } });
       const jaNotificado = Boolean(getLead(lead.id)?.lojaNotificadaEm);
-      const final = await reavaliarLead(lead.id, getLead);
-      if (final && !ctx.simulado && !final.teste && jaNotificado) await avisarVisita(final);
+      let final = await reavaliarLead(lead.id, getLead, { simulado: ctx.simulado });
+      // pedir visita é sinal explícito de compra: aprova para roteamento
+      if (final && !final.roteadoEm && criteriosMinimos(final, true).ok) {
+        await rotearLead(lead.id, { motivoAprovacao: `visita agendada: ${String(input.descricao ?? '')}`, simulado: ctx.simulado });
+        final = getLead(lead.id);
+      } else if (final && !ctx.simulado && !final.teste && jaNotificado) {
+        await avisarVisita(final);
+      }
       marcarProximoFollowup(getLead(lead.id)!);
-      return { ok: true, score: final?.score };
+      return { ok: true, score: final?.score, loja: final?.lojaSlug ? LOJAS_BY_SLUG[final.lojaSlug].nome : null };
     }
 
     case 'transferir_para_humano': {
       const lead = lead_(ctx);
-      updateLead(lead.id, {
-        humano: true,
-        humanoMotivo: String(input.motivo ?? ''),
-        proximoFollowupEm: null,
-        lojaSlug: lead.lojaSlug,
-      });
-      if (!ctx.simulado) {
-        addEvento({ tipo: 'handoff_humano', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { motivo: String(input.motivo ?? '') } });
-        const l = getLead(lead.id)!;
-        await notificarLojaQualificado(
-          { ...l, resumo: `${l.resumo} — Motivo: ${String(input.motivo ?? '')}`.trim() },
-          '🙋 *Cliente aguardando ATENDIMENTO HUMANO — Acelera V3*'
-        );
+      const motivo = String(input.motivo ?? '');
+      updateLead(lead.id, { humano: true, humanoMotivo: motivo, proximoFollowupEm: null });
+      if (!ctx.simulado) addEvento({ tipo: 'handoff_humano', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { motivo } });
+
+      const atual = getLead(lead.id)!;
+      if (!atual.roteadoEm) {
+        // pedir atendente é pedido explícito; o roteador escolhe a loja e já avisa
+        if (atual.totalMensagensLead > 0) {
+          if (!atual.resumo) updateLead(lead.id, { resumo: `Pediu atendimento humano: ${motivo}` });
+          await rotearLead(lead.id, { motivoAprovacao: `atendimento humano: ${motivo}`, simulado: ctx.simulado });
+        }
+      } else if (!ctx.simulado && !atual.teste) {
+        // já roteado: avisa a loja responsável que o cliente aguarda uma pessoa
+        await notificarLoja(atual.id, { veiculo: null, motivo: 'veiculo' }, {
+          titulo: `🙋 *Cliente aguardando ATENDIMENTO HUMANO — Acelera V3*\nMotivo: ${motivo}`,
+          forcar: true,
+        });
       }
-      return { ok: true };
+      const final = getLead(lead.id)!;
+      return { ok: true, loja: final.lojaSlug ? LOJAS_BY_SLUG[final.lojaSlug].nome : null };
     }
 
     default:

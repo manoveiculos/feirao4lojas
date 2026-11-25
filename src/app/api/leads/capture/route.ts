@@ -88,7 +88,8 @@ export async function POST(req: NextRequest) {
     const { lead, novo } = obterOuCriarLead(telefone, {
       nome: d.nome.trim(),
       origem,
-      lojaSlug: loja?.slug ?? null,
+      // pista para o Agente Roteador; a loja só recebe o lead depois da triagem do SDR
+      lojaSugerida: loja?.slug ?? null,
     });
     if (!novo) {
       updateLead(lead.id, { ...(d.nome && !lead.nome ? { nome: d.nome.trim() } : {}) });

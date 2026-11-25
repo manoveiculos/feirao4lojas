@@ -1,4 +1,6 @@
-import type { Clique, Evento, Lead, Mensagem, Settings } from './types';
+import type { Clique, EsperaItem, Evento, Lead, Mensagem, Settings } from './types';
+import type { LojaSlug } from '../types';
+import { LOJAS } from '../config';
 
 /**
  * Espelho em Postgres (Supabase / PostgREST) do store em memória.
@@ -18,6 +20,10 @@ interface Fila {
   eventos: Evento[];
   cliques: Map<string, Clique>;
   settings: Settings | null;
+  /** Tabelas novas (av3_lista_espera, av3_lojas): gravadas à parte para que uma falha nelas nunca trave leads/mensagens. */
+  espera: Map<string, EsperaItem>;
+  lojas: Settings['lojaTelefones'] | null;
+  falhasExtras?: number;
   timer: NodeJS.Timeout | null;
   enviando: boolean;
   falhas: number;
@@ -25,7 +31,7 @@ interface Fila {
 
 const g = globalThis as unknown as { __feiraoFila?: Fila };
 const fila = (): Fila =>
-  (g.__feiraoFila ??= { leads: new Map(), mensagens: [], eventos: [], cliques: new Map(), settings: null, timer: null, enviando: false, falhas: 0 });
+  (g.__feiraoFila ??= { leads: new Map(), mensagens: [], eventos: [], cliques: new Map(), settings: null, espera: new Map(), lojas: null, timer: null, enviando: false, falhas: 0 });
 
 async function rest(
   path: string,
@@ -145,11 +151,67 @@ async function descarregar(): Promise<void> {
       f.falhas += 1;
       console.error(`[supabase] falha ao gravar (tentativa ${f.falhas}); mantido na fila:`, e instanceof Error ? e.message : e);
     }
+
+    // Tabelas novas: falha aqui (ex.: migração ainda não aplicada) não afeta o bloco acima.
+    const espera = [...f.espera.values()];
+    const lojas = f.lojas;
+    f.espera.clear();
+    f.lojas = null;
+    try {
+      if (espera.length) {
+        await exigirOk(await upsert('av3_lista_espera', espera.map(linhaEspera), 'id'), 'lista_espera');
+      }
+      if (lojas) {
+        // nome e sigla são NOT NULL: o INSERT … ON CONFLICT valida a linha inteira antes de virar UPDATE
+        const linhas = LOJAS.map((l) => ({
+          slug: l.slug,
+          nome: l.nome,
+          sigla: l.sigla,
+          whatsapp_notificacao: lojas[l.slug] || null,
+          atualizado_em: new Date().toISOString(),
+        }));
+        await exigirOk(await upsert('av3_lojas', linhas, 'slug'), 'lojas');
+      }
+      if (espera.length || lojas) f.falhasExtras = 0;
+    } catch (e) {
+      for (const x of espera) if (!f.espera.has(x.id)) f.espera.set(x.id, x);
+      if (lojas && !f.lojas) f.lojas = lojas;
+      f.falhasExtras = (f.falhasExtras ?? 0) + 1;
+      // sem backoff infinito barulhento: loga e tenta de novo junto com a próxima escrita
+      if (f.falhasExtras <= 3 || f.falhasExtras % 50 === 0) {
+        console.error(`[supabase] falha ao gravar lista de espera/lojas (${f.falhasExtras}x):`, e instanceof Error ? e.message : e);
+      }
+    }
   } finally {
     f.enviando = false;
     const f2 = fila();
     if (f2.leads.size || f2.mensagens.length || f2.eventos.length || f2.cliques.size || f2.settings) agendar();
+    else if ((f2.espera.size || f2.lojas) && (f2.falhasExtras ?? 0) < 5) agendar();
   }
+}
+
+function linhaEspera(e: EsperaItem) {
+  return {
+    id: e.id,
+    lead_id: e.leadId,
+    telefone: e.telefone,
+    nome: e.nome,
+    marca: e.marca,
+    modelo: e.modelo,
+    categoria: e.categoria,
+    ano_minimo: e.anoMinimo,
+    preco_maximo: e.precoMaximo,
+    cambio: e.cambio,
+    tem_troca: e.temTroca,
+    observacoes: e.observacoes,
+    status: e.status,
+    matched_vehicle_id: e.matchedVehicleId,
+    matched_codigo: e.matchedCodigo,
+    veiculos_avisados: e.veiculosAvisados,
+    created_at: e.createdAt,
+    notified_at: e.notifiedAt,
+    atualizado_em: e.atualizadoEm,
+  };
 }
 
 export function espelharLead(l: Lead): void {
@@ -175,7 +237,54 @@ export function espelharClique(c: Clique): void {
 export function espelharSettings(s: Settings): void {
   if (!bancoConfigurado()) return;
   fila().settings = s;
+  fila().lojas = { ...s.lojaTelefones };
   agendar();
+}
+export function espelharEspera(e: EsperaItem): void {
+  if (!bancoConfigurado() || e.teste) return;
+  const f = fila();
+  f.espera.set(e.id, { ...e });
+  f.falhasExtras = Math.min(f.falhasExtras ?? 0, 4); // uma escrita nova sempre ganha nova tentativa
+  agendar();
+}
+
+export async function removerEsperaDoBanco(ids: string[]): Promise<void> {
+  if (!bancoConfigurado() || !ids.length) return;
+  for (const id of ids) fila().espera.delete(id);
+  const r = await rest(`av3_lista_espera?id=in.(${ids.map(encodeURIComponent).join(',')})`, { method: 'DELETE', prefer: 'return=minimal' });
+  if (!r.ok && r.status !== 404) await exigirOk(r, 'excluir lista de espera');
+}
+
+export async function carregarEsperaDoBanco(): Promise<EsperaItem[]> {
+  if (!bancoConfigurado()) return [];
+  type Linha = ReturnType<typeof linhaEspera>;
+  const linhas = await lerTudo<Linha>('av3_lista_espera?select=*&order=created_at.asc');
+  return linhas.map((r) => ({
+    id: r.id,
+    leadId: r.lead_id,
+    telefone: r.telefone,
+    nome: r.nome ?? '',
+    marca: r.marca,
+    modelo: r.modelo,
+    categoria: r.categoria,
+    anoMinimo: r.ano_minimo,
+    precoMaximo: r.preco_maximo === null ? null : Number(r.preco_maximo),
+    cambio: r.cambio,
+    temTroca: r.tem_troca,
+    observacoes: r.observacoes ?? '',
+    status: r.status,
+    matchedVehicleId: r.matched_vehicle_id,
+    matchedCodigo: r.matched_codigo,
+    veiculosAvisados: r.veiculos_avisados ?? [],
+    createdAt: r.created_at,
+    notifiedAt: r.notified_at,
+    atualizadoEm: r.atualizado_em,
+  }));
+}
+
+export async function carregarLojasDoBanco(): Promise<Array<{ slug: LojaSlug; whatsapp_notificacao: string | null }>> {
+  if (!bancoConfigurado()) return [];
+  return lerTudo<{ slug: LojaSlug; whatsapp_notificacao: string | null }>('av3_lojas?select=slug,whatsapp_notificacao');
 }
 
 /** Exclusão definitiva no banco (mensagens e eventos saem por cascata). */

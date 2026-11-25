@@ -18,7 +18,10 @@ export default function LoginPage() {
       body: JSON.stringify({ usuario, senha }),
     });
     const j = await r.json().catch(() => ({}));
-    if (r.ok) window.location.href = j.destino;
+    // volta para o link que trouxe a pessoa até aqui (ex.: aviso de lead no WhatsApp da loja)
+    const next = new URLSearchParams(window.location.search).get('next') || '';
+    const seguro = /^\/(admin|loja)(\/|\?|$)/.test(next) && !next.startsWith('//');
+    if (r.ok) window.location.href = seguro ? next : j.destino;
     else {
       setErro(j.erro || 'Não foi possível entrar.');
       setEnviando(false);

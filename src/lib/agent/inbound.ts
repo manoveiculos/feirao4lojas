@@ -43,12 +43,13 @@ function aplicarRef(lead: Lead, ref: string): Partial<Lead> {
     }
     const sigla = getSiglaFromCodigo(codigo);
     const loja = LOJAS.find((l) => l.sigla === sigla);
-    if (loja && !lead.lojaSlug) patch.lojaSlug = loja.slug;
+    // só uma pista: a loja responsável é definida pelo Agente Roteador depois da triagem
+    if (loja && !lead.lojaSugerida && !lead.roteadoEm) patch.lojaSugerida = loja.slug;
   }
   const l = ref.match(/^AV3-LOJA-(MV|NA|RA|V3)$/);
-  if (l && !lead.lojaSlug) {
+  if (l && !lead.roteadoEm) {
     const loja = LOJAS.find((x) => x.sigla === l[1]);
-    if (loja) patch.lojaSlug = loja.slug;
+    if (loja) patch.lojaSugerida = loja.slug;
   }
   return patch;
 }

@@ -9,7 +9,8 @@
     "lint": "next lint",
     "sync": "tsx scripts/sync-estoque.ts",
     "audit:data": "tsx scripts/audit-data.ts",
-    "test:api": "tsx scripts/test-api.ts"
+    "test:api": "tsx scripts/test-api.ts",
+    "test:roteamento": "tsx scripts/test-roteamento.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
