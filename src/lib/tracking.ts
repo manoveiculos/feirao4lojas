@@ -50,6 +50,8 @@ export interface WebhookLeadPayload {
   utm_content: string;
   fbclid: string;
   sid: string;
+  /** Texto exato que o site abre no WhatsApp: o backend casa a 1ª mensagem do cliente com este clique. */
+  mensagem: string;
   pagina: string;
   timestamp_iso: string;
 }
@@ -136,6 +138,7 @@ export function sendLeadWebhook(input: {
   };
   nome?: string;
   whatsapp?: string;
+  mensagem?: string;
 }): WebhookLeadPayload {
   const utms = getStoredTrackingParams();
   const payload: WebhookLeadPayload = {
@@ -158,6 +161,7 @@ export function sendLeadWebhook(input: {
     utm_content: utms.utm_content,
     fbclid: utms.fbclid,
     sid: getSid(),
+    mensagem: (input.mensagem || '').slice(0, 600),
     pagina: typeof window !== 'undefined' ? window.location.href : '',
     timestamp_iso: new Date().toISOString(),
   };
@@ -337,6 +341,7 @@ export function triggerWhatsappLead(params: {
     veiculo: params.veiculo,
     nome: params.nome,
     whatsapp: params.whatsapp,
+    mensagem: params.message,
   });
 
   if (params.isFormLead) {
@@ -362,8 +367,8 @@ export function triggerWhatsappLead(params: {
   } catch {
     // ignora
   }
-  const sid = getSid();
-  const url = buildWhatsappUrl(sid ? `${params.message} [#${sid}]` : params.message);
+  // Mensagem limpa (sem códigos): a atribuição é feita no backend casando este texto com o clique registrado acima.
+  const url = buildWhatsappUrl(params.message);
   if (params.openWindow !== false && typeof window !== 'undefined') {
     window.open(url, '_blank', 'noopener,noreferrer');
   }

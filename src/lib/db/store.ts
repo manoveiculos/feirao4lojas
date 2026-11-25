@@ -432,6 +432,29 @@ export function saveClique(c: Clique): void {
   schedule('cliques');
 }
 
+const normTexto = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+/**
+ * Casa a 1ª mensagem do cliente com o clique do site que abriu aquele texto no WhatsApp
+ * (as mensagens não levam mais código visível). Pega o clique não usado mais recente com o
+ * mesmo texto nas últimas 3 horas e o marca como usado.
+ */
+export function takeCliquePorMensagem(texto: string, janelaMs = 3 * 3600_000): Clique | undefined {
+  const alvo = normTexto(texto);
+  if (alvo.length < 12) return undefined;
+  const corte = Date.now() - janelaMs;
+  const c = [...state().cliques.values()]
+    .filter((x) => !x.usado && x.mensagem && Date.parse(x.ts) >= corte && normTexto(x.mensagem) === alvo)
+    .sort((a, b) => b.ts.localeCompare(a.ts))[0];
+  return c ? takeClique(c.sid) : undefined;
+}
+
 export function takeClique(sid: string): Clique | undefined {
   const c = state().cliques.get(sid);
   if (c) {

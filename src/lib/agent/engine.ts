@@ -295,7 +295,7 @@ export async function executarTool(
       const legenda =
         `🚗 *ACELERA V3 — ${FEIRAO_CONFIG.periodo}*\n` +
         `📍 ${FEIRAO_CONFIG.localPrincipal.endereco}${horario}\n\n` +
-        `✅ Saia rodando na hora\n✅ 1ª parcela só depois do Carnaval\n✅ Avaliamos seu usado na hora\n✅ Taxas especiais C6 Bank e Viacredi Alto Vale\n\n` +
+        `✅ Saia rodando na hora\n✅ Se financiar, 1ª parcela só depois do Carnaval\n✅ Avaliamos seu usado na hora\n✅ Taxas especiais C6 Bank e Viacredi Alto Vale\n\n` +
         `_Condições sujeitas à análise de crédito._\n🗺️ ${FEIRAO_CONFIG.localPrincipal.mapsUrl}`;
       const r = await enviarImagem(lead, `${FEIRAO_CONFIG.siteUrl}${FEIRAO_CONFIG.ogImage}`, legenda, {
         simulado: ctx.simulado,

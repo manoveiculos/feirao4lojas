@@ -149,6 +149,8 @@ export interface Clique {
   origem: Origem;
   ts: string;
   usado: boolean;
+  /** Texto que o site abriu no WhatsApp (sem códigos): usado para casar a 1ª mensagem com este clique. */
+  mensagem?: string;
 }
 
 export interface Settings {

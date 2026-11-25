@@ -36,10 +36,10 @@ function textoFollowup(lead: Lead, etapa: number): string {
           : `O ${FEIRAO_CONFIG.nome} está acontecendo agora (até 23/12).`;
 
   if (etapa === 0) {
-    return `${oi} Ficou alguma dúvida sobre ${interesse(lead)}? Posso te mandar mais fotos ou ver as condições de financiamento 😉`;
+    return `${oi} Ficou alguma dúvida sobre ${interesse(lead)}? Posso te mandar mais fotos ou ver as melhores condições de pagamento pra você 😉`;
   }
   if (etapa === 1) {
-    return `${oi} ${evento} Avaliamos seu usado na hora e a 1ª parcela fica só depois do Carnaval. Quer que eu reserve um horário pra você vir ver ${interesse(lead)}?`.replace('  ', ' ');
+    return `${oi} ${evento} Avaliamos seu usado na hora e, se for financiar, a 1ª parcela fica só depois do Carnaval. Quer que eu reserve um horário pra você vir ver ${interesse(lead)}?`.replace('  ', ' ');
   }
   return `${oi} Vou deixar seu atendimento em espera por aqui. Se ainda quiser ver ${interesse(lead)} ou outro carro, é só me chamar que retomo de onde paramos. Se preferir não receber mais mensagens, é só responder "parar". 🙏`;
 }

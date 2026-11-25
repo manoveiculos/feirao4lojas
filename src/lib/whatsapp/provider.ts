@@ -13,7 +13,13 @@ export interface Entrada {
   nome: string;
   midia: 'audio' | 'imagem' | 'video' | 'documento' | 'sticker' | 'outro' | null;
   referral: { ad_id: string; headline: string; ctwa_clid: string } | null;
+  /** Como baixar a mídia (foto/áudio) para o agente ler/transcrever. */
+  midiaFonte?: MidiaFonte | null;
 }
+
+export type MidiaFonte =
+  | { provedor: 'evolution'; mime: string; base64: string; raw: { key: unknown; message: unknown } }
+  | { provedor: 'meta'; mime: string; id: string };
 
 export interface Enviado {
   ok: boolean;
@@ -153,6 +159,36 @@ export async function enviarImagemWa(
   }
 }
 
+/**
+ * Baixa a mídia recebida (foto/áudio). Evolution: usa o base64 do webhook ou
+ * POST /chat/getBase64FromMediaMessage (mesmo caminho do CRM da Manos). Meta: Graph API.
+ */
+export async function baixarMidiaWa(f: MidiaFonte): Promise<{ buf: Buffer; mime: string } | null> {
+  try {
+    if (f.provedor === 'evolution') {
+      if (f.base64) return { buf: Buffer.from(f.base64, 'base64'), mime: f.mime };
+      const { base, headers, inst } = evo();
+      const r = await postJson(`${base}/chat/getBase64FromMediaMessage/${inst}`, headers, { message: f.raw, convertToMp4: false });
+      const b64 = asStr(r.json.base64);
+      if (!r.ok || !b64) {
+        console.error(`[midia] Evolution não devolveu a mídia: ${erroDe(r.json, r.status)}`);
+        return null;
+      }
+      return { buf: Buffer.from(b64, 'base64'), mime: asStr(r.json.mimetype) || f.mime };
+    }
+    const { headers } = meta();
+    const info = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(f.id)}`, { headers, signal: AbortSignal.timeout(15_000) });
+    const j = (await info.json().catch(() => ({}))) as { url?: string; mime_type?: string };
+    if (!info.ok || !j.url) return null;
+    const arq = await fetch(j.url, { headers, signal: AbortSignal.timeout(30_000) });
+    if (!arq.ok) return null;
+    return { buf: Buffer.from(await arq.arrayBuffer()), mime: j.mime_type || f.mime };
+  } catch (e) {
+    console.error('[midia] falha ao baixar:', e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
 /** Indicador "digitando…" (melhor esforço; nunca lança). */
 export async function digitandoWa(telefone: string, ms: number, metaMsgId = ''): Promise<void> {
   const p = providerNome();
@@ -233,14 +269,26 @@ export function parseEvolution(body: unknown): Entrada[] {
         }
       : null;
 
+    const midia = midiaEvolution(message);
+    const bloco = asObj(midia === 'audio' ? message.audioMessage : midia === 'imagem' ? message.imageMessage : null);
     out.push({
       tipo: key.fromMe === true ? 'eco_humano' : 'mensagem',
       telefone: numero.replace(/\D/g, ''),
       texto,
       waId: asStr(key.id),
       nome: asStr(d.pushName),
-      midia: midiaEvolution(message),
+      midia,
       referral,
+      midiaFonte:
+        midia === 'audio' || midia === 'imagem'
+          ? {
+              provedor: 'evolution',
+              mime: asStr(bloco.mimetype) || (midia === 'audio' ? 'audio/ogg' : 'image/jpeg'),
+              // com "Webhook Base64" ligado na Evolution a mídia já chega aqui
+              base64: asStr(message.base64) || asStr(d.base64),
+              raw: { key: d.key, message: d.message },
+            }
+          : null,
     });
   }
   return out;
@@ -269,7 +317,11 @@ export function parseMeta(body: unknown): Entrada[] {
           asStr(asObj(m.button).text) ||
           asStr(asObj(asObj(m.interactive).button_reply).title) ||
           asStr(asObj(m.image).caption);
+        const midiaObj = asObj(tipo === 'audio' ? m.audio : tipo === 'image' ? m.image : null);
         out.push({
+          midiaFonte: asStr(midiaObj.id)
+            ? { provedor: 'meta', id: asStr(midiaObj.id), mime: asStr(midiaObj.mime_type) || (tipo === 'audio' ? 'audio/ogg' : 'image/jpeg') }
+            : null,
           tipo: 'mensagem',
           telefone: asStr(m.from).replace(/\D/g, ''),
           texto,

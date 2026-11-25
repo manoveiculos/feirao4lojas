@@ -26,6 +26,8 @@ const schema = z.object({
   utm_campaign: z.string().max(200).optional().default(''),
   utm_content: z.string().max(200).optional().default(''),
   fbclid: z.string().max(400).optional().default(''),
+  /** Texto aberto no WhatsApp (atribuição sem código visível na mensagem) */
+  mensagem: z.string().max(600).optional().default(''),
 });
 
 // rate limit simples por IP (60 req / min)
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
 
   // Clique no WhatsApp: guarda para casar com a mensagem quando ela chegar
   if (d.sid) {
-    saveClique({ sid: d.sid, ref: origem.ref, lojaSigla: d.loja_sigla ?? null, origem, ts: new Date().toISOString(), usado: false });
+    saveClique({ sid: d.sid, ref: origem.ref, lojaSigla: d.loja_sigla ?? null, origem, ts: new Date().toISOString(), usado: false, mensagem: d.mensagem });
   }
 
   addEvento({

@@ -280,7 +280,7 @@ export function VehicleModal({
                         <div className="mt-3.5 rounded-xl border border-[#0B3C4E]/15 bg-[#062835]/5 p-3.5 sm:mt-4 sm:p-4">
                           {showOfferBadges && (
                             <p className="text-[11px] font-extrabold uppercase tracking-wider text-orange-600">
-                              ACELERA V3 • 1ª parcela depois do Carnaval
+                              ACELERA V3 • Financiando, 1ª parcela depois do Carnaval
                             </p>
                           )}
                           <p className="mt-0.5 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">

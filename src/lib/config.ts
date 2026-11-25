@@ -182,12 +182,13 @@ export function buildRefLoja(sigla: LojaSigla): string {
 }
 
 /**
- * Mensagens padronizadas terminando em [Ref: AV3-...]
- * Parseável por regex: /\[Ref: (AV3-[A-Z0-9-]+)\]/
+ * Mensagens que o site abre no WhatsApp: texto limpo, sem códigos para o cliente.
+ * A atribuição (carro, loja, UTM) vem do clique registrado em /api/leads/capture,
+ * casado com este mesmo texto quando a 1ª mensagem chega (src/lib/agent/inbound.ts).
  */
 export function buildVehicleWhatsappMessage(v: Veiculo): string {
-  const ref = buildRefCarro(v.codigo);
-  return `Olá! Vi o ${v.titulo} ${v.anoTexto} no Acelera V3 e quero sair rodando. Pode simular com a 1ª parcela depois do Carnaval? [Ref: ${ref}]`;
+  // Neutra de propósito: não sabemos se o cliente vai pagar à vista ou financiar. O agente pergunta isso na conversa.
+  return `Olá! Vi o ${v.titulo} ${v.anoTexto} no Acelera V3 e tenho interesse. Ainda está disponível?`;
 }
 
 export function buildSimulatorWhatsappMessage(params: {
@@ -195,21 +196,20 @@ export function buildSimulatorWhatsappMessage(params: {
   prazo: string;
   banco: string;
 }): string {
-  return `Olá! Quero simular no Acelera V3. Entrada: ${params.entrada}. Prazo: ${params.prazo}. Banco: ${params.banco}. [Ref: AV3-SIM]`;
+  return `Olá! Quero simular no Acelera V3. Entrada: ${params.entrada}. Prazo: ${params.prazo}. Banco: ${params.banco}.`;
 }
 
 export function buildTradeInWhatsappMessage(params: {
   modelo: string;
   ano: string;
 }): string {
-  return `Olá! Quero avaliar meu ${params.modelo} ${params.ano} no Acelera V3. [Ref: AV3-TROCA]`;
+  return `Olá! Quero avaliar meu ${params.modelo} ${params.ano} no Acelera V3.`;
 }
 
 export function buildStoreWhatsappMessage(loja: LojaInfo): string {
-  const ref = buildRefLoja(loja.sigla);
-  return `Olá! Quero falar com a loja ${loja.nome} no Acelera V3. [Ref: ${ref}]`;
+  return `Olá! Quero falar com a loja ${loja.nome} no Acelera V3.`;
 }
 
 export function buildGeneralWhatsappMessage(): string {
-  return `Olá! Quero conhecer as ofertas do Acelera V3. [Ref: AV3-GERAL]`;
+  return `Olá! Quero conhecer as ofertas do Acelera V3.`;
 }

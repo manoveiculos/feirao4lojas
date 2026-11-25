@@ -9,7 +9,9 @@ import { LOJAS } from '../config';
  * - Leads de teste (simulador) nunca vão para o banco.
  */
 
-const URL_BASE = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+// SUPABASE_URL tem prioridade; o .env de produção só tinha NEXT_PUBLIC_SUPABASE_URL e o espelho ficava desligado.
+// (Os testes zeram as duas para nunca gravar no banco real.)
+const URL_BASE = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export const bancoConfigurado = (): boolean => Boolean(URL_BASE && KEY);
