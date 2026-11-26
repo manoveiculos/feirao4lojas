@@ -23,8 +23,13 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   utilitario: ['utilitario', 'picape'],
 };
 
+/** Marcas que só fabricam motos: protegem contra anúncio de moto cadastrado com categoria de carro. */
+const MARCAS_SO_MOTO = ['yamaha', 'dafra', 'haojue', 'shineray', 'kawasaki', 'harley', 'triumph', 'ducati', 'royal enfield'];
+
 export function isMoto(v: Veiculo): boolean {
-  return normalizeSearch(v.categoria) === 'moto';
+  if (normalizeSearch(v.categoria) === 'moto') return true;
+  const marca = normalizeSearch(v.marca || '');
+  return MARCAS_SO_MOTO.some((m) => marca.startsWith(m));
 }
 
 export function formatKmDisplay(km: number | null, kmFormatado?: string): string {

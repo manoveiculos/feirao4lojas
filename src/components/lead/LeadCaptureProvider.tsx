@@ -7,6 +7,8 @@ import { buildQuickSimulatorMessage, PRECAPTURA_ATIVA } from '@/lib/config';
 import {
   lerContatoSalvo,
   salvarContato,
+  sendLeadWebhook,
+  trackLeadEvent,
   triggerWhatsappLead,
   type LeadOrigem,
   type LeadTipo,
@@ -38,13 +40,18 @@ export interface ContextoSimulador {
   formaInicial?: FormaNegocio;
 }
 
-type Modo = { tipo: 'contato'; intencao: Intencao } | { tipo: 'simulador'; ctx: ContextoSimulador };
+type Modo =
+  | { tipo: 'contato'; intencao: Intencao }
+  | { tipo: 'simulador'; ctx: ContextoSimulador }
+  | { tipo: 'vip'; origem: LeadOrigem };
 
 interface Ctx {
   /** Pede nome + WhatsApp e abre o WhatsApp com a mensagem da intenção (direto, se o contato já foi salvo). */
   abrirCaptura: (i: Intencao) => void;
   /** Abre o simulador rápido de 3 passos em gaveta/modal. */
   abrirSimulador: (c: ContextoSimulador) => void;
+  /** Lista VIP do pré-lançamento: guarda o contato (sem abrir o WhatsApp); a Val chama em seguida. */
+  abrirListaVip: (origem: LeadOrigem) => void;
   /** Envia o resultado do simulador (usado também pelo bloco inline da página). */
   enviarSimulacao: (r: ResultadoSimulador, c: ContextoSimulador) => void;
 }
@@ -108,6 +115,7 @@ export function LeadCaptureProvider({ children }: { children: React.ReactNode })
   const [modo, setModo] = useState<Modo | null>(null);
   const [aberto, setAberto] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [vipOk, setVipOk] = useState(false);
 
   const fechar = useCallback((open: boolean) => {
     setAberto(open);
@@ -137,6 +145,32 @@ export function LeadCaptureProvider({ children }: { children: React.ReactNode })
     setAberto(true);
   }, []);
 
+  const abrirListaVip = useCallback((origem: LeadOrigem) => {
+    registrarAcao('lead_formulario', { detalhe: `Abriu a lista VIP (${origem})` });
+    setModo({ tipo: 'vip', origem });
+    setVipOk(false);
+    setEnviando(false);
+    setAberto(true);
+  }, []);
+
+  const entrarListaVip = useCallback((origem: LeadOrigem, c: { nome: string; whatsapp: string }) => {
+    setEnviando(true);
+    salvarContato(c);
+    sendLeadWebhook({
+      tipo: 'lista_vip',
+      ref: 'AV3-VIP',
+      loja_sigla: null,
+      origem,
+      nome: c.nome,
+      whatsapp: c.whatsapp,
+      mensagem: 'Lista VIP do pré-lançamento',
+    });
+    trackLeadEvent({ tipo: 'lista_vip', ref: 'AV3-VIP', loja_sigla: null, origem, extra: { interesse: 'feirao' } });
+    registrarAcao('lead_formulario', { detalhe: 'Entrou na lista VIP do pré-lançamento' });
+    setVipOk(true);
+    setEnviando(false);
+  }, []);
+
   const abrirSimulador = useCallback((c: ContextoSimulador) => {
     registrarAcao('simulacao', { detalhe: `Abriu o simulador (${c.origem})` });
     setModo({ tipo: 'simulador', ctx: c });
@@ -150,8 +184,8 @@ export function LeadCaptureProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const valor = useMemo(
-    () => ({ abrirCaptura, abrirSimulador, enviarSimulacao }),
-    [abrirCaptura, abrirSimulador, enviarSimulacao]
+    () => ({ abrirCaptura, abrirSimulador, abrirListaVip, enviarSimulacao }),
+    [abrirCaptura, abrirSimulador, abrirListaVip, enviarSimulacao]
   );
 
   return (
@@ -163,12 +197,20 @@ export function LeadCaptureProvider({ children }: { children: React.ReactNode })
         title={
           modo?.tipo === 'simulador'
             ? 'Simular condição'
-            : (modo?.intencao.titulo ?? 'Fale com a gente')
+            : modo?.tipo === 'vip'
+              ? vipOk
+                ? 'Você está na lista VIP'
+                : 'Lista VIP do feirão'
+              : (modo?.intencao.titulo ?? 'Fale com a gente')
         }
         description={
           modo?.tipo === 'simulador'
             ? 'Responda em 2 toques e receba a condição no WhatsApp.'
-            : modo?.intencao.descricao
+            : modo?.tipo === 'vip'
+              ? vipOk
+                ? 'Nossa consultora vai te chamar no WhatsApp em instantes.'
+                : 'Seja avisado primeiro quando o feirão abrir e adiante sua simulação com a nossa consultora.'
+              : modo?.intencao.descricao
         }
       >
         {modo?.tipo === 'contato' && (
@@ -183,6 +225,27 @@ export function LeadCaptureProvider({ children }: { children: React.ReactNode })
                 finalizar();
               }}
             />
+          </div>
+        )}
+        {modo?.tipo === 'vip' && !vipOk && (
+          <div className="pb-2">
+            <ContactFields
+              idPrefix="vip"
+              cta="Entrar na lista VIP"
+              enviando={enviando}
+              onSubmit={(c) => entrarListaVip(modo.origem, c)}
+            />
+          </div>
+        )}
+        {modo?.tipo === 'vip' && vipOk && (
+          <div className="pb-3">
+            <button
+              type="button"
+              onClick={() => setAberto(false)}
+              className="min-h-[48px] w-full rounded-xl bg-[#062835] px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98] cursor-pointer"
+            >
+              Ver os carros
+            </button>
           </div>
         )}
         {modo?.tipo === 'simulador' && (

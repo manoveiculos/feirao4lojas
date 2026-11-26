@@ -18,6 +18,7 @@ import {
   Percent,
   RefreshCw,
   Search,
+  Star,
   SlidersHorizontal,
   X,
   Zap,
@@ -49,6 +50,8 @@ import type {
 import { CountdownBanner } from './CountdownBanner';
 import { ExitIntentModal } from './ExitIntentModal';
 import { HeroCountdown } from './HeroCountdown';
+import { HeroVideo } from './HeroVideo';
+import { HeroVitrine } from './HeroVitrine';
 import { LeadCaptureProvider, useLeadCapture } from './lead/LeadCaptureProvider';
 import { ShimmerButton } from './ui/ShimmerButton';
 import { InlineSimulatorSection } from './lead/InlineSimulatorSection';
@@ -114,7 +117,7 @@ function FeiraoCatalogInner({
   initialSimulationLabel,
 }: FeiraoCatalogProps) {
   // Date-driven campaign mode (America/Sao_Paulo) hydrated deterministically from SSR (zero mismatch)
-  const { abrirCaptura, abrirSimulador } = useLeadCapture();
+  const { abrirCaptura, abrirSimulador, abrirListaVip } = useLeadCapture();
   const heroRef = useRef<HTMLElement | null>(null);
   const [heroVisivel, setHeroVisivel] = useState(true);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -365,6 +368,10 @@ function FeiraoCatalogInner({
     abrirSimulador({ origem });
   };
 
+  const handleListaVip = (origem: 'hero' | 'flutuante') => {
+    abrirListaVip(origem);
+  };
+
   const handleStoreWhatsapp = (store: LojaInfo) => {
     abrirCaptura({
       titulo: `Falar com a ${store.nome}`,
@@ -481,6 +488,7 @@ function FeiraoCatalogInner({
             sizes="100vw"
             className="pointer-events-none object-cover object-[72%_center] sm:object-right"
           />
+          <HeroVideo />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#041B24]/95 via-[#062835]/80 to-[#062835]/20 sm:from-[#041B24]/92 sm:via-[#062835]/72 sm:to-transparent"
@@ -495,64 +503,85 @@ function FeiraoCatalogInner({
             <div className="hero-streak-delay absolute left-0 top-[68%] h-[2px] w-56 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
           </div>
 
-          <div className="relative mx-auto max-w-5xl px-4 pb-8 pt-6 text-center sm:px-6 sm:pb-16 sm:pt-12">
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-orange-400/40 bg-orange-500/15 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-orange-300">
-              <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-orange-400" />
-              <span>{isClosed ? 'Edição encerrada' : CAMPAIGN_COPY.selo}</span>
+          <div className="relative mx-auto max-w-7xl px-4 pb-7 pt-6 text-center sm:px-6 sm:pb-14 sm:pt-12 lg:text-left">
+            <div className="lg:max-w-2xl">
+              <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-orange-400/40 bg-orange-500/15 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-orange-300">
+                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-orange-400" />
+                <span>
+                  {isClosed
+                    ? 'Edição encerrada'
+                    : isPreLaunch
+                      ? 'Pré-lançamento · abre 14/12'
+                      : CAMPAIGN_COPY.selo}
+                </span>
+              </div>
+
+              <h1 className="mt-3 text-[1.7rem] font-black italic leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl lg:text-[3.4rem]">
+                {isClosed ? heroTitle : 'Seu próximo carro, com a 1ª parcela só depois do Carnaval'}
+              </h1>
+
+              <p className="mt-2.5 text-[13px] leading-relaxed text-slate-200 sm:mt-4 sm:text-lg">
+                {isClosed
+                  ? CAMPAIGN_COPY.encerradoSubtitulo
+                  : `${CAMPAIGN_COPY.nome}: 4 lojas em um só endereço, em Rio do Sul, de 14 a 23 de dezembro. Taxas especiais C6 Bank e Viacredi Alto Vale.`}
+              </p>
+
+              {/* Contador discreto; o grande só aparece nos últimos 3 dias */}
+              <HeroCountdown state={campaignState} compacto />
+
+              {/* CTAs: pré-lançamento capta a Lista VIP; com o feirão aberto, simula em 3 toques */}
+              {!isClosed ? (
+                <div className="mt-5 flex flex-col gap-3 sm:mt-7 sm:flex-row lg:justify-start">
+                  <ShimmerButton
+                    onClick={() => (isPreLaunch ? handleListaVip('hero') : handleSimular('hero'))}
+                    className="min-h-[56px] flex-1 whitespace-nowrap px-5 py-3.5 text-base sm:flex-none sm:px-7"
+                  >
+                    {isPreLaunch ? (
+                      <Star className="h-5 w-5 shrink-0" />
+                    ) : (
+                      <WhatsappIcon className="h-6 w-6 shrink-0" />
+                    )}
+                    {isPreLaunch ? 'Quero entrar na lista VIP' : CAMPAIGN_COPY.ctaPrincipal}
+                  </ShimmerButton>
+                  <a
+                    href="#estoque"
+                    className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98] sm:flex-none sm:px-7"
+                  >
+                    <Car className="h-5 w-5 shrink-0" />
+                    Ver os {facets.totalCarros} carros
+                  </a>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <a
+                    href="#estoque"
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+                  >
+                    <Car className="h-5 w-5 shrink-0" />
+                    Ver carros disponíveis nas lojas
+                  </a>
+                </div>
+              )}
+
+              {!isClosed && (
+                <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs font-bold text-slate-100 sm:text-sm lg:justify-start">
+                  {CAMPAIGN_COPY.faixaConfianca.map((item) => (
+                    <li key={item} className="inline-flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-400" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            <h1 className="mx-auto mt-3 max-w-4xl text-[1.7rem] font-black italic leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl lg:text-6xl">
-              {heroTitle}
-            </h1>
-
-            <p className="mx-auto mt-2.5 max-w-2xl text-[13px] leading-relaxed text-slate-200 sm:mt-4 sm:text-lg">
-              {isClosed ? CAMPAIGN_COPY.encerradoSubtitulo : CAMPAIGN_COPY.subtitulo}
-            </p>
-
-            {/* Contagem regressiva em tela grande */}
-            <HeroCountdown state={campaignState} />
-
-            {/* CTAs: o principal simula em 3 toques; o secundário leva ao estoque */}
-            {!isClosed ? (
-              <div className="mx-auto mt-6 flex max-w-xl flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center">
-                <ShimmerButton
-                  onClick={() => handleSimular('hero')}
-                  className="min-h-[56px] flex-1 px-6 py-3.5 text-base uppercase tracking-wide"
-                >
-                  <WhatsappIcon className="h-6 w-6 shrink-0" />
-                  {CAMPAIGN_COPY.ctaPrincipal}
-                </ShimmerButton>
-                <a
-                  href="#estoque"
-                  className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98]"
-                >
-                  <Car className="h-5 w-5 shrink-0" />
-                  {CAMPAIGN_COPY.ctaSecundario}
-                </a>
-              </div>
-            ) : (
-              <div className="mt-6">
-                <a
-                  href="#estoque"
-                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20"
-                >
-                  <Car className="h-5 w-5 shrink-0" />
-                  Ver carros disponíveis nas lojas
-                </a>
-              </div>
-            )}
-
-            {/* Faixa de confiança */}
-            {!isClosed && (
-              <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-100 sm:text-sm">
-                {CAMPAIGN_COPY.faixaConfianca.map((item) => (
-                  <li key={item} className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-orange-400" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* Vitrine com preços reais do estoque: cada cartão abre o estoque já filtrado */}
+            <div className="mt-6 sm:mt-9">
+              <HeroVitrine
+                veiculos={veiculos}
+                onSelect={(categoria) => applyQuickPreset({ categoria })}
+              />
+            </div>
           </div>
 
           {/* Legal notice right below Hero */}
@@ -1312,10 +1341,10 @@ function FeiraoCatalogInner({
 
             {!isClosed && (
               <ShimmerButton
-                onClick={() => handleSimular('flutuante')}
+                onClick={() => (isPreLaunch ? handleListaVip('flutuante') : handleSimular('flutuante'))}
                 className="h-12 flex-1 px-4 text-sm"
               >
-                {CAMPAIGN_COPY.ctaPrincipal}
+                {isPreLaunch ? 'Entrar na lista VIP' : CAMPAIGN_COPY.ctaPrincipal}
               </ShimmerButton>
             )}
 

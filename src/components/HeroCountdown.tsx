@@ -9,8 +9,25 @@ const pad = (n: number) => String(Math.max(0, Math.floor(n))).padStart(2, '0');
  * Contagem regressiva em tela grande: é o elemento central do hero.
  * Antes de 14/12 conta até a abertura; durante o feirão, até o encerramento (urgência real).
  */
-export function HeroCountdown({ state }: { state: CampaignState }) {
+export function HeroCountdown({ state, compacto = false }: { state: CampaignState; compacto?: boolean }) {
   if (state.mode === 'encerrado') return null;
+
+  // Versão discreta de uma linha: o contador gigante só entra nos últimos 3 dias, quando a urgência é real
+  if (compacto && !state.isLastCall) {
+    const rotulo = state.mode === 'pre_lancamento' ? 'Abre em' : 'Termina em';
+    const partes = `${state.days}d ${pad(state.hours)}h ${pad(state.minutes)}m ${pad(state.seconds)}s`;
+    return (
+      <p
+        role="timer"
+        aria-label={`${rotulo} ${state.days} dias e ${state.hours} horas`}
+        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-slate-100 backdrop-blur-md sm:text-sm"
+      >
+        <Timer className="h-4 w-4 text-orange-300" aria-hidden="true" />
+        {rotulo}
+        <span className="font-mono tabular-nums text-white" aria-hidden="true">{partes}</span>
+      </p>
+    );
+  }
 
   const antes = state.mode === 'pre_lancamento';
   const ultima = state.isLastCall;
