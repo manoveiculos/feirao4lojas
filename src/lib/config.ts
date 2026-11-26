@@ -213,3 +213,23 @@ export function buildStoreWhatsappMessage(loja: LojaInfo): string {
 export function buildGeneralWhatsappMessage(): string {
   return `Olá! Quero conhecer as ofertas do Acelera V3.`;
 }
+
+/** Simulador rápido do site (3 passos): mensagem neutra, as escolhas seguem para o perfil do lead. */
+export function buildQuickSimulatorMessage(params: {
+  forma: 'financiamento' | 'avista' | 'troca';
+  faixa: string;
+}): string {
+  if (params.forma === 'financiamento') {
+    return `Olá! Quero simular um financiamento no Acelera V3. Entrada: ${params.faixa}.`;
+  }
+  if (params.forma === 'avista') {
+    return `Olá! Quero ver opções à vista no Acelera V3. Faixa de valor: ${params.faixa}.`;
+  }
+  return `Olá! Quero avaliar meu carro na troca no Acelera V3. Pretendo: ${params.faixa}.`;
+}
+
+/**
+ * Pré-captura (Nome + WhatsApp) antes de abrir o WhatsApp.
+ * Para voltar ao WhatsApp direto, basta trocar para false.
+ */
+export const PRECAPTURA_ATIVA = true;

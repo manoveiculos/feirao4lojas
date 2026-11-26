@@ -5,9 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IMaskInput } from 'react-imask';
 import { RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
 import { buildTradeInWhatsappMessage } from '@/lib/config';
-import { triggerWhatsappLead } from '@/lib/tracking';
+import { useLeadCapture } from './lead/LeadCaptureProvider';
 import { WhatsappIcon } from './WhatsappIcon';
 
 const tradeInSchema = z.object({
@@ -22,6 +21,7 @@ const tradeInSchema = z.object({
 type TradeInFormValues = z.infer<typeof tradeInSchema>;
 
 export function TradeInSection() {
+  const { abrirCaptura } = useLeadCapture();
   const {
     register,
     control,
@@ -42,8 +42,10 @@ export function TradeInSection() {
       ano: data.ano,
     });
 
-    toast.success('Abrindo WhatsApp para avaliação do seu usado...');
-    triggerWhatsappLead({
+    abrirCaptura({
+      titulo: 'Avaliar meu carro',
+      descricao: `${data.modelo} ${data.ano}. Deixe seu contato e avaliamos seu usado na hora pelo WhatsApp.`,
+      cta: 'Avaliar meu carro',
       message,
       tipo: 'troca',
       ref: 'AV3-TROCA',
@@ -55,7 +57,6 @@ export function TradeInSection() {
         ano: data.ano,
         preco: '',
       },
-      isFormLead: true,
       customEvent: 'acelerav3_troca',
     });
   };

@@ -23,6 +23,13 @@ export type LeadOrigem =
   | 'flutuante'
   | 'header';
 
+export interface SimulacaoExtra {
+  forma: 'financiamento' | 'avista' | 'troca';
+  faixa: string;
+  /** valor numérico aproximado da faixa (entrada ou orçamento), quando existir */
+  valor?: number | null;
+}
+
 export interface TrackingParams {
   utm_source: string;
   utm_medium: string;
@@ -53,6 +60,10 @@ export interface WebhookLeadPayload {
   sid: string;
   /** Texto exato que o site abre no WhatsApp: o backend casa a 1ª mensagem do cliente com este clique. */
   mensagem: string;
+  /** true quando o site vai abrir o WhatsApp logo em seguida (o backend adia as boas-vindas ativas). */
+  abre_whatsapp?: boolean;
+  /** Escolhas do simulador rápido (opcional, só extensão do payload). */
+  simulacao?: SimulacaoExtra;
   pagina: string;
   timestamp_iso: string;
 }
@@ -132,6 +143,8 @@ export function sendLeadWebhook(input: {
   nome?: string;
   whatsapp?: string;
   mensagem?: string;
+  abre_whatsapp?: boolean;
+  simulacao?: SimulacaoExtra;
 }): WebhookLeadPayload {
   const utms = getStoredTrackingParams();
   const payload: WebhookLeadPayload = {
@@ -155,6 +168,8 @@ export function sendLeadWebhook(input: {
     fbclid: utms.fbclid,
     sid: getSid(),
     mensagem: (input.mensagem || '').slice(0, 600),
+    ...(input.abre_whatsapp ? { abre_whatsapp: true } : {}),
+    ...(input.simulacao ? { simulacao: input.simulacao } : {}),
     pagina: typeof window !== 'undefined' ? window.location.href : '',
     timestamp_iso: new Date().toISOString(),
   };
@@ -325,8 +340,11 @@ export function triggerWhatsappLead(params: {
   customEvent?: 'acelerav3_simulacao' | 'acelerav3_troca';
   isFormLead?: boolean;
   openWindow?: boolean;
+  simulacao?: SimulacaoExtra;
 }): string {
   sendLeadWebhook({
+    simulacao: params.simulacao,
+    abre_whatsapp: params.openWindow !== false,
     tipo: params.tipo,
     ref: params.ref,
     loja_sigla: params.loja_sigla,
@@ -377,4 +395,37 @@ export function triggerWhatsappLead(params: {
     window.open(url, '_blank', 'noopener,noreferrer');
   }
   return url;
+}
+
+// ───────────────────────── Contato salvo (pré-captura) ─────────────────────────
+
+const CONTATO_KEY = 'av3_contato';
+
+export interface ContatoSalvo {
+  nome: string;
+  whatsapp: string;
+}
+
+/** Quem já deixou nome e WhatsApp não precisa preencher de novo nos próximos cliques. */
+export function lerContatoSalvo(): ContatoSalvo | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(CONTATO_KEY);
+    if (!raw) return null;
+    const c = JSON.parse(raw) as Partial<ContatoSalvo>;
+    if (c.nome && c.whatsapp && c.whatsapp.replace(/\D/g, '').length === 11) {
+      return { nome: c.nome, whatsapp: c.whatsapp };
+    }
+  } catch {
+    // ignora
+  }
+  return null;
+}
+
+export function salvarContato(c: ContatoSalvo): void {
+  try {
+    window.localStorage.setItem(CONTATO_KEY, JSON.stringify(c));
+  } catch {
+    // ignora
+  }
 }

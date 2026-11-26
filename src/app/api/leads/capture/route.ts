@@ -5,6 +5,7 @@ import { obterOuCriarLead } from '@/lib/agent/inbound';
 import { LOJAS } from '@/lib/config';
 import { addEvento, normalizarTelefone, saveClique, updateLead } from '@/lib/db/store';
 import { origemVazia, type Origem } from '@/lib/db/types';
+import type { Lead } from '@/lib/db/types';
 import type { LojaSigla } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -28,7 +29,21 @@ const schema = z.object({
   fbclid: z.string().max(400).optional().default(''),
   /** Texto aberto no WhatsApp (atribuição sem código visível na mensagem) */
   mensagem: z.string().max(600).optional().default(''),
+  /** O site abre o WhatsApp logo após o envio: as boas-vindas ativas esperam o cliente falar primeiro */
+  abre_whatsapp: z.boolean().optional().default(false),
+  /** Escolhas do simulador rápido */
+  simulacao: z
+    .object({
+      forma: z.enum(['financiamento', 'avista', 'troca']),
+      faixa: z.string().max(80).default(''),
+      valor: z.number().nullable().optional(),
+    })
+    .optional(),
 });
+
+/** Quanto esperar antes de o agente puxar conversa com quem abriu o WhatsApp (e talvez desistiu de enviar) */
+const ESPERA_BOAS_VINDAS_MS = 150_000;
+const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // rate limit simples por IP (60 req / min)
 const janela = new Map<string, { n: number; ate: number }>();
@@ -93,11 +108,30 @@ export async function POST(req: NextRequest) {
       // pista para o Agente Roteador; a loja só recebe o lead depois da triagem do SDR
       lojaSugerida: loja?.slug ?? null,
     });
-    if (!novo) {
-      updateLead(lead.id, { ...(d.nome && !lead.nome ? { nome: d.nome.trim() } : {}) });
-    } else {
-      const interesse = d.veiculo?.modelo?.replace(/^Interesse:\s*/i, '') ?? '';
+    // escolhas do simulador entram no perfil: o agente não pergunta de novo
+    const sim = d.simulacao;
+    const perfilSim: Partial<Lead['perfil']> = {};
+    if (sim) {
+      if (sim.forma === 'financiamento') perfilSim.formaPagamento = 'financiamento';
+      if (sim.forma === 'avista') perfilSim.formaPagamento = 'avista';
+      if (sim.forma === 'troca') perfilSim.temTroca = true;
+      if (sim.valor != null) {
+        if (sim.forma === 'avista') perfilSim.orcamento = sim.valor;
+        else perfilSim.entrada = sim.valor;
+      }
+      perfilSim.observacoes = `Simulador do site (${sim.forma}): ${sim.faixa}`;
+    }
+    const patch: Partial<Lead> = {
+      ...(d.nome && !lead.nome ? { nome: d.nome.trim() } : {}),
+      ...(sim ? { perfil: { ...lead.perfil, ...perfilSim } } : {}),
+    };
+    if (Object.keys(patch).length) updateLead(lead.id, patch);
+
+    if (novo) {
+      const interesse = d.veiculo?.modelo?.replace(/^Interesse:\s*/i, '') || (sim ? sim.faixa : '');
+      const espera = d.abre_whatsapp ? ESPERA_BOAS_VINDAS_MS : 0;
       after(async () => {
+        if (espera) await dormir(espera);
         await boasVindasProativas(lead.id, interesse);
       });
     }

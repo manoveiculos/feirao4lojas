@@ -2,18 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TZDate } from '@date-fns/tz';
+import Image from 'next/image';
 import { Drawer } from 'vaul';
 import {
   Building2,
   Calendar,
-  Camera,
   Car,
   CheckCircle2,
   Clock,
-  Cog,
   Filter,
-  Fuel,
-  Gauge,
   Info,
   Landmark,
   MapPin,
@@ -22,11 +19,9 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
-  Store,
   X,
   Zap,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import {
   CAMPAIGN_COPY,
   CAMPAIGN_TIMEZONE,
@@ -44,7 +39,6 @@ import {
 } from '@/lib/config';
 import { filterVeiculos, formatKmDisplay } from '@/lib/filters';
 import { registrarAcao } from '@/lib/acessos/cliente';
-import { triggerWhatsappLead } from '@/lib/tracking';
 import type {
   CampaignMode,
   EstoqueMetadata,
@@ -55,7 +49,9 @@ import type {
 import { CountdownBanner } from './CountdownBanner';
 import { ExitIntentModal } from './ExitIntentModal';
 import { HeroCountdown } from './HeroCountdown';
-import { SimulatorSection } from './SimulatorSection';
+import { LeadCaptureProvider, useLeadCapture } from './lead/LeadCaptureProvider';
+import { ShimmerButton } from './ui/ShimmerButton';
+import { InlineSimulatorSection } from './lead/InlineSimulatorSection';
 import { TooltipHint, TooltipProviderRoot } from './TooltipHint';
 import { TradeInSection } from './TradeInSection';
 import { VehicleModal } from './VehicleModal';
@@ -100,7 +96,15 @@ function buildPriceRanges(maxArredondado: number) {
   ];
 }
 
-export function FeiraoCatalog({
+export function FeiraoCatalog(props: FeiraoCatalogProps) {
+  return (
+    <LeadCaptureProvider>
+      <FeiraoCatalogInner {...props} />
+    </LeadCaptureProvider>
+  );
+}
+
+function FeiraoCatalogInner({
   veiculos,
   lojas,
   metadata,
@@ -110,6 +114,7 @@ export function FeiraoCatalog({
   initialSimulationLabel,
 }: FeiraoCatalogProps) {
   // Date-driven campaign mode (America/Sao_Paulo) hydrated deterministically from SSR (zero mismatch)
+  const { abrirCaptura, abrirSimulador } = useLeadCapture();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
@@ -331,8 +336,10 @@ export function FeiraoCatalog({
   };
 
   const handleGeneralWhatsapp = (origem: 'header' | 'hero' | 'flutuante') => {
-    toast.success('Abrindo WhatsApp do Acelera V3...');
-    triggerWhatsappLead({
+    abrirCaptura({
+      titulo: 'Fale com o Acelera V3',
+      descricao: 'Deixe seu contato e abrimos o WhatsApp com a nossa consultora.',
+      cta: 'Falar no WhatsApp',
       message: buildGeneralWhatsappMessage(),
       tipo: 'geral',
       ref: 'AV3-GERAL',
@@ -341,27 +348,32 @@ export function FeiraoCatalog({
     });
   };
 
+  const handleSimular = (origem: 'hero' | 'flutuante' | 'header') => {
+    abrirSimulador({ origem });
+  };
+
   const handleStoreWhatsapp = (store: LojaInfo) => {
-    const ref = buildRefLoja(store.sigla);
-    toast.success(`Abrindo WhatsApp da ${store.nome}...`);
-    triggerWhatsappLead({
+    abrirCaptura({
+      titulo: `Falar com a ${store.nome}`,
+      descricao: 'Deixe seu contato e abrimos o WhatsApp.',
+      cta: 'Falar no WhatsApp',
       message: buildStoreWhatsappMessage(store),
       tipo: 'loja',
-      ref,
+      ref: buildRefLoja(store.sigla),
       loja_sigla: store.sigla,
       origem: 'lojas',
     });
   };
 
   const handleCarWhatsapp = (v: Veiculo) => {
-    const ref = buildRefCarro(v.codigo);
-    const sigla = getSiglaFromCodigo(v.codigo);
-    toast.success(`Abrindo WhatsApp sobre o ${v.modelo}...`);
-    triggerWhatsappLead({
+    abrirCaptura({
+      titulo: v.titulo,
+      descricao: `${v.anoTexto} • ${v.precoFormatado}. Deixe seu contato e abrimos o WhatsApp sobre este veículo.`,
+      cta: 'Tenho interesse',
       message: buildVehicleWhatsappMessage(v),
       tipo: 'carro',
-      ref,
-      loja_sigla: sigla,
+      ref: buildRefCarro(v.codigo),
+      loja_sigla: getSiglaFromCodigo(v.codigo),
       origem: 'card',
       veiculo: {
         codigo: v.codigo,
@@ -448,12 +460,13 @@ export function FeiraoCatalog({
         {/* 2) HERO */}
         <section className="relative overflow-hidden bg-[#062835] text-white">
           {/* Campaign cinematic background (clean right-weighted artwork, clear left space for text) */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={FEIRAO_CONFIG.campaignImage}
             alt="Campanha ACELERA V3 — Feirão de carros em Rio do Sul"
-            fetchPriority="high"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-right"
+            fill
+            priority
+            sizes="100vw"
+            className="pointer-events-none object-cover object-[72%_center] sm:object-right"
           />
           <div
             aria-hidden="true"
@@ -469,34 +482,33 @@ export function FeiraoCatalog({
             <div className="hero-streak-delay absolute left-0 top-[68%] h-[2px] w-56 bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
           </div>
 
-          <div className="relative mx-auto max-w-5xl px-4 pb-10 pt-8 text-center sm:px-6 sm:pb-16 sm:pt-12">
+          <div className="relative mx-auto max-w-5xl px-4 pb-8 pt-6 text-center sm:px-6 sm:pb-16 sm:pt-12">
             <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-orange-400/40 bg-orange-500/15 px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-orange-300">
               <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-orange-400" />
               <span>{isClosed ? 'Edição encerrada' : CAMPAIGN_COPY.selo}</span>
             </div>
 
-            <h1 className="mx-auto mt-4 max-w-4xl text-3xl font-black italic leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mx-auto mt-3 max-w-4xl text-[1.7rem] font-black italic leading-[1.1] tracking-tight text-white sm:mt-4 sm:text-5xl lg:text-6xl">
               {heroTitle}
             </h1>
 
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-200 sm:text-lg">
+            <p className="mx-auto mt-2.5 max-w-2xl text-[13px] leading-relaxed text-slate-200 sm:mt-4 sm:text-lg">
               {isClosed ? CAMPAIGN_COPY.encerradoSubtitulo : CAMPAIGN_COPY.subtitulo}
             </p>
 
             {/* Contagem regressiva em tela grande */}
             <HeroCountdown state={campaignState} />
 
-            {/* CTAs: o principal leva direto ao WhatsApp */}
+            {/* CTAs: o principal simula em 3 toques; o secundário leva ao estoque */}
             {!isClosed ? (
-              <div className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
-                <button
-                  type="button"
-                  onClick={() => handleGeneralWhatsapp('hero')}
-                  className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2.5 rounded-xl bg-orange-500 px-6 py-3.5 text-base font-extrabold uppercase tracking-wide text-white shadow-xl shadow-orange-600/40 transition hover:bg-orange-600 active:scale-[0.98] cursor-pointer"
+              <div className="mx-auto mt-6 flex max-w-xl flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center">
+                <ShimmerButton
+                  onClick={() => handleSimular('hero')}
+                  className="min-h-[56px] flex-1 px-6 py-3.5 text-base uppercase tracking-wide"
                 >
                   <WhatsappIcon className="h-6 w-6 shrink-0" />
-                  Quero meu carro no feirão
-                </button>
+                  {CAMPAIGN_COPY.ctaPrincipal}
+                </ShimmerButton>
                 <a
                   href="#estoque"
                   className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98]"
@@ -515,12 +527,6 @@ export function FeiraoCatalog({
                   Ver carros disponíveis nas lojas
                 </a>
               </div>
-            )}
-
-            {!isClosed && (
-              <a href="#simulador" className="mt-3 inline-block text-sm font-bold text-orange-300 underline underline-offset-4 hover:text-orange-200">
-                {CAMPAIGN_COPY.ctaPrincipal} →
-              </a>
             )}
 
             {/* Faixa de confiança */}
@@ -543,82 +549,6 @@ export function FeiraoCatalog({
             </p>
           </div>
         </section>
-
-        {/* 3) BENEFÍCIOS (4 cards) */}
-        {!isClosed && (
-          <section className="border-b border-slate-200 bg-white py-8 sm:py-10">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6">
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-                <BenefitCard
-                  icon={<Zap className="h-5 w-5 text-orange-500" />}
-                  title="Pronta entrega"
-                  description="Carros disponíveis nas 4 lojas de Rio do Sul/SC para você sair rodando."
-                />
-                <BenefitCard
-                  icon={<Calendar className="h-5 w-5 text-[#0B3C4E]" />}
-                  title="1ª parcela só depois do Carnaval"
-                  description="Mais fôlego para começar o ano com tranquilidade no orçamento."
-                />
-                <BenefitCard
-                  icon={<Percent className="h-5 w-5 text-orange-500" />}
-                  title="Taxas especiais C6 e Viacredi"
-                  description="Condições negociadas para o feirão, sujeitas à análise de crédito."
-                />
-                <BenefitCard
-                  icon={<RefreshCw className="h-5 w-5 text-[#0B3C4E]" />}
-                  title="Seu usado na troca"
-                  description="Avaliamos seu carro atual na hora para facilitar o fechamento."
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* 4) BANCOS PARCEIROS */}
-        {!isClosed && (
-          <section className="border-b border-slate-200 bg-slate-100/70 py-6 sm:py-8">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6">
-              <div className="text-center sm:text-left">
-                <p className="text-xs font-extrabold uppercase tracking-widest text-[#0B3C4E]">
-                  Parceiros de Financiamento
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-700">
-                  {CAMPAIGN_COPY.bancosTexto}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-3.5">
-                {FEIRAO_CONFIG.bancosParceiros.map((banco) => (
-                  <div
-                    key={banco.id}
-                    style={{ backgroundColor: banco.bgColor }}
-                    className="flex h-16 min-w-[185px] items-center justify-center overflow-hidden rounded-xl border border-slate-200/80 px-5 py-2 shadow-sm transition hover:shadow-md"
-                  >
-                    {banco.logoPath ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={banco.logoPath}
-                        alt={`Logo ${banco.nome}`}
-                        loading="lazy"
-                        className={banco.imgClass}
-                      />
-                    ) : (
-                      <>
-                        <Landmark className="h-4 w-4 text-[#0B3C4E]" />
-                        <span className="text-sm font-black tracking-tight text-slate-900">
-                          {banco.nome}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* 5) SIMULADOR (sem calcular parcela nem inventar taxa) */}
-        {!isClosed && <SimulatorSection />}
 
         {/* 6) ESTOQUE (FILTROS + CARDS) */}
         <main
@@ -1045,9 +975,10 @@ export function FeiraoCatalog({
             <>
               {/* Vehicles Grid */}
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-                {visibleVehicles.map((v) => (
+                {visibleVehicles.map((v, idx) => (
                   <VehicleCard
                     key={v.id}
+                    priority={idx < 2}
                     veiculo={v}
                     campaignMode={campaignState.mode}
                     onOpenDetails={() => setSelectedVehicle(v)}
@@ -1075,6 +1006,82 @@ export function FeiraoCatalog({
             </>
           )}
         </main>
+
+        {/* 3) BENEFÍCIOS (4 cards) */}
+        {!isClosed && (
+          <section className="border-b border-slate-200 bg-white py-8 sm:py-10">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-4">
+                <BenefitCard
+                  icon={<Zap className="h-5 w-5 text-orange-500" />}
+                  title="Pronta entrega"
+                  description="Carros disponíveis nas 4 lojas de Rio do Sul/SC para você sair rodando."
+                />
+                <BenefitCard
+                  icon={<Calendar className="h-5 w-5 text-[#0B3C4E]" />}
+                  title="1ª parcela só depois do Carnaval"
+                  description="Mais fôlego para começar o ano com tranquilidade no orçamento."
+                />
+                <BenefitCard
+                  icon={<Percent className="h-5 w-5 text-orange-500" />}
+                  title="Taxas especiais C6 e Viacredi"
+                  description="Condições negociadas para o feirão, sujeitas à análise de crédito."
+                />
+                <BenefitCard
+                  icon={<RefreshCw className="h-5 w-5 text-[#0B3C4E]" />}
+                  title="Seu usado na troca"
+                  description="Avaliamos seu carro atual na hora para facilitar o fechamento."
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 4) BANCOS PARCEIROS */}
+        {!isClosed && (
+          <section className="border-b border-slate-200 bg-slate-100/70 py-6 sm:py-8">
+            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6">
+              <div className="text-center sm:text-left">
+                <p className="text-xs font-extrabold uppercase tracking-widest text-[#0B3C4E]">
+                  Parceiros de Financiamento
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-700">
+                  {CAMPAIGN_COPY.bancosTexto}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3.5">
+                {FEIRAO_CONFIG.bancosParceiros.map((banco) => (
+                  <div
+                    key={banco.id}
+                    style={{ backgroundColor: banco.bgColor }}
+                    className="flex h-16 min-w-[185px] items-center justify-center overflow-hidden rounded-xl border border-slate-200/80 px-5 py-2 shadow-sm transition hover:shadow-md"
+                  >
+                    {banco.logoPath ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={banco.logoPath}
+                        alt={`Logo ${banco.nome}`}
+                        loading="lazy"
+                        className={banco.imgClass}
+                      />
+                    ) : (
+                      <>
+                        <Landmark className="h-4 w-4 text-[#0B3C4E]" />
+                        <span className="text-sm font-black tracking-tight text-slate-900">
+                          {banco.nome}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 5) SIMULADOR (sem calcular parcela nem inventar taxa) */}
+        {!isClosed && <InlineSimulatorSection />}
 
         {/* 7) BLOCO "SEU USADO VALE MAIS" */}
         {!isClosed && <TradeInSection />}
@@ -1273,8 +1280,8 @@ export function FeiraoCatalog({
 
         <ExitIntentModal encerrado={isClosed} />
 
-        {/* Mobile Fixed Bottom Bar (Filter + WhatsApp Floating CTA) */}
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-3.5 pt-2.5 shadow-[0_-8px_24px_rgba(6,40,53,0.14)] backdrop-blur-md md:hidden">
+        {/* Mobile Fixed Bottom Bar (Filtros + CTA principal com shimmer + WhatsApp) */}
+        <div className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-3.5 pt-2.5 shadow-[0_-8px_24px_rgba(6,40,53,0.14)] backdrop-blur-xl md:hidden">
           <div className="flex items-center gap-2.5">
             <button
               type="button"
@@ -1290,13 +1297,27 @@ export function FeiraoCatalog({
               )}
             </button>
 
+            {!isClosed && (
+              <ShimmerButton
+                onClick={() => handleSimular('flutuante')}
+                className="h-12 flex-1 px-4 text-sm"
+              >
+                {CAMPAIGN_COPY.ctaPrincipal}
+              </ShimmerButton>
+            )}
+
             <button
               type="button"
               onClick={() => handleGeneralWhatsapp('flutuante')}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-extrabold text-white shadow-lg shadow-orange-600/30 active:scale-[0.98] cursor-pointer"
+              aria-label="Falar no WhatsApp"
+              className={`flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-extrabold active:scale-[0.98] cursor-pointer ${
+                isClosed
+                  ? 'flex-1 bg-orange-500 px-4 text-white shadow-lg shadow-orange-600/30'
+                  : 'w-12 shrink-0 bg-[#25D366] text-white'
+              }`}
             >
-              <WhatsappIcon className="h-5 w-5 shrink-0" />
-              Falar no WhatsApp
+              <WhatsappIcon className="h-6 w-6 shrink-0" />
+              {isClosed && 'Falar no WhatsApp'}
             </button>
           </div>
         </div>
@@ -1487,42 +1508,43 @@ export function FeiraoCatalog({
 function VehicleCard({
   veiculo,
   campaignMode,
+  priority,
   onOpenDetails,
   onWhatsappClick,
 }: {
   veiculo: Veiculo;
   campaignMode: CampaignMode;
+  priority?: boolean;
   onOpenDetails: () => void;
   onWhatsappClick: () => void;
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const showOfferBadge = campaignMode !== 'encerrado' && Boolean(veiculo.pronta_entrega);
   const kmLabel = formatKmDisplay(veiculo.km, veiculo.kmFormatado);
-  const photoCount = veiculo.fotos.length;
+  const tags = [veiculo.anoTexto, kmLabel, veiculo.cambio].filter(Boolean);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl">
-      {/* Photo container with lazy loading & skeleton */}
-      <div
+      {/* Foto limpa, proporção fixa (sem salto de layout) */}
+      <button
+        type="button"
         onClick={onOpenDetails}
-        className="relative aspect-[16/10] w-full cursor-pointer overflow-hidden bg-slate-200"
+        aria-label={`Ver fotos de ${veiculo.titulo}`}
+        className="relative block aspect-[4/3] w-full overflow-hidden bg-slate-200 cursor-pointer"
       >
         {veiculo.fotoCapa ? (
           <>
             {!imgLoaded && (
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 animate-pulse bg-slate-200"
-              />
+              <div aria-hidden="true" className="absolute inset-0 animate-pulse bg-slate-200" />
             )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={veiculo.fotoCapa}
               alt={`${veiculo.titulo} ${veiculo.anoTexto} — ${veiculo.lojaNome}`}
-              loading="lazy"
-              decoding="async"
+              fill
+              sizes="(min-width: 1024px) 380px, (min-width: 640px) 45vw, 100vw"
+              priority={priority}
               onLoad={() => setImgLoaded(true)}
-              className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${
+              className={`object-cover transition duration-500 group-hover:scale-[1.03] ${
                 imgLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />
@@ -1533,111 +1555,59 @@ function VehicleCard({
             <span className="text-xs font-medium">Fotos sob consulta</span>
           </div>
         )}
-
-        {/* Top badges: Store name visible + Pronta entrega (ONLY when marked & not closed) */}
-        <div className="absolute left-2.5 right-2.5 top-2.5 flex items-start justify-between gap-2 sm:left-3 sm:right-3 sm:top-3">
-          <span className="inline-flex max-w-[65%] items-center gap-1 truncate rounded-lg bg-[#062835]/90 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
-            <Store className="h-3 w-3 shrink-0 text-orange-400" />
-            <span className="truncate">{veiculo.lojaNome}</span>
+        {showOfferBadge && (
+          <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-lg bg-orange-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-sm">
+            <Zap className="h-3 w-3" />
+            Pronta entrega
           </span>
-          {showOfferBadge && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-orange-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-sm">
-              <Zap className="h-3 w-3" />
-              Pronta entrega
-            </span>
-          )}
-        </div>
+        )}
+      </button>
 
-        {/* Bottom badges: Category + labeled photo counter ("12 fotos") */}
-        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 sm:left-3 sm:right-3">
-          <span className="rounded-md bg-black/65 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
-            {veiculo.categoria}
-          </span>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#0B3C4E]">
+          {veiculo.marca} <span className="font-semibold normal-case tracking-normal text-slate-400">• {veiculo.lojaNome}</span>
+        </p>
 
-          {photoCount > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
-              <Camera className="h-3 w-3 text-orange-300" />
-              <span>
-                {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}
-              </span>
-            </span>
-          )}
-        </div>
-      </div>
+        <TooltipHint content={veiculo.titulo}>
+          <h3
+            onClick={onOpenDetails}
+            className="mt-1 truncate cursor-pointer text-base font-extrabold leading-snug text-slate-950 transition group-hover:text-orange-600"
+          >
+            {veiculo.titulo}
+          </h3>
+        </TooltipHint>
+        <p className="mt-0.5 min-h-[1rem] truncate text-xs font-medium text-slate-500">
+          {veiculo.versao || veiculo.modelo}
+        </p>
 
-      {/* Card Body */}
-      <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
-        <div>
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#0B3C4E]">
-              {veiculo.marca}
-            </p>
-            <span className="text-[11px] font-bold text-slate-400">
-              {veiculo.lojaNome}
-            </span>
-          </div>
-
-          {/* Standardized Title with single-line/2-line ellipsis + accessible Radix Tooltip */}
-          <TooltipHint content={veiculo.titulo}>
-            <h3
-              onClick={onOpenDetails}
-              className="mt-1 truncate cursor-pointer text-base font-extrabold leading-snug text-slate-950 transition group-hover:text-orange-600"
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700"
             >
-              {veiculo.titulo}
-            </h3>
-          </TooltipHint>
-
-          <p className="mt-0.5 min-h-[1rem] truncate text-xs font-medium text-slate-500">
-            {veiculo.versao || veiculo.modelo}
-          </p>
-
-          {/* Price */}
-          <div className="mt-3 flex items-baseline justify-between gap-2">
-            <span className="text-2xl font-black tracking-tight text-slate-950">
-              {veiculo.precoFormatado}
+              {t}
             </span>
-            <span className="text-[11px] font-bold text-slate-400">
-              {veiculo.codigo}
-            </span>
-          </div>
-
-          {/* 4 Specs (Km sob consulta never breaks layout) */}
-          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-slate-100 pt-3 text-xs text-slate-700">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 shrink-0 text-[#0B3C4E]" />
-              <span className="truncate font-semibold">{veiculo.anoTexto}</span>
-            </div>
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Gauge className="h-3.5 w-3.5 shrink-0 text-[#0B3C4E]" />
-              <span className="truncate font-semibold" title={kmLabel}>
-                {kmLabel}
-              </span>
-            </div>
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Cog className="h-3.5 w-3.5 shrink-0 text-[#0B3C4E]" />
-              <span className="truncate font-semibold">{veiculo.cambio}</span>
-            </div>
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Fuel className="h-3.5 w-3.5 shrink-0 text-[#0B3C4E]" />
-              <span className="truncate font-semibold">{veiculo.combustivel}</span>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Actions: WhatsApp CTA + "Ver fotos e ficha" */}
-        <div className="mt-4 flex flex-col gap-2 pt-1.5">
+        <div className="mt-3 text-2xl font-black tracking-tight text-slate-950">
+          {veiculo.precoFormatado}
+        </div>
+
+        <div className="mt-auto flex flex-col gap-1.5 pt-4">
           <button
             type="button"
             onClick={onWhatsappClick}
-            className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 active:scale-[0.98] cursor-pointer"
+            className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 active:scale-[0.98] cursor-pointer"
           >
             <WhatsappIcon className="h-4 w-4 shrink-0" />
-            Chamar no WhatsApp
+            Tenho interesse
           </button>
           <button
             type="button"
             onClick={onOpenDetails}
-            className="min-h-[40px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-[#062835] transition hover:border-[#0B3C4E] hover:bg-slate-100 active:scale-[0.98] cursor-pointer"
+            className="min-h-[36px] w-full rounded-lg px-4 py-1.5 text-xs font-bold text-[#062835] underline-offset-4 transition hover:underline active:scale-[0.98] cursor-pointer"
           >
             Ver fotos e ficha
           </button>

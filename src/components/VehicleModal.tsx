@@ -22,7 +22,6 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import {
   buildRefCarro,
   buildVehicleWhatsappMessage,
@@ -30,7 +29,8 @@ import {
 } from '@/lib/config';
 import { formatKmDisplay } from '@/lib/filters';
 import { finalizarVisaoVeiculo, iniciarVisaoVeiculo, registrarInteracaoVeiculo } from '@/lib/acessos/cliente';
-import { trackViewContent, triggerWhatsappLead } from '@/lib/tracking';
+import { trackViewContent } from '@/lib/tracking';
+import { useLeadCapture } from './lead/LeadCaptureProvider';
 import type { CampaignMode, Veiculo } from '@/lib/types';
 import { WhatsappIcon } from './WhatsappIcon';
 
@@ -45,6 +45,7 @@ export function VehicleModal({
   campaignMode,
   onClose,
 }: VehicleModalProps) {
+  const { abrirCaptura } = useLeadCapture();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -99,15 +100,14 @@ export function VehicleModal({
 
   const handleWhatsappClick = () => {
     if (!veiculo) return;
-    const ref = buildRefCarro(veiculo.codigo);
-    const sigla = getSiglaFromCodigo(veiculo.codigo);
-    const message = buildVehicleWhatsappMessage(veiculo);
-    toast.success('Abrindo WhatsApp com os dados deste carro...');
-    triggerWhatsappLead({
-      message,
+    abrirCaptura({
+      titulo: veiculo.titulo,
+      descricao: `${veiculo.anoTexto} • ${veiculo.precoFormatado}. Deixe seu contato e abrimos o WhatsApp sobre este veículo.`,
+      cta: 'Tenho interesse',
+      message: buildVehicleWhatsappMessage(veiculo),
       tipo: 'carro',
-      ref,
-      loja_sigla: sigla,
+      ref: buildRefCarro(veiculo.codigo),
+      loja_sigla: getSiglaFromCodigo(veiculo.codigo),
       origem: 'card',
       veiculo: {
         codigo: veiculo.codigo,
