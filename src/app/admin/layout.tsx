@@ -30,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         { href: '/admin/conversas', label: 'Conversas' },
         { href: '/admin/espera', label: 'Lista de Espera' },
         { href: '/admin/campanhas', label: 'Campanhas' },
+        { href: '/admin/acessos', label: 'Acessos' },
         { href: '/admin/agente', label: 'Agente & Config' },
       ]}
       acoes={<AgentSwitch />}

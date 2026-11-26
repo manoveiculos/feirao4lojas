@@ -1,5 +1,6 @@
 'use client';
 
+import { idDoVisitante, registrarAcao } from './acessos/cliente';
 import { buildWhatsappUrl, N8N_WEBHOOK_URL } from './config';
 import type { LojaSigla, Veiculo } from './types';
 
@@ -57,21 +58,13 @@ export interface WebhookLeadPayload {
 }
 
 const UTM_STORAGE_KEY = 'acelerav3_tracking_params';
-const SID_STORAGE_KEY = 'acelerav3_sid';
 
-/** Identificador anônimo do visitante, usado para casar o clique no site com a conversa no WhatsApp. */
+/**
+ * Identificador anônimo do visitante (cookie av3_vid, 16 caracteres [a-z0-9]).
+ * Casa o clique no site com a conversa no WhatsApp e liga o lead à jornada no painel de Acessos.
+ */
 export function getSid(): string {
-  if (typeof window === 'undefined') return '';
-  try {
-    let sid = window.localStorage.getItem(SID_STORAGE_KEY);
-    if (!sid) {
-      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
-      window.localStorage.setItem(SID_STORAGE_KEY, sid);
-    }
-    return sid;
-  } catch {
-    return '';
-  }
+  return idDoVisitante();
 }
 
 declare global {
@@ -343,6 +336,17 @@ export function triggerWhatsappLead(params: {
     whatsapp: params.whatsapp,
     mensagem: params.message,
   });
+
+  // Telemetria de acessos: o clique vira passo da jornada (e o simulador/avaliação de troca também)
+  registrarAcao('whatsapp_click', {
+    detalhe: `Clicou no WhatsApp (${params.tipo}) em "${params.origem}"`,
+    veiculo_id: params.veiculo?.codigo || null,
+    veiculo_nome: params.veiculo?.modelo || null,
+  });
+  if (params.tipo === 'simulacao') registrarAcao('simulacao', { detalhe: 'Enviou a simulação de financiamento' });
+  if (params.tipo === 'troca') {
+    registrarAcao('troca', { detalhe: params.veiculo?.modelo ? `Troca: ${params.veiculo.modelo}` : 'Enviou a avaliação do usado' });
+  }
 
   if (params.isFormLead) {
     trackLeadEvent({

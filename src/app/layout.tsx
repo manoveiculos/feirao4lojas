@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { Telemetria } from '@/components/Telemetria';
 import { TrackingScripts } from '@/components/TrackingScripts';
 import { FEIRAO_CONFIG } from '@/lib/config';
 import './globals.css';
@@ -64,6 +65,7 @@ export default function RootLayout({
         {children}
         <Toaster position="top-center" richColors closeButton />
         <TrackingScripts />
+        <Telemetria />
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { IMaskInput } from 'react-imask';
 import { BellRing, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { registrarAcao } from '@/lib/acessos/cliente';
 import { sendLeadWebhook, trackLeadEvent } from '@/lib/tracking';
 
 const SESSION_KEY = 'av3_exit_shown';
@@ -71,6 +72,7 @@ export function ExitIntentModal({ encerrado }: { encerrado: boolean }) {
       /* ignora */
     }
     setAberto(true);
+    registrarAcao('popup_saida', { detalhe: 'Viu o pedido de contato ao sair' });
   }, []);
 
   const fechar = useCallback((registrarRecusa = true) => {
@@ -168,6 +170,7 @@ export function ExitIntentModal({ encerrado }: { encerrado: boolean }) {
       nome: d.nome,
       whatsapp: d.whatsapp,
     });
+    registrarAcao('lead_formulario', { detalhe: carro ? `Deixou contato (procura: ${carro})` : 'Deixou contato para ser avisado do feirão' });
     trackLeadEvent({ tipo: 'saida', ref: 'AV3-SAIDA', loja_sigla: null, origem: 'saida', extra: { interesse: carro || 'feirao' } });
     try {
       localStorage.setItem(DONE_KEY, String(Date.now()));

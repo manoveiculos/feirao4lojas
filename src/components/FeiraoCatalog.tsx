@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TZDate } from '@date-fns/tz';
 import { Drawer } from 'vaul';
 import {
@@ -43,6 +43,7 @@ import {
   getSiglaFromCodigo,
 } from '@/lib/config';
 import { filterVeiculos, formatKmDisplay } from '@/lib/filters';
+import { registrarAcao } from '@/lib/acessos/cliente';
 import { triggerWhatsappLead } from '@/lib/tracking';
 import type {
   CampaignMode,
@@ -163,6 +164,30 @@ export function FeiraoCatalog({
     const alvo = veiculos.find((v) => v.codigo.toLowerCase() === codigo.toLowerCase());
     if (alvo) setSelectedVehicle(alvo);
   }, [veiculos]);
+
+  // Telemetria de acessos: o que a pessoa filtrou no estoque (espera 1,5 s para não registrar cada tecla)
+  const primeiroFiltro = useRef(true);
+  useEffect(() => {
+    if (primeiroFiltro.current) {
+      primeiroFiltro.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      const ativos = [
+        q.trim() && `busca "${q.trim()}"`,
+        loja !== 'todas' && `loja ${loja}`,
+        marca !== 'todas' && `marca ${marca}`,
+        categoria !== 'todas' && `tipo ${categoria}`,
+        cambio !== 'todos' && `câmbio ${cambio}`,
+        combustivel !== 'todos' && `combustível ${combustivel}`,
+        prontaEntregaOnly && 'pronta entrega',
+        precoMax && `até R$ ${precoMax.toLocaleString('pt-BR')}`,
+        activeTab === 'motos' && 'motos',
+      ].filter(Boolean);
+      if (ativos.length) registrarAcao('filter_stock', { detalhe: `Filtrou o estoque: ${ativos.join(', ')}` });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [q, loja, marca, categoria, cambio, combustivel, prontaEntregaOnly, precoMax, activeTab]);
 
   const priceRanges = useMemo(
     () => buildPriceRanges(facets.faixaPreco.maxArredondado),

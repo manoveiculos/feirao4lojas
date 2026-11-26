@@ -103,9 +103,11 @@ export default function PrivacidadePage() {
               faixa de valor, entrada, forma de pagamento, carro para troca (modelo, ano e quilometragem), prazo de compra e cidade.
             </li>
             <li>
-              <b>Dados de navegação e de origem:</b> páginas e carros visualizados, cliques nos botões de WhatsApp, parâmetros da campanha que
-              trouxe você ao site (como <i>utm_source</i> e <i>utm_campaign</i>), identificadores de clique de anúncios (<i>fbclid</i>) e um código
-              anônimo do seu navegador que nos permite ligar o clique no site à conversa no WhatsApp.
+              <b>Dados de navegação e de origem:</b> páginas e carros visualizados, tempo de uso ativo da página e de cada carro, quanto você rolou a
+              página, fotos vistas, filtros e simuladores usados, cliques nos botões de WhatsApp, parâmetros da campanha que trouxe você ao site
+              (como <i>utm_source</i> e <i>utm_campaign</i>), identificadores de clique de anúncios (<i>fbclid</i>), o site de onde você veio, o tipo
+              de aparelho e de navegador, a <b>cidade aproximada</b> (obtida do seu endereço IP, que <b>não é guardado</b>) e um código anônimo do seu
+              navegador (cookie próprio <i>av3_vid</i>, de até 2 anos) que nos permite ligar o clique no site à conversa no WhatsApp.
             </li>
           </ul>
           <p>Não pedimos CPF, documentos, senhas ou dados de cartão pelo site ou pelo WhatsApp. A documentação é tratada presencialmente na loja.</p>
@@ -143,7 +145,7 @@ export default function PrivacidadePage() {
             <li>
               <b>Prestadores de serviço (operadores):</b> hospedagem do site e banco de dados, plataforma de envio de mensagens do WhatsApp e o
               provedor de inteligência artificial que processa as mensagens do assistente virtual. Esses fornecedores tratam os dados apenas
-              para prestar o serviço a nós.
+              para prestar o serviço a nós. Também usamos um serviço de geolocalização por IP para descobrir apenas a cidade aproximada do visitante.
             </li>
             <li>
               <b>Meta (Facebook e Instagram):</b> para medir e otimizar anúncios, enviamos eventos como “lead” ou “lead qualificado” com seu
@@ -161,12 +163,19 @@ export default function PrivacidadePage() {
             personalizar anúncios. Você pode bloquear ou apagar cookies nas configurações do seu navegador e ajustar suas preferências de
             anúncios nas configurações do Facebook, do Instagram e da sua conta Google.
           </p>
+          <p>
+            Além deles, usamos um cookie próprio (<i>av3_vid</i>) e armazenamento local do navegador para medir os acessos ao site (quais carros chamam
+            mais atenção, de onde vem o público e quanto tempo ele fica). <b>Você pode recusar</b> ativando o recurso “Não rastrear” (Do Not Track) do
+            navegador, apagando o cookie ou acrescentando <i>?notrack=1</i> ao endereço do site neste aparelho. A equipe da loja, quando conectada ao painel,
+            não entra nessa contagem.
+          </p>
         </Secao>
 
         <Secao id="retencao" titulo="7. Por quanto tempo guardamos">
           <ul className="list-disc space-y-2 pl-5">
             <li>Dados de contato e conversas: enquanto houver relacionamento comercial e por até 24 meses após o último contato, salvo obrigação legal de guarda por prazo maior.</li>
             <li>Registros de cliques usados para atribuição de campanhas: até 30 dias.</li>
+            <li>Dados de navegação do site (acessos, tempo, origem e cidade aproximada): até 120 dias.</li>
             <li>Quando você pede para não receber mensagens, guardamos apenas o registro desse pedido, para garantir que ele seja respeitado.</li>
           </ul>
         </Secao>

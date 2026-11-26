@@ -29,6 +29,7 @@ import {
   getSiglaFromCodigo,
 } from '@/lib/config';
 import { formatKmDisplay } from '@/lib/filters';
+import { finalizarVisaoVeiculo, iniciarVisaoVeiculo, registrarInteracaoVeiculo } from '@/lib/acessos/cliente';
 import { trackViewContent, triggerWhatsappLead } from '@/lib/tracking';
 import type { CampaignMode, Veiculo } from '@/lib/types';
 import { WhatsappIcon } from './WhatsappIcon';
@@ -74,6 +75,21 @@ export function VehicleModal({
       trackViewContent(veiculo);
     }
   }, [veiculo, emblaApi]);
+
+  // Telemetria de acessos: tempo ativo na ficha, fotos vistas e galeria aberta
+  useEffect(() => {
+    if (!veiculo) return;
+    iniciarVisaoVeiculo({ codigo: veiculo.codigo, titulo: veiculo.titulo, preco: veiculo.preco });
+    return () => finalizarVisaoVeiculo();
+  }, [veiculo]);
+
+  useEffect(() => {
+    if (veiculo) registrarInteracaoVeiculo('foto', selectedIndex);
+  }, [veiculo, selectedIndex]);
+
+  useEffect(() => {
+    if (lightboxOpen) registrarInteracaoVeiculo('galeria');
+  }, [lightboxOpen]);
 
   const fotos = veiculo?.fotos?.length ? veiculo.fotos : [];
 

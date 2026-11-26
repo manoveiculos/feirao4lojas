@@ -129,7 +129,7 @@ export async function api<T = unknown>(url: string, method: string, body?: unkno
 export function Barras({ dados }: { dados: Array<{ dia: string; leads: number; qualificados: number }> }) {
   const max = Math.max(1, ...dados.map((d) => d.leads));
   return (
-    <div className="flex h-36 items-end gap-1.5">
+    <div className="flex h-36 gap-1.5">
       {dados.map((d) => (
         <div key={d.dia} className="flex min-w-0 flex-1 flex-col items-center gap-1" title={`${d.dia}: ${d.leads} leads, ${d.qualificados} qualificados`}>
           <div className="relative flex w-full flex-1 items-end">
