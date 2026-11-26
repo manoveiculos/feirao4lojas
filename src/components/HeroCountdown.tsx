@@ -34,9 +34,9 @@ export function HeroCountdown({ state }: { state: CampaignState }) {
       ];
 
   return (
-    <div className="mx-auto mt-7 w-full max-w-3xl" role="timer" aria-label={`${titulo} ${state.days} dias e ${state.hours} horas`}>
+    <div className="mx-auto mt-4 w-full max-w-3xl sm:mt-7" role="timer" aria-label={`${titulo} ${state.days} dias e ${state.hours} horas`}>
       <p
-        className={`mb-3 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] sm:text-sm ${
+        className={`mb-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] sm:mb-3 sm:gap-2 sm:text-sm sm:tracking-[0.18em] ${
           ultima ? 'text-amber-300' : 'text-orange-300'
         }`}
       >
@@ -44,23 +44,23 @@ export function HeroCountdown({ state }: { state: CampaignState }) {
         {titulo}
       </p>
 
-      <div className="flex items-stretch justify-center gap-2 sm:gap-4" aria-hidden="true">
+      <div className="flex items-stretch justify-center gap-1 sm:gap-4" aria-hidden="true">
         {unidades.map(([valor, rotulo], i) => (
-          <div key={rotulo} className="flex items-center gap-2 sm:gap-4">
+          <div key={rotulo} className="flex items-center gap-1 sm:gap-4">
             <div
-              className={`flex min-w-[4.2rem] flex-col items-center rounded-2xl border px-2 py-3 shadow-2xl backdrop-blur-md sm:min-w-[7.5rem] sm:px-4 sm:py-5 ${
+              className={`flex min-w-[3.4rem] flex-col items-center rounded-xl border px-1.5 py-2 sm:rounded-2xl shadow-2xl backdrop-blur-md sm:min-w-[7.5rem] sm:px-4 sm:py-5 ${
                 ultima
                   ? 'border-amber-300/40 bg-gradient-to-b from-orange-600/90 to-orange-700/90'
                   : 'border-white/15 bg-gradient-to-b from-white/15 to-white/5'
               }`}
             >
-              <span className="font-mono text-[2.6rem] font-black leading-none tabular-nums text-white sm:text-7xl lg:text-8xl">
+              <span className="font-mono text-[1.9rem] font-black leading-none tabular-nums text-white sm:text-7xl lg:text-8xl">
                 {valor}
               </span>
-              <span className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-200 sm:text-xs">{rotulo}</span>
+              <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-200 sm:text-xs">{rotulo}</span>
             </div>
             {i < unidades.length - 1 && (
-              <span className="text-3xl font-black text-orange-400 sm:text-5xl">:</span>
+              <span className="text-xl font-black text-orange-400 sm:text-5xl">:</span>
             )}
           </div>
         ))}

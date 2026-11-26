@@ -115,7 +115,20 @@ function FeiraoCatalogInner({
 }: FeiraoCatalogProps) {
   // Date-driven campaign mode (America/Sao_Paulo) hydrated deterministically from SSR (zero mismatch)
   const { abrirCaptura, abrirSimulador } = useLeadCapture();
+  const heroRef = useRef<HTMLElement | null>(null);
+  const [heroVisivel, setHeroVisivel] = useState(true);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // A barra fixa só aparece depois que o CTA do hero sai da tela (evita dois botões iguais ao mesmo tempo)
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setHeroVisivel(e.intersectionRatio > 0.6), {
+      threshold: [0, 0.6, 1],
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const startedAt = Date.now();
@@ -458,7 +471,7 @@ function FeiraoCatalogInner({
         </header>
 
         {/* 2) HERO */}
-        <section className="relative overflow-hidden bg-[#062835] text-white">
+        <section ref={heroRef} className="relative overflow-hidden bg-[#062835] text-white">
           {/* Campaign cinematic background (clean right-weighted artwork, clear left space for text) */}
           <Image
             src={FEIRAO_CONFIG.campaignImage}
@@ -1281,7 +1294,7 @@ function FeiraoCatalogInner({
         <ExitIntentModal encerrado={isClosed} />
 
         {/* Mobile Fixed Bottom Bar (Filtros + CTA principal com shimmer + WhatsApp) */}
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-3.5 pt-2.5 shadow-[0_-8px_24px_rgba(6,40,53,0.14)] backdrop-blur-xl md:hidden">
+        <div className={`safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/90 bg-white/95 px-3.5 pt-2.5 transition-transform duration-300 ${heroVisivel ? 'translate-y-full' : 'translate-y-0'} shadow-[0_-8px_24px_rgba(6,40,53,0.14)] backdrop-blur-xl md:hidden`}>
           <div className="flex items-center gap-2.5">
             <button
               type="button"

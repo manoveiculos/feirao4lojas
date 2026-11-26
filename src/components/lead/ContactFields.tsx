@@ -74,13 +74,16 @@ export function ContactFields({
         {erroTel && (
           <p className="mt-1 text-xs font-semibold text-red-600">Informe um celular válido com DDD</p>
         )}
-        <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500">
-          <Zap className="h-3.5 w-3.5 shrink-0 text-orange-500" />
-          <span>Atendimento rápido no WhatsApp</span>
-          <span aria-hidden="true">•</span>
-          <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
-          <span>Seus dados estão protegidos</span>
-        </p>
+        <ul className="mt-2.5 flex flex-col gap-1 text-[11px] font-medium text-slate-500 min-[420px]:flex-row min-[420px]:gap-4">
+          <li className="flex items-center gap-1.5">
+            <Zap className="h-3.5 w-3.5 shrink-0 text-orange-500" />
+            Atendimento rápido no WhatsApp
+          </li>
+          <li className="flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+            Seus dados estão protegidos
+          </li>
+        </ul>
       </div>
 
       <ShimmerButton
