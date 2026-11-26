@@ -21,6 +21,16 @@ export function escopoDe(sessao: Sessao): LojaSlug | null {
   return sessao.papel === 'loja' ? sessao.loja : null;
 }
 
+/**
+ * Que dados de lead (nome, telefone…) este usuário pode ver nos painéis agregados (ex.: Acessos)?
+ * Admin: todos (undefined = sem filtro). Loja: só os liberados para ela pelo roteador.
+ */
+export function visibilidadeDeLeads(sessao: Sessao): ((l: Lead) => boolean) | undefined {
+  if (sessao.papel === 'admin') return undefined;
+  const loja = sessao.loja;
+  return (l) => Boolean(loja) && !l.teste && liberadoParaLoja(l, loja as LojaSlug);
+}
+
 /** Lead acessível ao usuário? Loja só enxerga os próprios. */
 export function leadAcessivel(sessao: Sessao, id: string): Lead | null {
   const lead = getLead(id);

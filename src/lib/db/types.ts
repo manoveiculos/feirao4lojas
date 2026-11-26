@@ -155,7 +155,24 @@ export interface Clique {
   mensagem?: string;
 }
 
+/** Preço por 1 milhão de tokens, em dólar. */
+export interface PrecoModelo {
+  entrada: number;
+  saida: number;
+  cacheEscrita: number;
+  cacheLeitura: number;
+}
+
+/** Configuração da aba Custos (editável pelo admin). */
+export interface ConfigCustos {
+  cotacaoUsdBrl: number;
+  precos: Record<string, PrecoModelo>;
+  /** Custos mensais fixos em reais (hospedagem, Evolution, Supabase, domínio…) */
+  fixos: Array<{ nome: string; valorMensalBrl: number }>;
+}
+
 export interface Settings {
+  custos?: ConfigCustos;
   agenteLigado: boolean;
   /** Mensagem proativa para quem deixa o WhatsApp no site */
   boasVindasProativas: boolean;

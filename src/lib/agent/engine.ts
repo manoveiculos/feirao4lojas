@@ -19,6 +19,7 @@ import {
   quebrarEmBaloes,
 } from '../whatsapp/outbound';
 import { imagemParaClaude } from '../whatsapp/midia';
+import { usoDaAnthropic } from '../custos/medidor';
 import { avisarVisita, criteriosMinimos, reavaliarLead } from './qualificacao';
 import { avisarAdminHumano, notificarLoja, rotearLead } from './roteador';
 import { cadastrarEspera, marcarEsperaEmAtendimento } from '../espera/espera';
@@ -510,7 +511,7 @@ interface RespostaApi {
  */
 const MAX_TOKENS = 2048;
 
-async function chamarClaude(system: string, dinamico: string, messages: MsgApi[], maxTokens = MAX_TOKENS): Promise<RespostaApi> {
+async function chamarClaude(system: string, dinamico: string, messages: MsgApi[], maxTokens = MAX_TOKENS, leadId: string | null = null): Promise<RespostaApi> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -532,7 +533,9 @@ async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]
     }),
     signal: AbortSignal.timeout(60_000),
   });
-  const json = (await res.json()) as RespostaApi;
+  const json = (await res.json()) as RespostaApi & { usage?: unknown };
+  // consumo exato desta chamada (aba Custos); mesmo erro cobra tokens de entrada às vezes, então registra sempre que houver usage
+  usoDaAnthropic(getSettings().modelo, json.usage, leadId);
   if (!res.ok) throw new Error(json.error?.message || `Anthropic HTTP ${res.status}`);
   return json;
 }
@@ -621,11 +624,11 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
   try {
     for (let i = 0; i < 7; i++) {
       if (chegouNova()) return { respondeu: false, descartada: true };
-      let resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
+      let resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages, MAX_TOKENS, leadId);
       if (resp.stop_reason === 'max_tokens') {
         // resposta cortada no meio: refaz UMA vez com o dobro de espaço (ferramenta truncada não é executada)
         console.warn(`[agente] lead ${leadId}: resposta cortada (max_tokens); refazendo com ${MAX_TOKENS * 2}`);
-        resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages, MAX_TOKENS * 2);
+        resp = await chamarClaude(system, promptLead(getLead(leadId)!), messages, MAX_TOKENS * 2, leadId);
       }
       ultimaResp = resp;
 
@@ -666,7 +669,7 @@ export async function responderLead(leadId: string, simulado = false): Promise<R
       } else if (ultimaMsg?.role === 'user') {
         ultimaMsg.content = [...(typeof ultimaMsg.content === 'string' ? [{ type: 'text', text: ultimaMsg.content } as Bloco] : ultimaMsg.content), pedido];
       }
-      const extra = await chamarClaude(system, promptLead(getLead(leadId)!), messages);
+      const extra = await chamarClaude(system, promptLead(getLead(leadId)!), messages, MAX_TOKENS, leadId);
       ultimoTexto = textoDe(extra);
     }
 

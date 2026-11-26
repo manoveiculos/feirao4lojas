@@ -12,7 +12,8 @@ const STATUS: EsperaStatus[] = ['aguardando', 'notificado', 'em_atendimento', 'e
 
 /** Lista de espera (somente Admin Geral). Filtros: q (modelo/marca/categoria/nome/telefone) e status. */
 export async function GET(req: NextRequest) {
-  const a = await exigirApi(req, 'admin');
+  // admin e lojas consultam; alterar status continua só com o admin (espera/[id])
+  const a = await exigirApi(req);
   if ('erro' in a) return a.erro;
   const sp = req.nextUrl.searchParams;
   const q = normalizeSearch(sp.get('q') || '');

@@ -19,10 +19,10 @@ const PERIODOS: Array<[string, string]> = [
   ['today', 'Hoje'], ['yesterday', 'Ontem'], ['last_7d', '7 dias'], ['last_14d', '14 dias'], ['last_30d', '30 dias'], ['maximum', 'Tudo'],
 ];
 
-export function AdsPanel() {
+export function AdsPanel({ admin = true }: { admin?: boolean } = {}) {
   const [periodo, setPeriodo] = useState('last_7d');
   const { data: a, erro } = usePolling<Ads>(`/api/admin/ads?periodo=${periodo}`, 30000);
-  const { data: st } = usePolling<Status>('/api/admin/status', 600000);
+  const { data: st } = usePolling<Status>(admin ? '/api/admin/status' : null, 600000);
   const [aberta, setAberta] = useState<string | null>(null);
 
   return (
@@ -97,6 +97,7 @@ export function AdsPanel() {
         </>
       )}
 
+      {admin && (
       <Card titulo="Estoque integrado ao catálogo da Meta">
         <p className="text-sm text-slate-600">
           Feed com todos os carros (foto, preço, km, loja) que atualiza sozinho a cada hora. Cadastre no Gerenciador de Comércio → Catálogo →
@@ -118,6 +119,7 @@ export function AdsPanel() {
           o agente recebe o ID do anúncio automaticamente.
         </p>
       </Card>
+      )}
     </div>
   );
 }

@@ -31,6 +31,9 @@ export default async function LojaLayout({
         { href: `/loja/${slug}`, label: 'Visão geral' },
         { href: `/loja/${slug}/leads`, label: 'Leads' },
         { href: `/loja/${slug}/conversas`, label: 'Conversas' },
+        { href: `/loja/${slug}/espera`, label: 'Lista de Espera' },
+        { href: `/loja/${slug}/campanhas`, label: 'Campanhas' },
+        { href: `/loja/${slug}/acessos`, label: 'Acessos' },
       ]}
     >
       {children}

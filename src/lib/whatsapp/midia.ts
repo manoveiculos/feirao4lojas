@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import { baixarMidiaWa, type MidiaFonte } from './provider';
+import { registrarUso } from '../custos/medidor';
 
 /**
  * Mídia recebida do cliente (foto e áudio):
@@ -53,7 +54,7 @@ function salvar(leadId: string, nome: string, buf: Buffer, mime: string): string
 }
 
 /** Transcreve áudio em português (OpenAI). Sem chave ou em caso de erro, devolve null. */
-export async function transcreverAudio(buf: Buffer, mime: string): Promise<string | null> {
+export async function transcreverAudio(buf: Buffer, mime: string, leadIdAtual: string | null = null): Promise<string | null> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return null;
   try {
@@ -68,7 +69,8 @@ export async function transcreverAudio(buf: Buffer, mime: string): Promise<strin
       body: form,
       signal: AbortSignal.timeout(60_000),
     });
-    const j = (await r.json().catch(() => ({}))) as { text?: string; error?: { message?: string } };
+    const j = (await r.json().catch(() => ({}))) as { text?: string; error?: { message?: string }; usage?: { input_tokens?: number; output_tokens?: number } };
+    if (r.ok) registrarUso({ servico: 'openai', modelo: process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe', entrada: Number(j.usage?.input_tokens) || 0, saida: Number(j.usage?.output_tokens) || 0, cacheEscrita: 0, cacheLeitura: 0, leadId: leadIdAtual });
     if (!r.ok) {
       console.error(`[audio] transcrição falhou: HTTP ${r.status} ${j.error?.message ?? ''}`);
       return null;
@@ -114,7 +116,7 @@ export async function processarMidiaRecebida(
   }
 
   const ref = salvar(leadId, nome, baixado.buf, baixado.mime);
-  const transcricao = await transcreverAudio(baixado.buf, baixado.mime);
+  const transcricao = await transcreverAudio(baixado.buf, baixado.mime, leadId);
   return { ref, texto: transcricao ? `🎤 (áudio transcrito) ${transcricao}` : '[áudio]' };
 }
 

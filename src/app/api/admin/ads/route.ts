@@ -6,7 +6,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const a = await exigirApi(req, 'admin');
+  // lojas também veem as campanhas (somente leitura; números gerais da campanha)
+  const a = await exigirApi(req);
   if ('erro' in a) return a.erro;
   const p = req.nextUrl.searchParams.get('periodo') as Periodo;
   const periodo: Periodo = PERIODOS.includes(p) ? p : 'last_7d';

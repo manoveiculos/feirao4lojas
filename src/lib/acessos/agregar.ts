@@ -42,9 +42,9 @@ function agruparPorVisitante(eventos: EventoAcesso[]): Map<string, EventoAcesso[
 }
 
 /** Leads do CRM ligados a um visitante: o sid do clique/formulário é o id do visitante. */
-function leadsPorVisitante(): Map<string, Lead> {
+function leadsPorVisitante(visivel?: (l: Lead) => boolean): Map<string, Lead> {
   const m = new Map<string, Lead>();
-  for (const l of listLeads()) if (!l.teste && l.origem.sid) m.set(l.origem.sid, l);
+  for (const l of listLeads()) if (!l.teste && l.origem.sid && (!visivel || visivel(l))) m.set(l.origem.sid, l);
   return m;
 }
 
@@ -56,11 +56,12 @@ const contar = (itens: Array<string | null | undefined>, limite = 8) => {
 
 // ───────────────────────── Resumo ─────────────────────────
 
-export function montarResumo(periodo: Periodo, agora = Date.now()) {
+/** `visivel`: quando informado (usuário de loja), só leads liberados para ele aparecem com dados de contato. */
+export function montarResumo(periodo: Periodo, agora = Date.now(), visivel?: (l: Lead) => boolean) {
   const ini = inicioDoPeriodo(periodo, agora);
   const eventos = eventosDesde(ini).filter((e) => Date.parse(e.criado_em) >= ini);
   const porVisitante = agruparPorVisitante(eventos);
-  const leads = leadsPorVisitante();
+  const leads = leadsPorVisitante(visivel);
 
   const visitantes = [...porVisitante.entries()].map(([id, passos]) => {
     const primeiro = passos.find((p) => p.canal !== 'direto') || passos[0];
@@ -282,10 +283,10 @@ export interface Jornada {
   lead: { id: string; nome: string; telefone: string; status: string; score: number; lojaNome: string | null; qualificado: boolean } | null;
 }
 
-export function montarJornadas(periodo: Periodo, opcoes: { canal?: Canal | null; limite?: number } = {}, agora = Date.now()): Jornada[] {
+export function montarJornadas(periodo: Periodo, opcoes: { canal?: Canal | null; limite?: number } = {}, agora = Date.now(), visivel?: (l: Lead) => boolean): Jornada[] {
   const ini = inicioDoPeriodo(periodo, agora);
   const eventos = eventosDesde(ini);
-  const leads = leadsPorVisitante();
+  const leads = leadsPorVisitante(visivel);
   const lista: Jornada[] = [];
 
   for (const [id, passos] of agruparPorVisitante(eventos)) {

@@ -259,6 +259,25 @@ async function main() {
     ok(store.getMensagens(l3.id).some((m) => m.autor === 'sistema' && m.texto.includes('não gerou resposta')), 'sem resposta: aviso de sistema no painel');
   }
 
+  logOriginal('\n9) Custo das APIs: tokens exatos viram R$ e o preço editado recalcula o histórico');
+  {
+    const { montarCustos } = await import('../src/lib/custos/resumo');
+    const t = tel();
+    respostasClaude = [
+      () => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: 'Oi! Aqui é a Val.' }], usage: { input_tokens: 1000, output_tokens: 500, cache_creation_input_tokens: 2000, cache_read_input_tokens: 4000 } }),
+    ];
+    await (await chegar({ telefone: t, texto: 'oi, bom dia' }))();
+    await new Promise((r) => setTimeout(r, 50));
+    const r1 = await montarCustos('hoje');
+    const usd = (1000 * 3 + 500 * 15 + 2000 * 3.75 + 4000 * 0.3) / 1e6; // preço padrão Claude
+    ok(Math.abs(r1.totais.apisUsd - usd) < 1e-9, `custo = tokens × preço (US$ ${r1.totais.apisUsd.toFixed(6)}, esperado ${usd.toFixed(6)})`);
+    ok(Math.abs(r1.totais.anthropicBrl - usd * 5.5) < 1e-6, 'convertido em R$ pela cotação');
+    store.saveSettings({ custos: { cotacaoUsdBrl: 6, precos: { 'claude-sonnet-5-5': { entrada: 6, saida: 30, cacheEscrita: 7.5, cacheLeitura: 0.6 } }, fixos: [{ nome: 'Hospedagem', valorMensalBrl: 100 }] } });
+    const r2 = await montarCustos('hoje');
+    ok(Math.abs(r2.totais.apisUsd - usd * 2) < 1e-9 && Math.abs(r2.totais.apisBrl - usd * 2 * 6) < 1e-6, 'preço e cotação novos recalculam o histórico');
+    ok(r2.totais.fixosMensalBrl === 100 && r2.totais.sistemaMensalEstimadoBrl >= 100, 'custos fixos entram no total mensal');
+  }
+
   logOriginal(falhas ? `\n❌ ${falhas} verificação(ões) falharam` : '\n✅ Tudo certo');
   fs.rmSync(process.env.DATA_DIR!, { recursive: true, force: true });
   process.exit(falhas ? 1 : 0);

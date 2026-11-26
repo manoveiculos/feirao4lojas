@@ -29,7 +29,7 @@ const STATUS: Array<[string, string, string]> = [
 const COR = Object.fromEntries(STATUS.map(([v, , c]) => [v, c]));
 const LABEL = Object.fromEntries(STATUS.map(([v, l]) => [v, l]));
 
-export function ListaEspera() {
+export function ListaEspera({ admin = true }: { admin?: boolean } = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -81,7 +81,7 @@ export function ListaEspera() {
 
       <Card
         titulo="Lista de espera"
-        acao={
+        acao={!admin ? undefined :
           <button onClick={rodarMatch} disabled={rodando} className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50 cursor-pointer">
             {rodando ? 'Cruzando…' : 'Cruzar com o estoque agora'}
           </button>
@@ -117,7 +117,9 @@ export function ListaEspera() {
               {data?.itens.map((e) => (
                 <tr key={e.id} className="align-top">
                   <td className="py-2 pr-2">
-                    <Link href={`/admin/conversas?lead=${e.leadId}`} className="font-bold text-slate-900 hover:underline">{e.leadNome || `+${e.telefone}`}</Link>
+                    {admin
+                      ? <Link href={`/admin/conversas?lead=${e.leadId}`} className="font-bold text-slate-900 hover:underline">{e.leadNome || `+${e.telefone}`}</Link>
+                      : <span className="font-bold text-slate-900">{e.leadNome || `+${e.telefone}`}</span>}
                     <div className="text-xs text-slate-500">+{e.telefone}</div>
                   </td>
                   <td className="pr-2">
@@ -139,10 +141,10 @@ export function ListaEspera() {
                   </td>
                   <td className="pr-2 whitespace-nowrap text-xs text-slate-500">{tempoRelativo(e.createdAt)}</td>
                   <td className="whitespace-nowrap text-right">
-                    <select value={e.status} onChange={(ev) => void mudarStatus(e.id, ev.target.value)} aria-label="Mudar status"
+                    {admin && <select value={e.status} onChange={(ev) => void mudarStatus(e.id, ev.target.value)} aria-label="Mudar status"
                       className="h-8 rounded-lg border border-slate-300 px-1 text-xs">
                       {STATUS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+                    </select>}
                   </td>
                 </tr>
               ))}

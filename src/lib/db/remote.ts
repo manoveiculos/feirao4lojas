@@ -435,3 +435,24 @@ export async function batimentoELider(): Promise<boolean> {
   const vivas = await lerJson<{ id: string }>(`av3_instancias?select=id&visto_em=gte.${enc(corte)}&order=iniciada_em.desc,id.desc&limit=1`, 8000);
   return !vivas[0] || vivas[0].id === INSTANCIA.id;
 }
+
+// ───────────────────────── Custos das APIs (av3_custos_api) ─────────────────────────
+
+interface LinhaCusto { id: string; ts: string; servico: 'anthropic' | 'openai'; modelo: string; entrada: number; saida: number; cache_escrita: number; cache_leitura: number; lead_id: string | null }
+
+export async function inserirCustos(usos: Array<{ id: string; ts: string; servico: 'anthropic' | 'openai'; modelo: string; entrada: number; saida: number; cacheEscrita: number; cacheLeitura: number; leadId: string | null }>): Promise<void> {
+  const linhas: LinhaCusto[] = usos.map((u) => ({ id: u.id, ts: u.ts, servico: u.servico, modelo: u.modelo, entrada: u.entrada, saida: u.saida, cache_escrita: u.cacheEscrita, cache_leitura: u.cacheLeitura, lead_id: u.leadId }));
+  await exigirOk(await inserirIgnorando('av3_custos_api', linhas, 'id'), 'custos');
+}
+
+export async function lerCustosDesde(desde: string) {
+  const out: Array<{ id: string; ts: string; servico: 'anthropic' | 'openai'; modelo: string; entrada: number; saida: number; cacheEscrita: number; cacheLeitura: number; leadId: string | null }> = [];
+  for (let de = 0; de < 100_000; de += 1000) {
+    const r = await rest(`av3_custos_api?select=*&ts=gte.${encodeURIComponent(desde)}&order=ts.asc`, { headers: { Range: `${de}-${de + 999}`, 'Range-Unit': 'items' } });
+    await exigirOk(r, 'custos');
+    const lote = (await r.json()) as LinhaCusto[];
+    for (const l of lote) out.push({ id: l.id, ts: l.ts, servico: l.servico, modelo: l.modelo, entrada: l.entrada, saida: l.saida, cacheEscrita: l.cache_escrita, cacheLeitura: l.cache_leitura, leadId: l.lead_id });
+    if (lote.length < 1000) break;
+  }
+  return out;
+}
