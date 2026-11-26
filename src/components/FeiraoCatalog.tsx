@@ -548,7 +548,7 @@ function FeiraoCatalogInner({
                     className="inline-flex min-h-[56px] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-[0.98] sm:flex-none sm:px-7"
                   >
                     <Car className="h-5 w-5 shrink-0" />
-                    Ver os {facets.totalCarros} carros
+                    Ver os carros
                   </a>
                 </div>
               ) : (
@@ -645,7 +645,7 @@ function FeiraoCatalogInner({
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Motos ({facets.totalMotos})
+                Motos
               </button>
             </div>
           </div>
@@ -804,7 +804,7 @@ function FeiraoCatalogInner({
                   <QuickChip
                     active={combustivel === 'Elétrico'}
                     onClick={() => applyQuickPreset({ combustivel: 'Elétrico' })}
-                    label={`Elétricos (${facets.totalEletricos})`}
+                    label="Elétricos"
                   />
                   <QuickChip
                     active={combustivel === 'Híbrido'}
@@ -1178,7 +1178,6 @@ function FeiraoCatalogInner({
             {/* Cards das 4 Lojas Participantes (sem endereços individuais e sem telefones) */}
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {lojas.map((l) => {
-                const count = metadata.porLoja[l.slug] || 0;
                 return (
                   <div
                     key={l.slug}
@@ -1205,9 +1204,6 @@ function FeiraoCatalogInner({
                         <h3 className="text-base font-extrabold text-slate-950">
                           {l.nome}
                         </h3>
-                        <span className="shrink-0 rounded-full bg-[#062835]/10 px-2.5 py-0.5 text-xs font-extrabold text-[#062835]">
-                          {count} {count === 1 ? 'carro' : 'carros'}
-                        </span>
                       </div>
 
                       <p className="mt-2 text-xs text-slate-600">

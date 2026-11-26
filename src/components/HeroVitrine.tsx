@@ -55,7 +55,7 @@ export function HeroVitrine({
         >
           <span className="min-w-0">
             <span className="block text-sm font-extrabold text-white">
-              {ROTULO[i.categoria]} <span className="font-semibold text-slate-300">· {i.n}</span>
+              {ROTULO[i.categoria]}
             </span>
             <span className="block truncate text-[11px] font-semibold text-orange-300">
               a partir de {brl(i.min)}
