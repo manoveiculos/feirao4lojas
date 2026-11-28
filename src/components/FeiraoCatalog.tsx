@@ -740,7 +740,7 @@ function FeiraoCatalogInner({
                   }
                   className="h-11 flex-1 rounded-xl border border-slate-300 bg-slate-50 px-3 text-sm font-bold text-slate-800 focus:border-[#0B3C4E] focus:outline-none"
                 >
-                  <option value="destaque">Destaques do feirão</option>
+                  <option value="destaque">Mais recentes</option>
                   <option value="preco_asc">Menor preço</option>
                   <option value="preco_desc">Maior preço</option>
                   <option value="ano_desc">Mais novos</option>
@@ -923,10 +923,10 @@ function FeiraoCatalogInner({
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Ordenar por
                   </label>
-                  <TooltipHint content="Destaques do feirão: mostra primeiro os carros com selo Pronta entrega e depois ordena pelo menor preço.">
+                  <TooltipHint content="Mais recentes: mostra primeiro os carros que entraram por último no estoque.">
                     <button
                       type="button"
-                      aria-label="Entender critério de ordenação Destaques do feirão"
+                      aria-label="Entender critério de ordenação Mais recentes"
                       className="text-slate-400 hover:text-[#0B3C4E] cursor-help"
                     >
                       <Info className="h-3.5 w-3.5" />
@@ -940,7 +940,7 @@ function FeiraoCatalogInner({
                   }
                   className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-semibold text-slate-800 transition focus:border-[#0B3C4E] focus:bg-white focus:outline-none"
                 >
-                  <option value="destaque">Destaques do feirão</option>
+                  <option value="destaque">Mais recentes</option>
                   <option value="preco_asc">Menor preço</option>
                   <option value="preco_desc">Maior preço</option>
                   <option value="ano_desc">Mais novos</option>

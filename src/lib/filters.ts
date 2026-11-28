@@ -195,12 +195,8 @@ export function filterVeiculos(
       break;
     case 'destaque':
     default:
-      // "Destaques do feirão": pronta entrega primeiro, depois menor preço
-      list.sort((a, b) => {
-        const peDiff = Number(Boolean(b.pronta_entrega)) - Number(Boolean(a.pronta_entrega));
-        if (peDiff !== 0) return peDiff;
-        return (a.preco ?? 9e9) - (b.preco ?? 9e9);
-      });
+      // "Mais recentes": o que entrou por último no estoque aparece primeiro (empate mantém a ordem da origem)
+      list.sort((a, b) => Date.parse(b.entradaEm ?? '') - Date.parse(a.entradaEm ?? '') || 0);
       break;
   }
 

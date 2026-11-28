@@ -8,6 +8,8 @@ export const runtime = 'nodejs';
 const schema = z.object({
   status: z.enum(['aguardando', 'notificado', 'em_atendimento', 'encerrado']).optional(),
   observacoes: z.string().max(500).optional(),
+  precoMaximo: z.number().int().positive().max(5_000_000).nullable().optional(),
+  anoMinimo: z.number().int().min(1980).max(2100).nullable().optional(),
 });
 
 /** Admin muda o status de um registro (ex.: encerrar, ou voltar para "aguardando"). */

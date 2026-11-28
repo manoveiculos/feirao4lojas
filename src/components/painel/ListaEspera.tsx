@@ -69,6 +69,21 @@ export function ListaEspera({ admin = true }: { admin?: boolean } = {}) {
     void recarregar();
   }
 
+  async function editar(e: Item) {
+    const p = window.prompt('Teto de preço em R$ (apenas números; vazio = sem limite):', e.precoMaximo ? String(e.precoMaximo) : '');
+    if (p === null) return;
+    const a = window.prompt('Ano mínimo (vazio = qualquer):', e.anoMinimo ? String(e.anoMinimo) : '');
+    if (a === null) return;
+    const preco = p.replace(/\D/g, '');
+    const ano = a.replace(/\D/g, '');
+    const r = await api<{ erro?: string }>(`/api/painel/espera/${e.id}`, 'PATCH', {
+      precoMaximo: preco ? Number(preco) : null,
+      anoMinimo: ano ? Number(ano) : null,
+    });
+    setMsg(r.ok ? 'Pedido atualizado.' : `Erro: ${r.data.erro ?? 'falha ao salvar'}`);
+    void recarregar();
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -141,6 +156,7 @@ export function ListaEspera({ admin = true }: { admin?: boolean } = {}) {
                   </td>
                   <td className="pr-2 whitespace-nowrap text-xs text-slate-500">{tempoRelativo(e.createdAt)}</td>
                   <td className="whitespace-nowrap text-right">
+                    {admin && <button onClick={() => void editar(e)} className="mr-1 h-8 rounded-lg border border-slate-300 px-2 text-xs font-bold cursor-pointer">Editar</button>}
                     {admin && <select value={e.status} onChange={(ev) => void mudarStatus(e.id, ev.target.value)} aria-label="Mudar status"
                       className="h-8 rounded-lg border border-slate-300 px-1 text-xs">
                       {STATUS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}

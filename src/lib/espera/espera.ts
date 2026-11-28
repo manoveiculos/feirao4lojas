@@ -11,7 +11,7 @@ import {
   updateLead,
 } from '../db/store';
 import type { EsperaItem, Lead } from '../db/types';
-import { loadEstoque } from '../estoque';
+import { ENTRADA_LEGADO, loadEstoque } from '../estoque';
 import { isMoto, normalizeSearch } from '../filters';
 import type { Veiculo } from '../types';
 import { dentroDoHorarioComercial } from '../agent/followup';
@@ -228,7 +228,14 @@ async function executar(opts: { forcarTodos?: boolean; veiculoIds?: string[]; ig
       ultimaVerificacao: agora.toISOString(),
     });
 
-  if (!candidatos.length) {
+  // Rede de segurança: além dos "novos" detectados, todo carro que ENTROU depois do pedido do cliente
+  // (entradaEm > createdAt, últimos 7 dias) também é cruzado — não depende do controle de pendentes.
+  const limiteRecente = new Date(agora.getTime() - VALIDADE_PENDENTE_MS).toISOString();
+  const recentes = opts.veiculoIds ? [] : estoque.filter((v) => v.entradaEm && v.entradaEm !== ENTRADA_LEGADO && v.entradaEm > limiteRecente);
+  const minCriado = aguardando.reduce((m, e) => (e.createdAt < m ? e.createdAt : m), '9999');
+  const recentesUteis = recentes.filter((v) => v.entradaEm! > minCriado);
+
+  if (!candidatos.length && !recentesUteis.length) {
     // nada a cruzar: só grava se o conjunto de veículos mudou (ex.: carro vendido saiu do estoque)
     if (novos.length || pendentesMap.size !== controle.pendentes.length || conhecidos.size !== porId.size) salvar(pendentesMap);
     return { ...base, status: 'sem_novos' };
@@ -240,7 +247,7 @@ async function executar(opts: { forcarTodos?: boolean; veiculoIds?: string[]; ig
   }
 
   // 2) Cruza: cada lead recebe no máximo UM aviso por execução, nunca o mesmo carro duas vezes
-  base.veiculosAnalisados = candidatos.length;
+  base.veiculosAnalisados = new Set([...candidatos, ...recentesUteis].map((v) => v.id)).size;
   const leadsAvisados = new Set<string>();
   const ordenados = [...aguardando].sort((a, b) => a.createdAt.localeCompare(b.createdAt)); // quem esperou mais vem primeiro
   for (const item of ordenados) {
@@ -248,7 +255,9 @@ async function executar(opts: { forcarTodos?: boolean; veiculoIds?: string[]; ig
     const lead = getLead(item.leadId);
     if (!lead || lead.teste || lead.status === 'optout' || lead.status === 'comprou' || !lead.agenteAtivo) continue;
     const jaAvisadosDoLead = new Set(listEspera().filter((e) => e.leadId === item.leadId).flatMap((e) => e.veiculosAvisados));
-    const match = candidatos
+    const doItem = new Map(candidatos.map((v) => [v.id, v]));
+    for (const v of recentesUteis) if (v.entradaEm! > item.createdAt) doItem.set(v.id, v);
+    const match = [...doItem.values()]
       .filter((v) => !jaAvisadosDoLead.has(v.id) && veiculoAtende(item, v))
       .sort((a, b) => (a.preco ?? Infinity) - (b.preco ?? Infinity))[0];
     if (!match) continue;

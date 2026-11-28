@@ -14,7 +14,35 @@ export {
 
 export const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'estoque.json');
 
+/** Data-sentinela: veículo que já estava no estoque antes de existir o carimbo de entrada (data real desconhecida). */
+export const ENTRADA_LEGADO = '2000-01-01T00:00:00.000Z';
+
+/**
+ * Carimba `entradaEm` (1ª vez que o veículo apareceu). Quem já estava no estoque anterior mantém a data;
+ * veículo inédito recebe agora; estoque antigo sem data recebe ENTRADA_LEGADO (não dispara aviso retroativo).
+ */
+function carimbarEntrada(db: EstoqueDatabase): void {
+  let anterior: EstoqueDatabase | null = null;
+  try {
+    if (fs.existsSync(DATA_FILE_PATH)) anterior = JSON.parse(fs.readFileSync(DATA_FILE_PATH, 'utf8')) as EstoqueDatabase;
+  } catch {
+    anterior = null;
+  }
+  const porId = new Map<string, string>();
+  const porUrl = new Map<string, string>();
+  for (const v of anterior?.veiculos ?? []) {
+    const t = v.entradaEm || ENTRADA_LEGADO;
+    porId.set(v.id, t);
+    if (v.urlOriginal) porUrl.set(v.urlOriginal, t);
+  }
+  const agora = new Date().toISOString();
+  for (const v of db.veiculos) {
+    v.entradaEm = v.entradaEm || porId.get(v.id) || (v.urlOriginal && porUrl.get(v.urlOriginal)) || (anterior ? agora : ENTRADA_LEGADO);
+  }
+}
+
 export function saveEstoque(db: EstoqueDatabase): void {
+  carimbarEntrada(db);
   fs.mkdirSync(path.dirname(DATA_FILE_PATH), { recursive: true });
   fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(db, null, 2), 'utf8');
 }
