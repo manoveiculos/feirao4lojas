@@ -54,12 +54,17 @@ export function ListaEspera({ admin = true }: { admin?: boolean } = {}) {
     if (!window.confirm('Cruzar TODO o estoque atual com quem está aguardando? Clientes com carro compatível recebem a mensagem no WhatsApp agora (cada carro só é avisado uma vez por cliente).')) return;
     setRodando(true);
     setMsg('');
-    const r = await api<{ status: string; notificados?: unknown[]; motivo?: string; erro?: string }>('/api/estoque/match-espera', 'POST', { todos: true });
+    let r = await api<{ status: string; notificados?: unknown[]; motivo?: string; erro?: string; veiculosAnalisados?: number }>('/api/estoque/match-espera', 'POST', { todos: true });
+    if (r.ok && r.data.status === 'adiado' && r.data.motivo?.includes('horário') && window.confirm(`${r.data.motivo}
+
+Enviar mesmo assim, agora?`)) {
+      r = await api<{ status: string; notificados?: unknown[]; motivo?: string; erro?: string; veiculosAnalisados?: number }>('/api/estoque/match-espera', 'POST', { todos: true, ignorarHorario: true });
+    }
     setRodando(false);
     setMsg(
       !r.ok ? `Erro: ${r.data.erro ?? 'falha'}`
         : r.data.status === 'adiado' ? `Adiado: ${r.data.motivo}`
-        : `${r.data.notificados?.length ?? 0} cliente(s) avisado(s).`
+        : `${r.data.notificados?.length ?? 0} cliente(s) avisado(s) — ${r.data.veiculosAnalisados ?? 0} carro(s) analisados.`
     );
     void recarregar();
   }
