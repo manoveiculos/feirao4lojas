@@ -55,6 +55,8 @@ export interface Veiculo {
   fotos: string[];
   urlOriginal: string;
   atualizadoEm: string;
+  /** Quando o veículo apareceu pela 1ª vez no estoque (preservado entre sincronizações). */
+  entradaEm?: string;
   /** Campo pronta_entrega: documentação ok, revisado, higienizado (default false). */
   pronta_entrega: boolean;
 }

@@ -129,7 +129,7 @@ const TOOLS = [
         modelo: { type: 'string', description: 'Modelo desejado, ex: "Corolla Cross", "HB20S"' },
         categoria: { type: 'string', enum: ['suv', 'sedan', 'hatch', 'picape', 'moto', 'utilitario'] },
         ano_minimo: { type: 'number', description: 'Ano mínimo aceito' },
-        preco_maximo: { type: 'number', description: 'Valor máximo em reais que o cliente pagaria' },
+        preco_maximo: { type: 'number', description: 'Valor máximo em reais que o cliente pagaria PARA ESTE carro. Só informe se ele disse esse teto agora; nunca reaproveite o valor de outro carro que ele já tinha pedido (se mudou de carro, deixe vazio).' },
         cambio: { type: 'string', enum: ['automatico', 'manual'] },
         tem_troca: { type: 'boolean' },
         observacoes: { type: 'string', description: 'Detalhes extras: cor, km máximo, versão, uso' },
@@ -375,7 +375,8 @@ export async function executarTool(
         modelo: a.modelo,
         categoria: a.categoria,
         anoMinimo: a.ano_minimo,
-        precoMaximo: a.preco_maximo ?? lead.perfil.orcamento,
+        // Pedido por modelo específico: não herda o orçamento antigo da ficha (ex.: R$ 19 mil do Fox travava o match de um Geely EX2).
+        precoMaximo: a.preco_maximo ?? (a.modelo ? null : lead.perfil.orcamento),
         cambio: a.cambio,
         temTroca: a.tem_troca,
         observacoes: a.observacoes,
