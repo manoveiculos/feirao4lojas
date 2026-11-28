@@ -20,6 +20,7 @@ import { processarMidiaRecebida } from '../whatsapp/midia';
 import { enviarTexto, sleep } from '../whatsapp/outbound';
 import type { Entrada } from '../whatsapp/provider';
 import { responderLead } from './engine';
+import { aplicarRecusa } from './respeito';
 import { sincronizarLead, sincronizarPorTelefone } from '../db/sync';
 
 const RE_REF = /\[Ref:\s*(AV3-[A-Z0-9-]+)\]/i;
@@ -174,6 +175,11 @@ async function processarMensagemCliente(
     addEvento({ tipo: 'primeira_resposta', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { canal: lead.origem.canal } });
   }
   void novo;
+
+  // ── Recusa e pedido de espaço: "não quero essa", "só me chame se…", "já te disse" ──
+  // (regras em código: não dependem de o modelo lembrar de chamar descartar_veiculo/nao_perturbar)
+  const recusa = aplicarRecusa(lead.id, texto);
+  if (recusa.naoPerturbar) addEvento({ tipo: 'lead_status', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { de: 'follow-up', para: 'nao_perturbar' } });
 
   // ── Opt-out (LGPD / boa prática) ──
   if (RE_OPTOUT.test(texto)) {

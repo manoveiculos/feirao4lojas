@@ -248,6 +248,10 @@ export function createLead(input: Partial<Lead> & { telefone: string }): Lead {
     roteadoEm: null,
     roteamentoMotivo: '',
     esperaAviso: null,
+    veiculosDescartados: [],
+    naoPerturbar: null,
+    ultimoFollowupEm: null,
+    followupsTotal: 0,
     ...resto,
   };
   s.leads.set(lead.id, lead);
@@ -371,6 +375,11 @@ export function saveEsperaControle(patch: Partial<EsperaControle>): EsperaContro
 
 export function getMensagens(leadId: string): Mensagem[] {
   return state().mensagens.get(leadId) ?? [];
+}
+
+/** Marca um id do WhatsApp como nosso (sem criar mensagem): o eco do envio não vira "atendente humano". */
+export function marcarWaIdProcessado(waId: string): void {
+  if (waId) state().waIds.add(waId);
 }
 
 export function jaProcessouWaId(waId: string): boolean {

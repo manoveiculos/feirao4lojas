@@ -5,6 +5,8 @@ import { sincronizarLead } from '../db/sync';
 import type { Lead } from '../db/types';
 import { loadEstoque } from '../estoque';
 import { enviarTexto, marcarProximoFollowup } from '../whatsapp/outbound';
+import { gerarFollowupIA } from './engine';
+import { podeReceberFollowup, primeiroNome } from './respeito';
 import { FEIRAO_CONFIG } from '../config';
 import { getCampaignState, resolveEffectiveDate } from '../campaign';
 
@@ -14,23 +16,26 @@ export function dentroDoHorarioComercial(agora = new Date()): boolean {
   return h >= 8 && h < 20;
 }
 
+/** Carro que o cliente ainda quer: nunca um que ele recusou. Vazio quando não há nenhum. */
 function interesse(lead: Lead): string {
-  const cod = lead.perfil.veiculosInteresse[lead.perfil.veiculosInteresse.length - 1];
+  const desc = new Set((lead.veiculosDescartados ?? []).map((c) => c.toUpperCase()));
+  const cods = lead.perfil.veiculosInteresse.filter((c) => !desc.has(c.toUpperCase()));
+  const cod = cods[cods.length - 1];
   if (cod) {
     const v = loadEstoque().veiculos.find((x) => x.codigo === cod);
-    if (v) return `o ${v.marca} ${v.modelo} ${v.anoTexto}`.replace(/\s{2,}/g, ' ');
+    if (v) return `o ${v.marca} ${v.modelo} ${v.anoTexto}`.replace(/s{2,}/g, ' ');
   }
-  return lead.perfil.marca_modelo || (lead.perfil.categoria ? `um ${lead.perfil.categoria}` : 'o carro que você procura');
+  return lead.perfil.marca_modelo || (lead.perfil.categoria ? `um ${lead.perfil.categoria}` : '');
 }
 
 /**
- * Follow-up automático (padrão: 2 h, 24 h e 72 h sem resposta, só das 8h às 20h; ajustável em Agente & Config).
- * Mensagens de 1–2 linhas, com o carro que o cliente olhou e uma pergunta só.
+ * Texto de reserva do follow-up (usado só se a IA não puder escrever). Curto, sem inventar,
+ * nunca cita carro recusado e não presume financiamento.
  */
 export function textoFollowup(lead: Lead, etapa: number): string {
-  // só usa o nome que o cliente confirmou (o do perfil do WhatsApp pode ser apelido ou empresa)
-  const nome = lead.perfil.nomeConfirmado && lead.nome ? lead.nome.split(/\s+/)[0] : '';
+  const nome = primeiroNome(lead);
   const oi = nome ? `Oi, ${nome}!` : 'Oi!';
+  const carro = interesse(lead);
   const st = getCampaignState(resolveEffectiveDate(null, 0).nowBrt);
   const evento =
     st.mode === 'encerrado'
@@ -40,13 +45,12 @@ export function textoFollowup(lead: Lead, etapa: number): string {
         : st.isLastCall
           ? `O ${FEIRAO_CONFIG.nome} vai só até 23/12.`
           : `O ${FEIRAO_CONFIG.nome} está rolando agora.`;
-  // não presume financiamento: o benefício da parcela só aparece para quem disse que vai financiar
   const beneficio =
     lead.perfil.formaPagamento === 'financiamento' ? 'a 1ª parcela fica só depois do Carnaval' : 'avaliamos seu usado na hora';
 
-  if (etapa === 0) return `${oi} Ainda quer ver ${interesse(lead)}? Te mando mais fotos 😉`;
-  if (etapa === 1) return `${oi} ${evento} E ${beneficio}. Quer reservar um horário pra ver ${interesse(lead)}?`.replace(/\s{2,}/g, ' ');
-  return `${oi} Vou pausar por aqui. Quando quiser retomar, é só me chamar 🙏 (Se não quiser mais mensagens, responda "parar".)`;
+  if (etapa === 0) return carro ? `${oi} Ainda quer ver ${carro}? Te mando mais fotos 😉` : `${oi} Ficou alguma dúvida? Posso te ajudar por aqui 🙂`;
+  if (etapa === 1) return (carro ? `${oi} ${evento} E ${beneficio}. Quer reservar um horário pra ver ${carro}?` : `${oi} ${evento} E ${beneficio}. Quer que eu reserve um horário pra você?`).replace(/s{2,}/g, ' ');
+  return `${oi} Vou pausar por aqui. Quando quiser retomar, é só me chamar 🙏`;
 }
 
 /**
@@ -76,10 +80,23 @@ export async function executarTick(agora = new Date()): Promise<{ followups: num
       await sincronizarLead(lead.id);
       const fresco = getLead(lead.id);
       if (!fresco || fresco.humano || fresco.status === 'optout' || !fresco.proximoFollowupEm || Date.parse(fresco.proximoFollowupEm) > agora.getTime() || fresco.followupsEnviados !== lead.followupsEnviados) continue;
+      // regras de respeito: quem recusou, pediu espaço, está na lista de espera ou já tem consultor não recebe
+      const pode = podeReceberFollowup(fresco);
+      if (!pode.ok) {
+        updateLead(lead.id, { proximoFollowupEm: null });
+        continue;
+      }
       const etapa = lead.followupsEnviados;
-      const r = await enviarTexto(lead, textoFollowup(lead, etapa), { autor: 'agente' });
+      // a Val escreve lendo a conversa; sem IA disponível, usa o texto de reserva
+      const ia = await gerarFollowupIA(fresco, etapa);
+      if (ia === '') {
+        // a IA concluiu que não há nada útil a dizer: melhor silêncio que insistência
+        updateLead(lead.id, { proximoFollowupEm: null });
+        continue;
+      }
+      const r = await enviarTexto(lead, ia ?? textoFollowup(fresco, etapa), { autor: 'agente' });
       if (r.ok) {
-        updateLead(lead.id, { followupsEnviados: etapa + 1 });
+        updateLead(lead.id, { followupsEnviados: etapa + 1, ultimoFollowupEm: agora.toISOString(), followupsTotal: (lead.followupsTotal ?? 0) + 1 });
         addEvento({ tipo: 'followup', leadId: lead.id, lojaSlug: lead.lojaSlug, meta: { etapa } });
         marcarProximoFollowup(lead);
         followups++;

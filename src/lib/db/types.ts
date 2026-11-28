@@ -101,6 +101,13 @@ export interface Lead {
   teste?: boolean;
   /** Instância do servidor que gravou esta versão no banco (sincronização entre instâncias). */
   instancia?: string;
+  /** Códigos de carros que o cliente RECUSOU: nunca mais citados em follow-up nem oferecidos de novo. */
+  veiculosDescartados?: string[];
+  /** Cliente pediu espaço ("só me chame se…", "para de insistir"): sem follow-ups. Avisos combinados (lista de espera) continuam. */
+  naoPerturbar?: { em: string; motivo: string } | null;
+  /** Controle de cadência: quando saiu o último follow-up e quantos já saíram no total. */
+  ultimoFollowupEm?: string | null;
+  followupsTotal?: number;
 }
 
 export type MensagemAutor = 'lead' | 'agente' | 'humano' | 'sistema';

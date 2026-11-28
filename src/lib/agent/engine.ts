@@ -19,6 +19,7 @@ import {
   quebrarEmBaloes,
 } from '../whatsapp/outbound';
 import { imagemParaClaude } from '../whatsapp/midia';
+import { descartarVeiculo, marcarNaoPerturbar, primeiroNome } from './respeito';
 import { usoDaAnthropic } from '../custos/medidor';
 import { avisarVisita, criteriosMinimos, reavaliarLead } from './qualificacao';
 import { avisarAdminHumano, notificarLoja, rotearLead } from './roteador';
@@ -111,6 +112,22 @@ const TOOLS = [
       },
       required: ['descricao'],
     },
+  },
+  {
+    name: 'descartar_veiculo',
+    description:
+      'Registra que o cliente RECUSOU um carro (disse que não quer, não gostou, "essa não"). O carro sai da ficha e nunca mais é citado nem oferecido. Chame na hora, antes de responder. Não é para carro que ele só achou caro: só quando recusou.',
+    input_schema: {
+      type: 'object',
+      properties: { codigo: { type: 'string', description: 'Código do carro recusado, ex: NA-015 (veja "Carros de interesse")' } },
+      required: ['codigo'],
+    },
+  },
+  {
+    name: 'nao_perturbar',
+    description:
+      'Registra que o cliente pediu espaço: "só me chame se…", "para de insistir", "já te disse", "não me chame". O sistema para TODOS os follow-ups dele (avisos que ele mesmo pediu, como a lista de espera, continuam). Chame e responda curto e com respeito, sem tentar reverter.',
+    input_schema: { type: 'object', properties: { motivo: { type: 'string', description: 'O que o cliente disse, em uma frase' } }, required: ['motivo'] },
   },
   {
     name: 'enviar_localizacao',
@@ -283,7 +300,8 @@ export async function executarTool(
           i === 0
             ? `*${v.titulo}* ${v.anoTexto}\n💰 ${v.precoFormatado} | 🛣️ ${v.kmFormatado} | ⚙️ ${v.cambio}`
             : '';
-        const r = await enviarImagem(lead, fotos[i], legenda, { simulado: ctx.simulado });
+        // álbum: a 1ª foto cria UMA linha no painel com todas as fotos; as demais só marcam o id (sem linhas vazias)
+        const r = await enviarImagem(lead, fotos[i], legenda, { simulado: ctx.simulado, silencioso: i > 0, midiasRegistro: i === 0 ? fotos : undefined });
         if (r.ok) enviadas++;
       }
       const atual = lead_(ctx);
@@ -354,6 +372,18 @@ export async function executarTool(
         roteado: Boolean(final?.roteadoEm),
         aprovavel: final ? criteriosMinimos(final, false) : undefined,
       };
+    }
+
+    case 'descartar_veiculo': {
+      const codigo = String(input.codigo ?? '').trim();
+      if (!codigo) return { ok: false, erro: 'Informe o código do carro.' };
+      descartarVeiculo(ctx.leadId, codigo);
+      return { ok: true, instrucao: 'Carro descartado. Reconheça sem insistir nele e pergunte (uma vez) o que o cliente prefere ver.' };
+    }
+
+    case 'nao_perturbar': {
+      marcarNaoPerturbar(ctx.leadId, String(input.motivo ?? ''));
+      return { ok: true, instrucao: 'Follow-ups desligados para este cliente. Responda curto e gentil; não peça nada em troca.' };
     }
 
     case 'enviar_localizacao': {
@@ -512,7 +542,7 @@ interface RespostaApi {
  */
 const MAX_TOKENS = 2048;
 
-async function chamarClaude(system: string, dinamico: string, messages: MsgApi[], maxTokens = MAX_TOKENS, leadId: string | null = null): Promise<RespostaApi> {
+async function chamarClaude(system: string, dinamico: string, messages: MsgApi[], maxTokens = MAX_TOKENS, leadId: string | null = null, semTools = false): Promise<RespostaApi> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY não configurada.');
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -529,7 +559,7 @@ async function chamarClaude(system: string, dinamico: string, messages: MsgApi[]
         { type: 'text', text: system, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: dinamico },
       ],
-      tools: TOOLS,
+      ...(semTools ? {} : { tools: TOOLS }),
       messages,
     }),
     signal: AbortSignal.timeout(60_000),
@@ -592,6 +622,51 @@ function idUltimaDoCliente(leadId: string): string | undefined {
 
 /** Resposta curta no WhatsApp: no máx. 2 balões, sem códigos internos. */
 export const MAX_BALOES = 2;
+
+/**
+ * Follow-up escrito pela Val lendo a conversa (sem ferramentas, 1 chamada curta).
+ * Devolve o texto; '' = não há nada útil a dizer (melhor silêncio); null = IA indisponível (usa o texto de reserva).
+ */
+export async function gerarFollowupIA(lead: Lead, etapa: number): Promise<string | null> {
+  if (!process.env.ANTHROPIC_API_KEY) return null;
+  try {
+    const historico = montarHistorico(lead.id, 14);
+    if (!historico.length) return null;
+    const nome = primeiroNome(lead);
+    const descartados = (lead.veiculosDescartados ?? []).join(', ') || 'nenhum';
+    const instrucao: Bloco = {
+      type: 'text',
+      text:
+        `[instrução interna — não responda a isto como se o cliente tivesse dito] O cliente ficou sem responder. Escreva UMA mensagem de follow-up (etapa ${etapa + 1} de 2), de 1 a 2 linhas, no máximo 220 caracteres, ` +
+        'retomando EXATAMENTE de onde a conversa parou: se você tinha feito uma pergunta (ano/km da troca, entrada, nome, qual carro), retome essa pergunta; se o cliente estava vendo um carro, pergunte se quer fotos ou reservar um horário. ' +
+        (nome ? `Trate-o por "${nome}". ` : 'Não use nome. ') +
+        `Carros que ele RECUSOU (nunca cite): ${descartados}. ` +
+        'Regras: sem códigos de carro; não comente preço nem diga que passa do orçamento; não presuma financiamento; não repita o que você já disse; um emoji no máximo; não cobre nem insista. ' +
+        'Se NÃO houver nada útil e respeitoso a dizer (cliente recusou, já combinou o próximo passo, pediu para ser chamado só depois), responda apenas: NADA',
+    };
+    const messages: MsgApi[] = [...historico];
+    const ultima = messages[messages.length - 1];
+    if (ultima.role === 'user') {
+      ultima.content = [...(typeof ultima.content === 'string' ? [{ type: 'text', text: ultima.content } as Bloco] : ultima.content), instrucao];
+    } else {
+      messages.push({ role: 'user', content: [instrucao] });
+    }
+    const resp = await chamarClaude(promptBase(), promptLead(lead), messages, 400, lead.id, true);
+    const texto = limparTextoCliente(
+      resp.content
+        .filter((b): b is Extract<Bloco, { type: 'text' }> => b.type === 'text')
+        .map((b) => b.text)
+        .join(' ')
+        .trim()
+    );
+    if (!texto || /^\W*NADA\W*$/i.test(texto)) return '';
+    const primeira = quebrarEmBaloes(texto, 1)[0] ?? '';
+    return primeira.length > 320 ? primeira.slice(0, 320).replace(/\s+\S*$/, '…') : primeira;
+  } catch (e) {
+    console.warn(`[followup] IA indisponível para ${lead.id}; usando texto de reserva:`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
 
 /**
  * Roda o agente para um lead: lê o histórico, deixa o Claude usar as tools

@@ -1,7 +1,8 @@
 import { FEIRAO_CONFIG } from '../config';
-import { addMensagem, getLead, getSettings, updateLead } from '../db/store';
+import { addMensagem, getLead, getSettings, marcarWaIdProcessado, updateLead } from '../db/store';
 import type { Lead, MensagemAutor } from '../db/types';
 import { digitandoWa, enviarImagemWa, enviarTextoWa } from './provider';
+import { INTERVALO_MIN_FOLLOWUP_MS, MAX_FOLLOWUPS_TOTAL } from '../agent/respeito';
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -57,6 +58,10 @@ export interface OpcoesEnvio {
   autor?: MensagemAutor;
   /** Em modo teste: não envia ao provedor, só registra e devolve. */
   simulado?: boolean;
+  /** Foto extra de um álbum: envia, mas não cria uma linha de mensagem própria (só marca o id para o eco). */
+  silencioso?: boolean;
+  /** Fotos mostradas na linha de mensagem do envio (álbum numa linha só). */
+  midiasRegistro?: string[];
 }
 
 export async function enviarTexto(
@@ -106,8 +111,9 @@ export async function enviarImagem(
   const url = urlFotoWhatsapp(fotoOrigem);
   if (!getLead(lead.id)) return { ok: false, erro: 'lead excluído' };
 
+  const midias = opts.midiasRegistro ?? [fotoOrigem];
   if (opts.simulado) {
-    addMensagem({ leadId: lead.id, autor, texto: legenda, midias: [fotoOrigem], waId: '' });
+    if (!opts.silencioso) addMensagem({ leadId: lead.id, autor, texto: legenda, midias, waId: '' });
     return { ok: true };
   }
 
@@ -116,7 +122,8 @@ export async function enviarImagem(
     console.error(`[outbound] falha ao enviar imagem para ${lead.telefone}: ${r.erro}`);
     return { ok: false, erro: r.erro };
   }
-  addMensagem({ leadId: lead.id, autor, texto: legenda, midias: [fotoOrigem], waId: r.waId });
+  if (opts.silencioso) marcarWaIdProcessado(r.waId);
+  else addMensagem({ leadId: lead.id, autor, texto: legenda, midias, waId: r.waId });
   await sleep(900);
   return { ok: true };
 }
@@ -149,11 +156,13 @@ export function marcarProximoFollowup(lead: Lead): void {
   }
   const idx = lead.followupsEnviados;
   const horas = s.followupHoras[idx];
-  if (idx >= s.maxFollowups || horas === undefined) {
+  // sem follow-up para quem pediu espaço, nunca respondeu ou já esgotou o limite (respeito.ts)
+  if (idx >= s.maxFollowups || horas === undefined || lead.naoPerturbar || (lead.followupsTotal ?? 0) >= MAX_FOLLOWUPS_TOTAL || lead.totalMensagensLead < 1) {
     updateLead(lead.id, { proximoFollowupEm: null });
     return;
   }
-  updateLead(lead.id, {
-    proximoFollowupEm: new Date(Date.now() + horas * 3600_000).toISOString(),
-  });
+  // nunca dois follow-ups em menos de 20 h, mesmo que o cliente converse no meio (era o "ciclo de 2 em 2 horas")
+  let quando = Date.now() + horas * 3600_000;
+  if (lead.ultimoFollowupEm) quando = Math.max(quando, Date.parse(lead.ultimoFollowupEm) + INTERVALO_MIN_FOLLOWUP_MS);
+  updateLead(lead.id, { proximoFollowupEm: new Date(quando).toISOString() });
 }

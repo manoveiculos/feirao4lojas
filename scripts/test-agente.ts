@@ -278,6 +278,99 @@ async function main() {
     ok(r2.totais.fixosMensalBrl === 100 && r2.totais.sistemaMensalEstimadoBrl >= 100, 'custos fixos entram no total mensal');
   }
 
+  logOriginal('\n10) Respeito ao cliente (caso da Kicks): recusa, pedido de espaço e follow-up');
+  {
+    const { executarTick, textoFollowup } = await import('../src/lib/agent/followup');
+    const { detectarRecusa, podeReceberFollowup, primeiroNome } = await import('../src/lib/agent/respeito');
+    const { executarTool } = await import('../src/lib/agent/engine');
+    const agoraTick = new Date('2026-11-28T15:00:00Z'); // 12h em Brasília
+    const aguardarTodos = () => { for (const l of store.listLeads()) store.updateLead(l.id, { proximoFollowupEm: null }); };
+    const vencido = new Date(Date.now() - 60_000).toISOString();
+
+    ok(detectarRecusa('nao quero essa ja te disse').naoPerturbar && detectarRecusa('nao quero essa ja te disse').descartarUltimoCarro, 'detecta "não quero essa, já te disse"');
+    ok(detectarRecusa('so me chame se entrar uma mais nova').naoPerturbar, 'detecta "só me chame se entrar uma mais nova"');
+    ok(!detectarRecusa('tem kicks 2022?').naoPerturbar && !detectarRecusa('tem kicks 2022?').descartarUltimoCarro, 'pergunta normal não é recusa');
+
+    // a) o cliente recusa a Kicks e pede espaço: ficha limpa e follow-up desligado
+    const t1 = tel();
+    const { lead: l1 } = (await import('../src/lib/agent/inbound')).obterOuCriarLead(t1, { nome: 'Alexandre' });
+    store.updateLead(l1.id, { perfil: { ...l1.perfil, veiculosInteresse: ['NA-015'], nomeConfirmado: true } });
+    respostasClaude = [textoClaude('Entendido, sem problema.')];
+    await (await chegar({ telefone: t1, texto: 'nao quero essa ja te disse' }))();
+    const a1 = store.getLead(l1.id)!;
+    ok(!a1.perfil.veiculosInteresse.includes('NA-015') && (a1.veiculosDescartados ?? []).includes('NA-015'), 'a Kicks saiu da ficha e foi marcada como recusada');
+    ok(Boolean(a1.naoPerturbar), 'cliente marcado como "não perturbar"');
+    aguardarTodos();
+    store.updateLead(l1.id, { proximoFollowupEm: vencido, followupsEnviados: 0 });
+    const antes1 = enviadosWa.length;
+    await executarTick(agoraTick);
+    ok(!enviadosWa.slice(antes1).some((x) => x.numero === t1), 'NENHUM follow-up para quem pediu espaço');
+
+    // b) lista de espera ativa: sem follow-up
+    const t2 = tel();
+    respostasClaude = [textoClaude('Anotado!')];
+    await (await chegar({ telefone: t2, texto: 'tem corolla cross?' }))();
+    const l2 = store.findLeadByTelefone(t2)!;
+    store.addEspera({ leadId: l2.id, telefone: t2, nome: 'X', marca: null, modelo: 'Corolla Cross', categoria: 'suv', anoMinimo: null, precoMaximo: null, cambio: null, temTroca: null, observacoes: '' });
+    aguardarTodos();
+    store.updateLead(l2.id, { proximoFollowupEm: vencido, followupsEnviados: 0 });
+    const antes2 = enviadosWa.length;
+    await executarTick(agoraTick);
+    ok(!enviadosWa.slice(antes2).some((x) => x.numero === t2), 'sem follow-up para quem está na lista de espera');
+
+    // c) quem nunca respondeu não recebe follow-up
+    const t3 = tel();
+    const { lead: l3 } = (await import('../src/lib/agent/inbound')).obterOuCriarLead(t3, { nome: 'Geraldo' });
+    aguardarTodos();
+    store.updateLead(l3.id, { proximoFollowupEm: vencido, followupsEnviados: 0 });
+    const antes3 = enviadosWa.length;
+    await executarTick(agoraTick);
+    ok(!enviadosWa.slice(antes3).some((x) => x.numero === t3), 'sem follow-up para quem nunca respondeu');
+
+    // d) lead normal: follow-up escrito pela IA, cadência de 20 h e contagem
+    const t4 = tel();
+    respostasClaude = [textoClaude('Oi! Vi que ficou a dúvida do ano e da km da sua Strada. Me passa?')];
+    await (await chegar({ telefone: t4, texto: 'quero trocar minha strada' }))();
+    const l4 = store.findLeadByTelefone(t4)!;
+    aguardarTodos();
+    store.updateLead(l4.id, { proximoFollowupEm: vencido, followupsEnviados: 0 });
+    respostasClaude = [textoClaude('Conseguiu separar o ano e a km da Strada? Com isso eu adianto.')];
+    const antes4 = enviadosWa.length;
+    await executarTick(agoraTick);
+    const fu4 = enviadosWa.slice(antes4).filter((x) => x.numero === t4);
+    ok(fu4.length === 1 && fu4[0].texto.includes('Strada'), 'follow-up da IA retoma a pergunta pendente');
+    const a4 = store.getLead(l4.id)!;
+    ok(a4.followupsTotal === 1 && Boolean(a4.ultimoFollowupEm), 'follow-up contado e registrado');
+    ok(!a4.proximoFollowupEm || Date.parse(a4.proximoFollowupEm) >= Date.now() + 19 * 3600_000, 'próximo follow-up só depois de 20 h (acabou o ciclo de 2 em 2 h)');
+
+    // e) a IA pode decidir pelo silêncio
+    const t5 = tel();
+    respostasClaude = [textoClaude('Show!')];
+    await (await chegar({ telefone: t5, texto: 'vou pensar com calma' }))();
+    const l5 = store.findLeadByTelefone(t5)!;
+    aguardarTodos();
+    store.updateLead(l5.id, { proximoFollowupEm: vencido, followupsEnviados: 0 });
+    respostasClaude = [textoClaude('NADA')];
+    const antes5 = enviadosWa.length;
+    await executarTick(agoraTick);
+    ok(!enviadosWa.slice(antes5).some((x) => x.numero === t5) && !store.getLead(l5.id)!.proximoFollowupEm, 'IA responde NADA: silêncio em vez de insistir');
+
+    // f) limite de 2 follow-ups
+    ok(!podeReceberFollowup({ ...a4, followupsTotal: 2, naoPerturbar: null, humano: false, roteadoEm: null }).ok, 'no máximo 2 follow-ups por lead');
+
+    // g) texto de reserva nunca cita carro recusado; nome preferido
+    const lx = { ...store.getLead(l4.id)!, perfil: { ...store.getLead(l4.id)!.perfil, veiculosInteresse: [carro.codigo] }, veiculosDescartados: [carro.codigo] };
+    ok(!textoFollowup(lx, 0).includes(carro.modelo), 'texto de reserva não cita o carro recusado');
+    ok(primeiroNome({ ...lx, nome: 'Clodoaldo (Clo)', perfil: { ...lx.perfil, nomeConfirmado: true } }) === 'Clo', 'usa o apelido pedido ("Clo")');
+
+    // h) álbum de fotos: uma linha só, sem mensagens vazias
+    const t6 = tel();
+    const { lead: l6 } = (await import('../src/lib/agent/inbound')).obterOuCriarLead(t6, { nome: 'Foto' });
+    const r6 = (await executarTool('enviar_fotos', { codigo: carro.codigo }, { leadId: l6.id, simulado: false })) as { ok: boolean; enviadas?: number };
+    const m6 = store.getMensagens(l6.id).filter((m) => m.autor === 'agente');
+    ok(r6.ok && m6.length === 1 && m6[0].texto !== '' && m6[0].midias.length === (r6.enviadas ?? 0), `fotos numa linha só (${m6.length} linha, ${m6[0]?.midias.length ?? 0} fotos)`);
+  }
+
   logOriginal(falhas ? `\n❌ ${falhas} verificação(ões) falharam` : '\n✅ Tudo certo');
   fs.rmSync(process.env.DATA_DIR!, { recursive: true, force: true });
   process.exit(falhas ? 1 : 0);
